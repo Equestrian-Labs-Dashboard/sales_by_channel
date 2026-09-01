@@ -21,15 +21,6 @@ jobs:
       - name: Install dependencies
         run: pip install requests python-dateutil
 
-      # TODO: add scripts/fetch_sales_by_channel.py that:
-      #   1. Calls the Shopify Admin API for each brand's store
-      #      (SHOPIFY_CORRO_DOMAIN / SHOPIFY_CAVALI_DOMAIN) for gross_sales,
-      #      discounts and orders per channel.
-      #   2. Calls the QuickBooks Online API (reusing the OAuth2 flow already set up
-      #      for the AP dashboard) for COGS and per-channel expenses, and computes
-      #      margin1_pct / margin2_pct / margin3_pct.
-      #   3. Writes the result into data/sales-channels.json, keeping the current
-      #      { "channels": { "<period>": { "corro": [...], "cavali": [...] } } } shape.
       - name: Fetch and build data
         env:
           SHOPIFY_CORRO_DOMAIN: ${{ secrets.SHOPIFY_CORRO_DOMAIN }}
@@ -40,7 +31,7 @@ jobs:
           QBO_CLIENT_SECRET: ${{ secrets.QBO_CLIENT_SECRET }}
           QBO_REFRESH_TOKEN: ${{ secrets.QBO_REFRESH_TOKEN }}
         run: |
-          echo "TODO: python scripts/fetch_sales_by_channel.py"
+          python scripts/fetch_sales_by_channel.py
 
       - name: Commit updated data
         run: |
