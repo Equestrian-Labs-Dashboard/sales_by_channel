@@ -1,0 +1,42 @@
+name: Update sales-by-channel data
+
+on:
+  schedule:
+    - cron: "0 9 * * *"   # todos los días 09:00 UTC — ajustar a la cadencia real
+  workflow_dispatch: {}
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install requests python-dateutil
+
+      # TODO: agregar scripts/fetch_sales_by_channel.py que:
+      #   1. Llama a Shopify Admin API para gross_sales, discounts y orders por canal.
+      #   2. Llama a QuickBooks Online API (reutilizando el flujo OAuth2 del dashboard de AP)
+      #      para COGS y gastos por canal, y calcula margin1_pct / margin2_pct / margin3_pct.
+      #   3. Escribe el resultado en data/sales-channels.json respetando el esquema actual.
+      - name: Fetch and build data
+        env:
+          SHOPIFY_STORE: ${{ secrets.SHOPIFY_STORE }}
+          SHOPIFY_ADMIN_TOKEN: ${{ secrets.SHOPIFY_ADMIN_TOKEN }}
+          QBO_CLIENT_ID: ${{ secrets.QBO_CLIENT_ID }}
+          QBO_CLIENT_SECRET: ${{ secrets.QBO_CLIENT_SECRET }}
+          QBO_REFRESH_TOKEN: ${{ secrets.QBO_REFRESH_TOKEN }}
+        run: |
+          echo "Pendiente: python scripts/fetch_sales_by_channel.py"
+
+      - name: Commit updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/sales-channels.json
+          git diff --cached --quiet || git commit -m "chore: refresh sales-by-channel data"
+          git push
