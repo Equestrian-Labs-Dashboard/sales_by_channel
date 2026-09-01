@@ -14,15 +14,17 @@ const themeKnob = document.getElementById("themeKnob");
 
 function setTheme(mode) {
   document.body.setAttribute("data-theme", mode);
-  themeKnob.innerHTML = mode === "dark" ? MOON_ICON : SUN_ICON;
-  themeToggle.setAttribute("aria-pressed", mode === "dark");
+  if (themeKnob) themeKnob.innerHTML = mode === "dark" ? MOON_ICON : SUN_ICON;
+  if (themeToggle) themeToggle.setAttribute("aria-pressed", mode === "dark");
   localStorage.setItem("spc-theme", mode);
 }
 
-themeToggle.addEventListener("click", () => {
-  const current = document.body.getAttribute("data-theme");
-  setTheme(current === "dark" ? "light" : "dark");
-});
+if (themeToggle) {
+  themeToggle.addEventListener("click", () => {
+    const current = document.body.getAttribute("data-theme");
+    setTheme(current === "dark" ? "light" : "dark");
+  });
+}
 
 setTheme(localStorage.getItem("spc-theme") || "light");
 
@@ -31,19 +33,24 @@ fetch("data/sales-channels.json")
   .then((r) => r.json())
   .then((json) => {
     DATA = json;
-    document.getElementById("updatedLabel").textContent = "updated " + json.meta.last_updated;
+    const updateLabel = document.getElementById("updatedLabel");
+    if (updateLabel) updateLabel.textContent = "updated " + json.meta.last_updated;
     buildMonthSelect();
     const initial = json.periods[json.periods.length - 1];
     selectPeriod(initial.id);
   })
   .catch((err) => {
-    document.getElementById("tableBody").innerHTML =
-      `<tr><td colspan="7">Could not load data (${err.message}). Check data/sales-channels.json.</td></tr>`;
+    const errBody = document.getElementById("tableBody");
+    if (errBody) {
+      errBody.innerHTML =
+        `<tr><td colspan="7">Could not load data (${err.message}). Check data/sales-channels.json.</td></tr>`;
+    }
   });
 
 // ---------- Month select ----------
 function buildMonthSelect() {
   const select = document.getElementById("monthSelect");
+  if (!select) return;
   select.innerHTML = DATA.periods
     .map((p) => `<option value="${p.id}">${p.label}</option>`)
     .join("");
@@ -52,7 +59,8 @@ function buildMonthSelect() {
 
 function selectPeriod(periodId) {
   activePeriod = periodId;
-  document.getElementById("monthSelect").value = periodId;
+  const select = document.getElementById("monthSelect");
+  if (select) select.value = periodId;
   render(periodId);
 }
 
@@ -78,6 +86,7 @@ function render(periodId) {
 
 function renderKPIs(totalGross, totalNet, weightedM1, totalOrders) {
   const el = document.getElementById("kpiRow");
+  if (!el) return;
   const cards = [
     { label: "Gross Sales", value: fmtUSD(totalGross) },
     { label: "Net Sales", value: fmtUSD(totalNet), sub: fmtPct(totalNet / totalGross) + " of gross" },
@@ -100,35 +109,40 @@ function renderTable(rows, totalGross) {
   const body = document.getElementById("tableBody");
   const sorted = [...rows].sort((a, b) => b.gross_sales - a.gross_sales);
 
-  body.innerHTML = sorted
-    .map((c) => {
-      const share = c.gross_sales / totalGross;
-      const m3 = c.margin3_pending || c.margin3_pct === null
-        ? `<span class="pending">pending</span>`
-        : fmtPct(c.margin3_pct);
-      return `
-      <tr>
-        <td>${c.name}${c.note ? `<span class="channel-note">${c.note}</span>` : ""}</td>
-        <td class="share-cell">
-          <span class="share-pct">${fmtPct(share)}</span>
-          <div class="share-bar-track"><div class="share-bar-fill" style="width:${(share * 100).toFixed(1)}%"></div></div>
-        </td>
-        <td>${fmtUSD(c.gross_sales)}</td>
-        <td>${fmtUSD(c.net_sales)}</td>
-        <td>${fmtPct(c.margin1_pct)}</td>
-        <td>${fmtPct(c.margin2_pct)}</td>
-        <td>${m3}</td>
-      </tr>`;
-    })
-    .join("");
+  if (body) {
+    body.innerHTML = sorted
+      .map((c) => {
+        const share = c.gross_sales / totalGross;
+        const m3 = c.margin3_pending || c.margin3_pct === null
+          ? `<span class="pending">pending</span>`
+          : fmtPct(c.margin3_pct);
+        return `
+        <tr>
+          <td>${c.name}${c.note ? `<span class="channel-note">${c.note}</span>` : ""}</td>
+          <td class="share-cell">
+            <span class="share-pct">${fmtPct(share)}</span>
+            <div class="share-bar-track"><div class="share-bar-fill" style="width:${(share * 100).toFixed(1)}%"></div></div>
+          </td>
+          <td>${fmtUSD(c.gross_sales)}</td>
+          <td>${fmtUSD(c.net_sales)}</td>
+          <td>${fmtPct(c.margin1_pct)}</td>
+          <td>${fmtPct(c.margin2_pct)}</td>
+          <td>${m3}</td>
+        </tr>`;
+      })
+      .join("");
+  }
 
   const totalNet = rows.reduce((s, c) => s + c.net_sales, 0);
-  document.getElementById("tableFoot").innerHTML = `
-    <tr>
-      <td>Total</td>
-      <td class="share-cell">100.0%</td>
-      <td>${fmtUSD(totalGross)}</td>
-      <td>${fmtUSD(totalNet)}</td>
-      <td colspan="3"></td>
-    </tr>`;
+  const foot = document.getElementById("tableFoot");
+  if (foot) {
+    foot.innerHTML = `
+      <tr>
+        <td>Total</td>
+        <td class="share-cell">100.0%</td>
+        <td>${fmtUSD(totalGross)}</td>
+        <td>${fmtUSD(totalNet)}</td>
+        <td colspan="3"></td>
+      </tr>`;
+  }
 }
