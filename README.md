@@ -20,14 +20,14 @@ No build step: plain HTML/CSS/JS, same pattern as the AP dashboard and the subsc
 ## What's in the draft
 
 - Brand filter: **All brands / Corro / Cavali**, with each brand color-coded (Corro `#9C5F3C`, Cavali `#3C6E71` in light mode — both shift lighter in dark mode). "All brands" combines both, channel by channel, with margins weighted by net sales.
-- Period filter: Q1/Q2/Q3 2026 and "Last 3 months" as quick pills, plus an open date range (`dateFrom`/`dateTo`) already wired in the HTML, ready to connect to a real by-date query.
+- Month filter: a single dropdown listing each available month (currently Jan–Aug 2026). Selecting a month re-renders the whole table and KPIs for that month.
 - Share, Gross Sales, Net Sales, Margin 1 and Margin 2 per channel, sorted by actual Gross Sales (not a fixed order) within whichever brand view is selected.
 - Margin 3 marked **pending** for physical channels (HITS/Trailer, Wellington, New York/Silo) in both brands, since there's no shipping cost to pull from QBO for those yet. Fill in `margin3_pct` and flip `margin3_pending` to `false` in the JSON once that data is ready — no HTML/JS changes needed.
 - Light/dark theme toggle styled as an actual sun/moon icon (inline SVG, not emoji), gold accent (`#B8863E` light / `#E3B764` dark), preference saved in the visitor's `localStorage`.
 
 ## Feeding `data/sales-channels.json` with real data
 
-The JSON is built so the ETL only has to overwrite `channels[period].corro` and `channels[period].cavali`. Each channel entry needs:
+The JSON is built so the ETL only has to overwrite `channels[month].corro` and `channels[month].cavali` for the month it just ran for (or append a new month key). Each channel entry needs:
 
 | Field | Source | Detail |
 |---|---|---|

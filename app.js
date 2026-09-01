@@ -34,8 +34,8 @@ fetch("data/sales-channels.json")
     DATA = json;
     document.getElementById("updatedLabel").textContent = "updated " + json.meta.last_updated;
     buildBrandButtons();
-    buildPeriodButtons();
-    const initial = json.periods.find((p) => p.id === "2026-q3") || json.periods[0];
+    buildMonthSelect();
+    const initial = json.periods[json.periods.length - 1];
     selectPeriod(initial.id);
   })
   .catch((err) => {
@@ -66,40 +66,19 @@ function buildBrandButtons() {
   container.querySelector('[data-brand="all"]').classList.add("active");
 }
 
-// ---------- Period controls ----------
-function buildPeriodButtons() {
-  const container = document.getElementById("periodButtons");
-  container.innerHTML = "";
-  DATA.periods.forEach((p) => {
-    const btn = document.createElement("button");
-    btn.className = "period-btn";
-    btn.textContent = p.label;
-    btn.dataset.period = p.id;
-    btn.addEventListener("click", () => selectPeriod(p.id));
-    container.appendChild(btn);
-  });
+// ---------- Month select ----------
+function buildMonthSelect() {
+  const select = document.getElementById("monthSelect");
+  select.innerHTML = DATA.periods
+    .map((p) => `<option value="${p.id}">${p.label}</option>`)
+    .join("");
+  select.addEventListener("change", () => selectPeriod(select.value));
 }
 
 function selectPeriod(periodId) {
   activePeriod = periodId;
-  document.querySelectorAll(".period-btn").forEach((b) => {
-    b.classList.toggle("active", b.dataset.period === periodId);
-  });
-  const period = DATA.periods.find((p) => p.id === periodId);
-  if (period) {
-    document.getElementById("dateFrom").value = period.start;
-    document.getElementById("dateTo").value = period.end;
-  }
+  document.getElementById("monthSelect").value = periodId;
   render(periodId);
-}
-
-document.getElementById("dateFrom").addEventListener("change", clearActivePeriodButtons);
-document.getElementById("dateTo").addEventListener("change", clearActivePeriodButtons);
-
-function clearActivePeriodButtons() {
-  // Custom range: the active period's data still renders for now
-  // (the open date filter is wired and ready to connect to the real source by date).
-  document.querySelectorAll(".period-btn").forEach((b) => b.classList.remove("active"));
 }
 
 // ---------- Data helpers ----------

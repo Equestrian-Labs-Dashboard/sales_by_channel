@@ -30,17 +30,8 @@
       <div class="pill-row" id="brandButtons"></div>
     </div>
     <div class="control-group">
-      <span class="control-label">Period</span>
-      <div class="pill-row" id="periodButtons"></div>
-    </div>
-    <div class="control-group">
-      <span class="control-label">Custom range</span>
-      <div class="range-picker">
-        <label for="dateFrom">from</label>
-        <input type="date" id="dateFrom">
-        <label for="dateTo">to</label>
-        <input type="date" id="dateTo">
-      </div>
+      <span class="control-label">Month</span>
+      <select id="monthSelect" class="month-select"></select>
     </div>
   </div>
 
@@ -69,7 +60,7 @@
   </section>
 
   <footer class="source-note">
-    Gross Sales and discounts from Shopify Admin API (2 stores per brand) · COGS and margins from QuickBooks Online ·
+    Gross Sales and discounts from Shopify Admin API (1 store per brand) · COGS and margins from QuickBooks Online ·
     sample data — see README.md for the replacement pipeline via GitHub Actions.
   </footer>
 
