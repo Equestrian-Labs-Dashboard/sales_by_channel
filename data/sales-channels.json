@@ -1,8 +1,8 @@
 {
   "meta": {
-    "note": "Live data from Shopify (gross_sales, discounts, orders) + QuickBooks Online (margins).",
+    "note": "SAMPLE DATA (demo). Replace via the GitHub Actions pipeline described in README.md, cross-referencing Shopify (order volume, gross sales, discounts) with QuickBooks Online (COGS, per-channel expenses, shipping).",
     "currency": "USD",
-    "last_updated": "2026-09-01",
+    "last_updated": "2026-08-29",
     "brands": {
       "corro": {
         "label": "Corro",
@@ -50,10 +50,6 @@
     {
       "id": "2026-08",
       "label": "Aug 2026"
-    },
-    {
-      "id": "2026-09",
-      "label": "Sep 2026"
     }
   ],
   "channels": {
@@ -104,52 +100,6 @@
           "margin3_pending": true,
           "orders": 189,
           "note": "Physical channel, retains more value. No shipping to pull."
-        },
-        {
-          "id": "silo",
-          "name": "New York (Silo)",
-          "gross_sales": 21600,
-          "discounts": 850,
-          "margin1_pct": 0.594,
-          "margin2_pct": 0.553,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 68,
-          "note": "New physical store, ramping up."
-        },
-        {
-          "id": "cavalli",
-          "name": "Cavalli",
-          "gross_sales": 29500,
-          "discounts": 3880,
-          "margin1_pct": 0.551,
-          "margin2_pct": 0.501,
-          "margin3_pct": 0.437,
-          "margin3_pending": false,
-          "orders": 219
-        },
-        {
-          "id": "brothery",
-          "name": "Brothery",
-          "gross_sales": 12200,
-          "discounts": 1100,
-          "margin1_pct": 0.556,
-          "margin2_pct": 0.525,
-          "margin3_pct": 0.468,
-          "margin3_pending": false,
-          "orders": 81
-        },
-        {
-          "id": "others",
-          "name": "Others",
-          "gross_sales": 8000,
-          "discounts": 480,
-          "margin1_pct": 0.41,
-          "margin2_pct": 0.363,
-          "margin3_pct": 0.299,
-          "margin3_pending": false,
-          "orders": 62,
-          "note": "Affiliates and minor channels."
         }
       ],
       "cavali": [
@@ -198,52 +148,6 @@
           "margin3_pending": true,
           "orders": 92,
           "note": "Physical channel, retains more value. No shipping to pull."
-        },
-        {
-          "id": "silo",
-          "name": "New York (Silo)",
-          "gross_sales": 7700,
-          "discounts": 300,
-          "margin1_pct": 0.58,
-          "margin2_pct": 0.537,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 25,
-          "note": "New physical store, ramping up."
-        },
-        {
-          "id": "cavalli",
-          "name": "Cavalli",
-          "gross_sales": 10700,
-          "discounts": 1500,
-          "margin1_pct": 0.523,
-          "margin2_pct": 0.479,
-          "margin3_pct": 0.422,
-          "margin3_pending": false,
-          "orders": 82
-        },
-        {
-          "id": "brothery",
-          "name": "Brothery",
-          "gross_sales": 5500,
-          "discounts": 520,
-          "margin1_pct": 0.532,
-          "margin2_pct": 0.509,
-          "margin3_pct": 0.45,
-          "margin3_pending": false,
-          "orders": 38
-        },
-        {
-          "id": "others",
-          "name": "Others",
-          "gross_sales": 3900,
-          "discounts": 150,
-          "margin1_pct": 0.394,
-          "margin2_pct": 0.346,
-          "margin3_pct": 0.289,
-          "margin3_pending": false,
-          "orders": 31,
-          "note": "Affiliates and minor channels."
         }
       ]
     },
@@ -294,52 +198,6 @@
           "margin3_pending": true,
           "orders": 204,
           "note": "Physical channel, retains more value. No shipping to pull."
-        },
-        {
-          "id": "silo",
-          "name": "New York (Silo)",
-          "gross_sales": 23900,
-          "discounts": 990,
-          "margin1_pct": 0.6,
-          "margin2_pct": 0.554,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 75,
-          "note": "New physical store, ramping up."
-        },
-        {
-          "id": "cavalli",
-          "name": "Cavalli",
-          "gross_sales": 34100,
-          "discounts": 4640,
-          "margin1_pct": 0.547,
-          "margin2_pct": 0.487,
-          "margin3_pct": 0.418,
-          "margin3_pending": false,
-          "orders": 253
-        },
-        {
-          "id": "brothery",
-          "name": "Brothery",
-          "gross_sales": 13400,
-          "discounts": 1120,
-          "margin1_pct": 0.555,
-          "margin2_pct": 0.51,
-          "margin3_pct": 0.448,
-          "margin3_pending": false,
-          "orders": 89
-        },
-        {
-          "id": "others",
-          "name": "Others",
-          "gross_sales": 8300,
-          "discounts": 490,
-          "margin1_pct": 0.396,
-          "margin2_pct": 0.339,
-          "margin3_pct": 0.31,
-          "margin3_pending": false,
-          "orders": 64,
-          "note": "Affiliates and minor channels."
         }
       ],
       "cavali": [
@@ -388,52 +246,6 @@
           "margin3_pending": true,
           "orders": 94,
           "note": "Physical channel, retains more value. No shipping to pull."
-        },
-        {
-          "id": "silo",
-          "name": "New York (Silo)",
-          "gross_sales": 8800,
-          "discounts": 330,
-          "margin1_pct": 0.588,
-          "margin2_pct": 0.54,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 28,
-          "note": "New physical store, ramping up."
-        },
-        {
-          "id": "cavalli",
-          "name": "Cavalli",
-          "gross_sales": 12800,
-          "discounts": 1550,
-          "margin1_pct": 0.518,
-          "margin2_pct": 0.461,
-          "margin3_pct": 0.391,
-          "margin3_pending": false,
-          "orders": 98
-        },
-        {
-          "id": "brothery",
-          "name": "Brothery",
-          "gross_sales": 5900,
-          "discounts": 490,
-          "margin1_pct": 0.542,
-          "margin2_pct": 0.492,
-          "margin3_pct": 0.421,
-          "margin3_pending": false,
-          "orders": 41
-        },
-        {
-          "id": "others",
-          "name": "Others",
-          "gross_sales": 4200,
-          "discounts": 170,
-          "margin1_pct": 0.376,
-          "margin2_pct": 0.311,
-          "margin3_pct": 0.282,
-          "margin3_pending": false,
-          "orders": 33,
-          "note": "Affiliates and minor channels."
         }
       ]
     },
@@ -484,52 +296,6 @@
           "margin3_pending": true,
           "orders": 222,
           "note": "Physical channel, retains more value. No shipping to pull."
-        },
-        {
-          "id": "silo",
-          "name": "New York (Silo)",
-          "gross_sales": 26100,
-          "discounts": 1040,
-          "margin1_pct": 0.613,
-          "margin2_pct": 0.565,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 82,
-          "note": "New physical store, ramping up."
-        },
-        {
-          "id": "cavalli",
-          "name": "Cavalli",
-          "gross_sales": 34300,
-          "discounts": 4250,
-          "margin1_pct": 0.554,
-          "margin2_pct": 0.502,
-          "margin3_pct": 0.44,
-          "margin3_pending": false,
-          "orders": 254
-        },
-        {
-          "id": "brothery",
-          "name": "Brothery",
-          "gross_sales": 15700,
-          "discounts": 1480,
-          "margin1_pct": 0.578,
-          "margin2_pct": 0.519,
-          "margin3_pct": 0.45,
-          "margin3_pending": false,
-          "orders": 105
-        },
-        {
-          "id": "others",
-          "name": "Others",
-          "gross_sales": 9200,
-          "discounts": 590,
-          "margin1_pct": 0.407,
-          "margin2_pct": 0.34,
-          "margin3_pct": 0.289,
-          "margin3_pending": false,
-          "orders": 71,
-          "note": "Affiliates and minor channels."
         }
       ],
       "cavali": [
@@ -578,52 +344,6 @@
           "margin3_pending": true,
           "orders": 102,
           "note": "Physical channel, retains more value. No shipping to pull."
-        },
-        {
-          "id": "silo",
-          "name": "New York (Silo)",
-          "gross_sales": 9800,
-          "discounts": 380,
-          "margin1_pct": 0.587,
-          "margin2_pct": 0.54,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 32,
-          "note": "New physical store, ramping up."
-        },
-        {
-          "id": "cavalli",
-          "name": "Cavalli",
-          "gross_sales": 12700,
-          "discounts": 1690,
-          "margin1_pct": 0.54,
-          "margin2_pct": 0.474,
-          "margin3_pct": 0.423,
-          "margin3_pending": false,
-          "orders": 97
-        },
-        {
-          "id": "brothery",
-          "name": "Brothery",
-          "gross_sales": 7300,
-          "discounts": 640,
-          "margin1_pct": 0.564,
-          "margin2_pct": 0.508,
-          "margin3_pct": 0.428,
-          "margin3_pending": false,
-          "orders": 50
-        },
-        {
-          "id": "others",
-          "name": "Others",
-          "gross_sales": 4300,
-          "discounts": 180,
-          "margin1_pct": 0.393,
-          "margin2_pct": 0.313,
-          "margin3_pct": 0.276,
-          "margin3_pending": false,
-          "orders": 34,
-          "note": "Affiliates and minor channels."
         }
       ]
     },
@@ -674,52 +394,6 @@
           "margin3_pending": true,
           "orders": 222,
           "note": "Physical channel, retains more value. No shipping to pull."
-        },
-        {
-          "id": "silo",
-          "name": "New York (Silo)",
-          "gross_sales": 23000,
-          "discounts": 920,
-          "margin1_pct": 0.607,
-          "margin2_pct": 0.552,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 72,
-          "note": "New physical store, ramping up."
-        },
-        {
-          "id": "cavalli",
-          "name": "Cavalli",
-          "gross_sales": 32900,
-          "discounts": 4320,
-          "margin1_pct": 0.542,
-          "margin2_pct": 0.483,
-          "margin3_pct": 0.438,
-          "margin3_pending": false,
-          "orders": 244
-        },
-        {
-          "id": "brothery",
-          "name": "Brothery",
-          "gross_sales": 14700,
-          "discounts": 1320,
-          "margin1_pct": 0.57,
-          "margin2_pct": 0.526,
-          "margin3_pct": 0.459,
-          "margin3_pending": false,
-          "orders": 98
-        },
-        {
-          "id": "others",
-          "name": "Others",
-          "gross_sales": 9500,
-          "discounts": 550,
-          "margin1_pct": 0.402,
-          "margin2_pct": 0.363,
-          "margin3_pct": 0.31,
-          "margin3_pending": false,
-          "orders": 73,
-          "note": "Affiliates and minor channels."
         }
       ],
       "cavali": [
@@ -768,52 +442,6 @@
           "margin3_pending": true,
           "orders": 107,
           "note": "Physical channel, retains more value. No shipping to pull."
-        },
-        {
-          "id": "silo",
-          "name": "New York (Silo)",
-          "gross_sales": 8100,
-          "discounts": 320,
-          "margin1_pct": 0.588,
-          "margin2_pct": 0.538,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 26,
-          "note": "New physical store, ramping up."
-        },
-        {
-          "id": "cavalli",
-          "name": "Cavalli",
-          "gross_sales": 12200,
-          "discounts": 1600,
-          "margin1_pct": 0.527,
-          "margin2_pct": 0.471,
-          "margin3_pct": 0.417,
-          "margin3_pending": false,
-          "orders": 93
-        },
-        {
-          "id": "brothery",
-          "name": "Brothery",
-          "gross_sales": 6600,
-          "discounts": 590,
-          "margin1_pct": 0.559,
-          "margin2_pct": 0.51,
-          "margin3_pct": 0.447,
-          "margin3_pending": false,
-          "orders": 45
-        },
-        {
-          "id": "others",
-          "name": "Others",
-          "gross_sales": 4400,
-          "discounts": 170,
-          "margin1_pct": 0.381,
-          "margin2_pct": 0.334,
-          "margin3_pct": 0.285,
-          "margin3_pending": false,
-          "orders": 35,
-          "note": "Affiliates and minor channels."
         }
       ]
     },
@@ -864,52 +492,6 @@
           "margin3_pending": true,
           "orders": 232,
           "note": "Physical channel, retains more value. No shipping to pull."
-        },
-        {
-          "id": "silo",
-          "name": "New York (Silo)",
-          "gross_sales": 23300,
-          "discounts": 970,
-          "margin1_pct": 0.593,
-          "margin2_pct": 0.539,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 73,
-          "note": "New physical store, ramping up."
-        },
-        {
-          "id": "cavalli",
-          "name": "Cavalli",
-          "gross_sales": 34000,
-          "discounts": 4720,
-          "margin1_pct": 0.552,
-          "margin2_pct": 0.496,
-          "margin3_pct": 0.418,
-          "margin3_pending": false,
-          "orders": 252
-        },
-        {
-          "id": "brothery",
-          "name": "Brothery",
-          "gross_sales": 15100,
-          "discounts": 1420,
-          "margin1_pct": 0.558,
-          "margin2_pct": 0.531,
-          "margin3_pct": 0.447,
-          "margin3_pending": false,
-          "orders": 101
-        },
-        {
-          "id": "others",
-          "name": "Others",
-          "gross_sales": 9000,
-          "discounts": 510,
-          "margin1_pct": 0.401,
-          "margin2_pct": 0.342,
-          "margin3_pct": 0.288,
-          "margin3_pending": false,
-          "orders": 69,
-          "note": "Affiliates and minor channels."
         }
       ],
       "cavali": [
@@ -958,52 +540,6 @@
           "margin3_pending": true,
           "orders": 116,
           "note": "Physical channel, retains more value. No shipping to pull."
-        },
-        {
-          "id": "silo",
-          "name": "New York (Silo)",
-          "gross_sales": 8300,
-          "discounts": 350,
-          "margin1_pct": 0.579,
-          "margin2_pct": 0.514,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 27,
-          "note": "New physical store, ramping up."
-        },
-        {
-          "id": "cavalli",
-          "name": "Cavalli",
-          "gross_sales": 12000,
-          "discounts": 1610,
-          "margin1_pct": 0.531,
-          "margin2_pct": 0.467,
-          "margin3_pct": 0.407,
-          "margin3_pending": false,
-          "orders": 92
-        },
-        {
-          "id": "brothery",
-          "name": "Brothery",
-          "gross_sales": 7000,
-          "discounts": 630,
-          "margin1_pct": 0.535,
-          "margin2_pct": 0.512,
-          "margin3_pct": 0.436,
-          "margin3_pending": false,
-          "orders": 48
-        },
-        {
-          "id": "others",
-          "name": "Others",
-          "gross_sales": 4200,
-          "discounts": 160,
-          "margin1_pct": 0.375,
-          "margin2_pct": 0.318,
-          "margin3_pct": 0.264,
-          "margin3_pending": false,
-          "orders": 33,
-          "note": "Affiliates and minor channels."
         }
       ]
     },
@@ -1054,52 +590,6 @@
           "margin3_pending": true,
           "orders": 222,
           "note": "Physical channel, retains more value. No shipping to pull."
-        },
-        {
-          "id": "silo",
-          "name": "New York (Silo)",
-          "gross_sales": 26400,
-          "discounts": 1080,
-          "margin1_pct": 0.593,
-          "margin2_pct": 0.542,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 82,
-          "note": "New physical store, ramping up."
-        },
-        {
-          "id": "cavalli",
-          "name": "Cavalli",
-          "gross_sales": 35400,
-          "discounts": 4940,
-          "margin1_pct": 0.564,
-          "margin2_pct": 0.491,
-          "margin3_pct": 0.422,
-          "margin3_pending": false,
-          "orders": 262
-        },
-        {
-          "id": "brothery",
-          "name": "Brothery",
-          "gross_sales": 15200,
-          "discounts": 1370,
-          "margin1_pct": 0.561,
-          "margin2_pct": 0.52,
-          "margin3_pct": 0.445,
-          "margin3_pending": false,
-          "orders": 101
-        },
-        {
-          "id": "others",
-          "name": "Others",
-          "gross_sales": 9300,
-          "discounts": 530,
-          "margin1_pct": 0.403,
-          "margin2_pct": 0.351,
-          "margin3_pct": 0.308,
-          "margin3_pending": false,
-          "orders": 72,
-          "note": "Affiliates and minor channels."
         }
       ],
       "cavali": [
@@ -1148,52 +638,6 @@
           "margin3_pending": true,
           "orders": 105,
           "note": "Physical channel, retains more value. No shipping to pull."
-        },
-        {
-          "id": "silo",
-          "name": "New York (Silo)",
-          "gross_sales": 9300,
-          "discounts": 370,
-          "margin1_pct": 0.566,
-          "margin2_pct": 0.521,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 30,
-          "note": "New physical store, ramping up."
-        },
-        {
-          "id": "cavalli",
-          "name": "Cavalli",
-          "gross_sales": 13700,
-          "discounts": 1730,
-          "margin1_pct": 0.541,
-          "margin2_pct": 0.461,
-          "margin3_pct": 0.4,
-          "margin3_pending": false,
-          "orders": 105
-        },
-        {
-          "id": "brothery",
-          "name": "Brothery",
-          "gross_sales": 6700,
-          "discounts": 560,
-          "margin1_pct": 0.539,
-          "margin2_pct": 0.491,
-          "margin3_pct": 0.415,
-          "margin3_pending": false,
-          "orders": 46
-        },
-        {
-          "id": "others",
-          "name": "Others",
-          "gross_sales": 4500,
-          "discounts": 190,
-          "margin1_pct": 0.391,
-          "margin2_pct": 0.329,
-          "margin3_pct": 0.285,
-          "margin3_pending": false,
-          "orders": 36,
-          "note": "Affiliates and minor channels."
         }
       ]
     },
@@ -1244,52 +688,6 @@
           "margin3_pending": true,
           "orders": 259,
           "note": "Physical channel, retains more value. No shipping to pull."
-        },
-        {
-          "id": "silo",
-          "name": "New York (Silo)",
-          "gross_sales": 28000,
-          "discounts": 1040,
-          "margin1_pct": 0.607,
-          "margin2_pct": 0.543,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 88,
-          "note": "New physical store, ramping up."
-        },
-        {
-          "id": "cavalli",
-          "name": "Cavalli",
-          "gross_sales": 40800,
-          "discounts": 5710,
-          "margin1_pct": 0.55,
-          "margin2_pct": 0.486,
-          "margin3_pct": 0.429,
-          "margin3_pending": false,
-          "orders": 302
-        },
-        {
-          "id": "brothery",
-          "name": "Brothery",
-          "gross_sales": 15900,
-          "discounts": 1370,
-          "margin1_pct": 0.577,
-          "margin2_pct": 0.514,
-          "margin3_pct": 0.462,
-          "margin3_pending": false,
-          "orders": 106
-        },
-        {
-          "id": "others",
-          "name": "Others",
-          "gross_sales": 10600,
-          "discounts": 610,
-          "margin1_pct": 0.4,
-          "margin2_pct": 0.349,
-          "margin3_pct": 0.299,
-          "margin3_pending": false,
-          "orders": 82,
-          "note": "Affiliates and minor channels."
         }
       ],
       "cavali": [
@@ -1338,52 +736,6 @@
           "margin3_pending": true,
           "orders": 129,
           "note": "Physical channel, retains more value. No shipping to pull."
-        },
-        {
-          "id": "silo",
-          "name": "New York (Silo)",
-          "gross_sales": 9700,
-          "discounts": 370,
-          "margin1_pct": 0.592,
-          "margin2_pct": 0.517,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 31,
-          "note": "New physical store, ramping up."
-        },
-        {
-          "id": "cavalli",
-          "name": "Cavalli",
-          "gross_sales": 15400,
-          "discounts": 2090,
-          "margin1_pct": 0.532,
-          "margin2_pct": 0.469,
-          "margin3_pct": 0.401,
-          "margin3_pending": false,
-          "orders": 118
-        },
-        {
-          "id": "brothery",
-          "name": "Brothery",
-          "gross_sales": 6800,
-          "discounts": 570,
-          "margin1_pct": 0.552,
-          "margin2_pct": 0.497,
-          "margin3_pct": 0.446,
-          "margin3_pending": false,
-          "orders": 47
-        },
-        {
-          "id": "others",
-          "name": "Others",
-          "gross_sales": 4900,
-          "discounts": 210,
-          "margin1_pct": 0.374,
-          "margin2_pct": 0.339,
-          "margin3_pct": 0.288,
-          "margin3_pending": false,
-          "orders": 39,
-          "note": "Affiliates and minor channels."
         }
       ]
     },
@@ -1434,52 +786,6 @@
           "margin3_pending": true,
           "orders": 242,
           "note": "Physical channel, retains more value. No shipping to pull."
-        },
-        {
-          "id": "silo",
-          "name": "New York (Silo)",
-          "gross_sales": 27900,
-          "discounts": 1080,
-          "margin1_pct": 0.596,
-          "margin2_pct": 0.547,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 87,
-          "note": "New physical store, ramping up."
-        },
-        {
-          "id": "cavalli",
-          "name": "Cavalli",
-          "gross_sales": 37300,
-          "discounts": 4500,
-          "margin1_pct": 0.538,
-          "margin2_pct": 0.5,
-          "margin3_pct": 0.424,
-          "margin3_pending": false,
-          "orders": 276
-        },
-        {
-          "id": "brothery",
-          "name": "Brothery",
-          "gross_sales": 15800,
-          "discounts": 1530,
-          "margin1_pct": 0.582,
-          "margin2_pct": 0.529,
-          "margin3_pct": 0.464,
-          "margin3_pending": false,
-          "orders": 105
-        },
-        {
-          "id": "others",
-          "name": "Others",
-          "gross_sales": 10300,
-          "discounts": 610,
-          "margin1_pct": 0.408,
-          "margin2_pct": 0.354,
-          "margin3_pct": 0.294,
-          "margin3_pending": false,
-          "orders": 79,
-          "note": "Affiliates and minor channels."
         }
       ],
       "cavali": [
@@ -1528,55 +834,8 @@
           "margin3_pending": true,
           "orders": 121,
           "note": "Physical channel, retains more value. No shipping to pull."
-        },
-        {
-          "id": "silo",
-          "name": "New York (Silo)",
-          "gross_sales": 10500,
-          "discounts": 430,
-          "margin1_pct": 0.573,
-          "margin2_pct": 0.526,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 34,
-          "note": "New physical store, ramping up."
-        },
-        {
-          "id": "cavalli",
-          "name": "Cavalli",
-          "gross_sales": 14400,
-          "discounts": 1800,
-          "margin1_pct": 0.513,
-          "margin2_pct": 0.48,
-          "margin3_pct": 0.398,
-          "margin3_pending": false,
-          "orders": 110
-        },
-        {
-          "id": "brothery",
-          "name": "Brothery",
-          "gross_sales": 7400,
-          "discounts": 710,
-          "margin1_pct": 0.563,
-          "margin2_pct": 0.513,
-          "margin3_pct": 0.435,
-          "margin3_pending": false,
-          "orders": 51
-        },
-        {
-          "id": "others",
-          "name": "Others",
-          "gross_sales": 4700,
-          "discounts": 200,
-          "margin1_pct": 0.381,
-          "margin2_pct": 0.333,
-          "margin3_pct": 0.271,
-          "margin3_pending": false,
-          "orders": 37,
-          "note": "Affiliates and minor channels."
         }
       ]
-    },
-    "2026-09": {}
+    }
   }
 }

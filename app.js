@@ -7,6 +7,7 @@ const MOON_ICON = `<svg viewBox="0 0 24 24"><path d="M20 14.5a8.5 8.5 0 1 1-9.5-
 
 let DATA = null;
 let activePeriod = null;
+let activeBrand = "corro";
 
 // ---------- Theme ----------
 const themeToggle = document.getElementById("themeToggle");
@@ -35,6 +36,7 @@ fetch("data/sales-channels.json")
     DATA = json;
     const updateLabel = document.getElementById("updatedLabel");
     if (updateLabel) updateLabel.textContent = "updated " + json.meta.last_updated;
+    buildBrandSelect();
     buildMonthSelect();
     const initial = json.periods[json.periods.length - 1];
     selectPeriod(initial.id);
@@ -46,6 +48,39 @@ fetch("data/sales-channels.json")
         `<tr><td colspan="7">Could not load data (${err.message}). Check data/sales-channels.json.</td></tr>`;
     }
   });
+
+// ---------- Brand select ----------
+function buildBrandSelect() {
+  const select = document.getElementById("brandSelect");
+  if (!select) return;
+  const brands = Object.entries(DATA.meta.brands || {}).map(([id, b]) => ({ id, label: b.label }));
+  
+  if (brands.length === 0) {
+    brands.push({ id: "corro", label: "Corro" });
+    brands.push({ id: "cavali", label: "Cavali" });
+  }
+
+  select.innerHTML = brands
+    .map((b) => `<option value="${b.id}">${b.label}</option>`)
+    .join("");
+  
+  select.value = activeBrand;
+  select.addEventListener("change", () => selectBrand(select.value));
+}
+
+function selectBrand(brandId) {
+  activeBrand = brandId;
+  const select = document.getElementById("brandSelect");
+  if (select) select.value = brandId;
+  
+  const sub = document.getElementById("brandSubtitle");
+  if (sub) {
+    const brandLabel = DATA.meta.brands?.[brandId]?.label || (brandId === "corro" ? "Corro" : "Cavali");
+    sub.textContent = `${brandLabel} — channel-by-channel performance`;
+  }
+  
+  if (activePeriod) render(activePeriod);
+}
 
 // ---------- Month select ----------
 function buildMonthSelect() {
@@ -67,7 +102,7 @@ function selectPeriod(periodId) {
 // ---------- Data helpers ----------
 function getRowsForPeriod(periodId) {
   const periodData = DATA.channels[periodId] || DATA.channels[Object.keys(DATA.channels)[0]];
-  return (periodData.corro || []).map((c) => ({ ...c }));
+  return (periodData[activeBrand] || []).map((c) => ({ ...c }));
 }
 
 // ---------- Render ----------
