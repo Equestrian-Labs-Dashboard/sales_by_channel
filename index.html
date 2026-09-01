@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ventas por canal — Equestrian Labs</title>
+<title>Sales by Channel — Equestrian Labs</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
@@ -13,24 +13,34 @@
 
   <header class="masthead">
     <div>
-      <h1>Ventas por canal</h1>
+      <h1>Sales by Channel</h1>
       <p class="sub">Corro &amp; Cavali — Equestrian Labs</p>
     </div>
     <div class="masthead-right">
-      <div class="updated" id="updatedLabel">actualizado —</div>
-      <button class="toggle" id="themeToggle" aria-label="Cambiar entre modo claro y oscuro" aria-pressed="false">
-        <span class="knob" id="themeKnob">☀</span>
+      <div class="updated" id="updatedLabel">updated —</div>
+      <button class="toggle" id="themeToggle" aria-label="Switch between light and dark mode" aria-pressed="false">
+        <span class="knob" id="themeKnob"></span>
       </button>
     </div>
   </header>
 
   <div class="controls">
-    <div class="periods" id="periodButtons"></div>
-    <div class="range-picker">
-      <label for="dateFrom">desde</label>
-      <input type="date" id="dateFrom">
-      <label for="dateTo">hasta</label>
-      <input type="date" id="dateTo">
+    <div class="control-group">
+      <span class="control-label">Brand</span>
+      <div class="pill-row" id="brandButtons"></div>
+    </div>
+    <div class="control-group">
+      <span class="control-label">Period</span>
+      <div class="pill-row" id="periodButtons"></div>
+    </div>
+    <div class="control-group">
+      <span class="control-label">Custom range</span>
+      <div class="range-picker">
+        <label for="dateFrom">from</label>
+        <input type="date" id="dateFrom">
+        <label for="dateTo">to</label>
+        <input type="date" id="dateTo">
+      </div>
     </div>
   </div>
 
@@ -38,13 +48,13 @@
 
   <section>
     <div class="table-head-row">
-      <h2>Participación por canal</h2>
-      <div class="legend"><span><span class="legend-dot"></span>Margin 3 pendiente (sin costo de shipping que jalar)</span></div>
+      <h2>Channel share</h2>
+      <div class="legend"><span><span class="legend-dot"></span>Margin 3 pending (no shipping cost to pull)</span></div>
     </div>
     <table>
       <thead>
         <tr>
-          <th>Canal</th>
+          <th>Channel</th>
           <th class="share-cell">Share</th>
           <th>Gross Sales</th>
           <th>Net Sales</th>
@@ -59,8 +69,8 @@
   </section>
 
   <footer class="source-note">
-    Gross Sales y descuentos desde Shopify Admin API · COGS y márgenes desde QuickBooks Online ·
-    datos de muestra — ver README.md para el pipeline de reemplazo vía GitHub Actions.
+    Gross Sales and discounts from Shopify Admin API (2 stores per brand) · COGS and margins from QuickBooks Online ·
+    sample data — see README.md for the replacement pipeline via GitHub Actions.
   </footer>
 
 </div>

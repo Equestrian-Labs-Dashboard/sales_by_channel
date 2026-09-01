@@ -1,8 +1,8 @@
-# Ventas por canal — Corro & Cavali
+# Sales by Channel — Corro & Cavali
 
-Dashboard estático (GitHub Pages) para el reporte de ventas por canal, tal como se acordó en la reunión: tabla completa con share, Gross Sales, Net Sales y Gross Margin 1/2/3, filtrable por período.
+Static dashboard (GitHub Pages) for the sales-by-channel report: full table with share, Gross Sales, Net Sales and Gross Margin 1/2/3, filterable by brand and period.
 
-## Estructura
+## Structure
 
 ```
 sales-per-channel/
@@ -10,41 +10,52 @@ sales-per-channel/
 ├── styles.css
 ├── app.js
 ├── data/
-│   └── sales-channels.json     ← datos de muestra, reemplazar por el ETL real
+│   └── sales-channels.json     ← sample data, replace with the real ETL output
 └── .github/workflows/
-    └── update-data.yml         ← stub para automatizar el refresh (Shopify + QBO)
+    └── update-data.yml         ← stub to automate the refresh (4 Shopify stores + QBO)
 ```
 
-No hay build step: es HTML/CSS/JS vanilla, igual que el dashboard de AP y el de suscripciones. Para publicarlo en GitHub Pages, sube esta carpeta a un repo y activa Pages apuntando a `main` / `root`.
+No build step: plain HTML/CSS/JS, same pattern as the AP dashboard and the subscription dashboard. To publish on GitHub Pages, push this folder to a repo and point Pages at `main` / `root`.
 
-## Estado del draft del viernes
+## What's in the draft
 
-- ✅ Share, Gross Sales, Net Sales, Margin 1 y Margin 2 por canal.
-- ⏳ Margin 3: implementado en el esquema (`margin3_pct`, `margin3_pending`), pero marcado como "pendiente" para los canales físicos (HITS/Trailer, Wellington, Nueva York/Silo) porque todavía no hay costo de shipping que jalar de QBO para esos canales. Escalar cuando esos datos estén listos — no hay que tocar el HTML/JS, solo llenar el campo en el JSON.
-- Los 8 canales están cargados en el orden de volumen que se acordó: E-Commerce, Concierge, HITS/Trailer, Wellington, Nueva York (Silo), Cavalli, Brothery, Others. La tabla siempre reordena por Gross Sales real, así que si el volumen cambia de mes a mes el orden se ajusta solo.
-- Filtro de período: bloques de Q1/Q2/Q3 2026 y "Últimos 3 meses" como botones rápidos, más un rango de fechas abierto (`dateFrom`/`dateTo`) ya cableado en el HTML para conectarlo a una consulta por fecha cuando el pipeline lo soporte.
-- Decisión de ubicación: quedó armado como reportecito aparte (según la alternativa que se mencionó). Si prefieren integrarlo dentro del modelo actual cerca de "Growth and Margin Engine" / "Stock Sharing", la tabla (`renderTable` en `app.js`) se puede montar como una sección más de esa página sin cambios de lógica.
+- Brand filter: **All brands / Corro / Cavali**, with each brand color-coded (Corro `#9C5F3C`, Cavali `#3C6E71` in light mode — both shift lighter in dark mode). "All brands" combines both, channel by channel, with margins weighted by net sales.
+- Period filter: Q1/Q2/Q3 2026 and "Last 3 months" as quick pills, plus an open date range (`dateFrom`/`dateTo`) already wired in the HTML, ready to connect to a real by-date query.
+- Share, Gross Sales, Net Sales, Margin 1 and Margin 2 per channel, sorted by actual Gross Sales (not a fixed order) within whichever brand view is selected.
+- Margin 3 marked **pending** for physical channels (HITS/Trailer, Wellington, New York/Silo) in both brands, since there's no shipping cost to pull from QBO for those yet. Fill in `margin3_pct` and flip `margin3_pending` to `false` in the JSON once that data is ready — no HTML/JS changes needed.
+- Light/dark theme toggle styled as an actual sun/moon icon (inline SVG, not emoji), gold accent (`#B8863E` light / `#E3B764` dark), preference saved in the visitor's `localStorage`.
 
-## Cómo alimentar `data/sales-channels.json` con datos reales
+## Feeding `data/sales-channels.json` with real data
 
-El JSON está pensado para que el ETL solo tenga que sobrescribir el array `channels[periodo]`. Cada canal necesita:
+The JSON is built so the ETL only has to overwrite `channels[period].corro` and `channels[period].cavali`. Each channel entry needs:
 
-| Campo | Fuente | Detalle |
+| Field | Source | Detail |
 |---|---|---|
-| `gross_sales` | Shopify Admin API — `orders` | Suma de `total_price` (o `current_subtotal_price` si se excluyen impuestos) por canal/ubicación de venta, en el rango de fechas. |
-| `discounts` | Shopify Admin API — `discount_applications` en cada orden | Para llegar a Net Sales = `gross_sales - discounts`. Es el punto clave para Concierge, que históricamente descuenta mucho más que Wellington. |
-| `orders` | Shopify Admin API — conteo de `orders` | Volumen de órdenes por canal. |
-| `margin1_pct`, `margin2_pct`, `margin3_pct` | QuickBooks Online API | COGS por clase/canal contable para Margin 1; sumar gastos operativos directos del canal para Margin 2; sumar shipping/fulfillment para Margin 3. |
-| `margin3_pending` | — | `true` mientras el canal no tenga costo de shipping cargado en QBO (típicamente canales físicos). |
+| `gross_sales` | Shopify Admin API — `orders` | Sum of order totals per channel/sales location, per store, in the date range. |
+| `discounts` | Shopify Admin API — `discount_applications` on each order | Net Sales = `gross_sales - discounts`. This is the key figure for Concierge, which historically discounts far more than Wellington. |
+| `orders` | Shopify Admin API — `orders` count | Order volume per channel. |
+| `margin1_pct`, `margin2_pct`, `margin3_pct` | QuickBooks Online API | COGS by class/channel for Margin 1; add direct channel operating costs for Margin 2; add shipping/fulfillment for Margin 3. |
+| `margin3_pending` | — | `true` while the channel doesn't yet have a shipping cost loaded in QBO (typically physical channels). |
 
-Esto sigue el mismo patrón que ya está en uso:
-- Autenticación OAuth2 a QBO con rotación de refresh tokens → igual que en el dashboard de AP.
-- Extracción de Shopify vía GitHub Actions con export/upsert → igual que en el pipeline de suscripciones (Smartrr).
+### Shopify connections — 4 stores total
 
-`update-data.yml` es un stub con la forma del job (cron diario, checkout, run del script Python de ETL, commit del JSON actualizado). Falta:
-1. El script real de extracción (`scripts/fetch_sales_by_channel.py`), que junte Shopify + QBO y escriba `data/sales-channels.json`.
-2. Los secrets del repo: credenciales de Shopify y el token/refresh token de QBO (reutilizables desde el dashboard de AP si ya están guardados como secrets).
+Two Shopify stores per brand feed this dashboard. Set these as **GitHub repo secrets**:
 
-## Tema
+| Secret | Store |
+|---|---|
+| `SHOPIFY_CORRO_STORE_1_DOMAIN` / `SHOPIFY_CORRO_STORE_1_TOKEN` | Corro — store 1 |
+| `SHOPIFY_CORRO_STORE_2_DOMAIN` / `SHOPIFY_CORRO_STORE_2_TOKEN` | Corro — store 2 |
+| `SHOPIFY_CAVALI_STORE_1_DOMAIN` / `SHOPIFY_CAVALI_STORE_1_TOKEN` | Cavali — store 1 |
+| `SHOPIFY_CAVALI_STORE_2_DOMAIN` / `SHOPIFY_CAVALI_STORE_2_TOKEN` | Cavali — store 2 |
 
-Blanco y negro puro, con un toggle sol/luna (☀ / ☾) que cambia entre modo claro y oscuro. La preferencia se guarda en `localStorage` del navegador de quien lo mira, así que no requiere backend.
+The ETL script sums `gross_sales`, `discounts` and `orders` across both stores of a brand before writing that brand's channel rows — the dashboard itself only ever sees one combined figure per brand per channel, not per store.
+
+QBO stays a single OAuth2 connection (reuse the refresh-token rotation already set up for the AP dashboard) — `QBO_CLIENT_ID`, `QBO_CLIENT_SECRET`, `QBO_REFRESH_TOKEN`, same as before.
+
+`update-data.yml` is a stub with the shape of the job (daily cron, checkout, run the Python ETL, commit the updated JSON). Still missing:
+1. The real extraction script (`scripts/fetch_sales_by_channel.py`) that pulls from all 4 Shopify stores + QBO and writes `data/sales-channels.json`.
+2. The 8 Shopify secrets above, plus the 3 QBO secrets, added to the repo.
+
+## Theme
+
+Warm ivory/near-black base with a single gold accent (used for the toggle, active period pill, and share bars), plus a brand color per row (Corro terracotta, Cavali teal) so a mixed "All brands" view stays easy to scan. The sun/moon toggle is a real icon, not text — swaps between a sun (rays) and a crescent moon.

@@ -1,29 +1,45 @@
 {
   "meta": {
-    "note": "DATOS DE MUESTRA (demo). Reemplazar mediante el pipeline de GitHub Actions descrito en README.md, cruzando Shopify (volumen, gross sales, descuentos) con QuickBooks Online (COGS, gastos por canal, shipping) vía OAuth2.",
+    "note": "SAMPLE DATA (demo). Replace via the GitHub Actions pipeline described in README.md, cross-referencing Shopify (order volume, gross sales, discounts) with QuickBooks Online (COGS, per-channel expenses, shipping).",
     "currency": "USD",
     "last_updated": "2026-08-29",
+    "brands": {
+      "corro": { "label": "Corro", "color": "#9C5F3C" },
+      "cavali": { "label": "Cavali", "color": "#3C6E71" }
+    },
     "source": {
-      "gross_sales_and_discounts": "Shopify Admin API (orders, discount_applications)",
-      "cogs_and_margins": "QuickBooks Online API (Cost of Goods Sold por clase/canal)"
+      "gross_sales_and_discounts": "Shopify Admin API (orders, discount_applications) — 2 stores per brand",
+      "cogs_and_margins": "QuickBooks Online API (Cost of Goods Sold by class/channel)"
     }
   },
   "periods": [
     { "id": "2026-q1", "label": "Q1 2026", "start": "2026-01-01", "end": "2026-03-31" },
     { "id": "2026-q2", "label": "Q2 2026", "start": "2026-04-01", "end": "2026-06-30" },
     { "id": "2026-q3", "label": "Q3 2026", "start": "2026-07-01", "end": "2026-09-30" },
-    { "id": "trailing-3m", "label": "Últimos 3 meses", "start": "2026-06-01", "end": "2026-08-31" }
+    { "id": "trailing-3m", "label": "Last 3 months", "start": "2026-06-01", "end": "2026-08-31" }
   ],
   "channels": {
-    "2026-q3": [
-      { "id": "ecommerce",   "name": "E-Commerce",         "gross_sales": 420000, "discounts": 46200, "margin1_pct": 0.58, "margin2_pct": 0.51, "margin3_pct": 0.44, "margin3_pending": false, "orders": 5210 },
-      { "id": "concierge",   "name": "Concierge",          "gross_sales": 310000, "discounts": 99200, "margin1_pct": 0.52, "margin2_pct": 0.46, "margin3_pct": 0.41, "margin3_pending": false, "orders": 1180 },
-      { "id": "trailer",     "name": "HITS / Trailer",     "gross_sales": 180000, "discounts": 9000,  "margin1_pct": 0.62, "margin2_pct": 0.57, "margin3_pct": null, "margin3_pending": true,  "orders": 940, "note": "Próximamente solo 'Trailer'. Sin costos de shipping que jalar (canal físico)." },
-      { "id": "wellington",  "name": "Wellington",         "gross_sales": 150000, "discounts": 4500,  "margin1_pct": 0.64, "margin2_pct": 0.60, "margin3_pct": null, "margin3_pending": true,  "orders": 610, "note": "Canal físico, retiene más valor. Sin shipping que jalar." },
-      { "id": "silo",        "name": "Nueva York (Silo)",  "gross_sales": 110000, "discounts": 4400,  "margin1_pct": 0.60, "margin2_pct": 0.55, "margin3_pct": null, "margin3_pending": true,  "orders": 340, "note": "Tienda física nueva, por entrar / en rampa." },
-      { "id": "cavalli",     "name": "Cavalli",            "gross_sales": 95000,  "discounts": 12350, "margin1_pct": 0.55, "margin2_pct": 0.49, "margin3_pct": 0.43, "margin3_pending": false, "orders": 705 },
-      { "id": "brothery",    "name": "Brothery",           "gross_sales": 40000,  "discounts": 3600,  "margin1_pct": 0.57, "margin2_pct": 0.52, "margin3_pct": 0.46, "margin3_pending": false, "orders": 265 },
-      { "id": "others",      "name": "Others",             "gross_sales": 25000,  "discounts": 1500,  "margin1_pct": 0.40, "margin2_pct": 0.35, "margin3_pct": 0.30, "margin3_pending": false, "orders": 190, "note": "Afiliados y canales menores." }
-    ]
+    "2026-q3": {
+      "corro": [
+        { "id": "ecommerce",   "name": "E-Commerce",         "gross_sales": 420000, "discounts": 46200, "margin1_pct": 0.58, "margin2_pct": 0.51, "margin3_pct": 0.44, "margin3_pending": false, "orders": 5210 },
+        { "id": "concierge",   "name": "Concierge",          "gross_sales": 310000, "discounts": 99200, "margin1_pct": 0.52, "margin2_pct": 0.46, "margin3_pct": 0.41, "margin3_pending": false, "orders": 1180 },
+        { "id": "trailer",     "name": "HITS / Trailer",     "gross_sales": 180000, "discounts": 9000,  "margin1_pct": 0.62, "margin2_pct": 0.57, "margin3_pct": null, "margin3_pending": true,  "orders": 940, "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)." },
+        { "id": "wellington",  "name": "Wellington",         "gross_sales": 150000, "discounts": 4500,  "margin1_pct": 0.64, "margin2_pct": 0.60, "margin3_pct": null, "margin3_pending": true,  "orders": 610, "note": "Physical channel, retains more value. No shipping to pull." },
+        { "id": "silo",        "name": "New York (Silo)",    "gross_sales": 110000, "discounts": 4400,  "margin1_pct": 0.60, "margin2_pct": 0.55, "margin3_pct": null, "margin3_pending": true,  "orders": 340, "note": "New physical store, ramping up." },
+        { "id": "cavalli",     "name": "Cavalli",            "gross_sales": 95000,  "discounts": 12350, "margin1_pct": 0.55, "margin2_pct": 0.49, "margin3_pct": 0.43, "margin3_pending": false, "orders": 705 },
+        { "id": "brothery",    "name": "Brothery",           "gross_sales": 40000,  "discounts": 3600,  "margin1_pct": 0.57, "margin2_pct": 0.52, "margin3_pct": 0.46, "margin3_pending": false, "orders": 265 },
+        { "id": "others",      "name": "Others",             "gross_sales": 25000,  "discounts": 1500,  "margin1_pct": 0.40, "margin2_pct": 0.35, "margin3_pct": 0.30, "margin3_pending": false, "orders": 190, "note": "Affiliates and minor channels." }
+      ],
+      "cavali": [
+        { "id": "ecommerce",   "name": "E-Commerce",         "gross_sales": 260000, "discounts": 28600, "margin1_pct": 0.56, "margin2_pct": 0.49, "margin3_pct": 0.42, "margin3_pending": false, "orders": 3120 },
+        { "id": "concierge",   "name": "Concierge",          "gross_sales": 140000, "discounts": 42000, "margin1_pct": 0.50, "margin2_pct": 0.44, "margin3_pct": 0.39, "margin3_pending": false, "orders": 560 },
+        { "id": "trailer",     "name": "HITS / Trailer",     "gross_sales": 95000,  "discounts": 4750,  "margin1_pct": 0.60, "margin2_pct": 0.55, "margin3_pct": null, "margin3_pending": true,  "orders": 480, "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)." },
+        { "id": "wellington",  "name": "Wellington",         "gross_sales": 70000,  "discounts": 2100,  "margin1_pct": 0.63, "margin2_pct": 0.58, "margin3_pct": null, "margin3_pending": true,  "orders": 265, "note": "Physical channel, retains more value. No shipping to pull." },
+        { "id": "silo",        "name": "New York (Silo)",    "gross_sales": 40000,  "discounts": 1600,  "margin1_pct": 0.58, "margin2_pct": 0.53, "margin3_pct": null, "margin3_pending": true,  "orders": 140, "note": "New physical store, ramping up." },
+        { "id": "cavalli",     "name": "Cavalli",            "gross_sales": 35000,  "discounts": 4550,  "margin1_pct": 0.53, "margin2_pct": 0.47, "margin3_pct": 0.41, "margin3_pending": false, "orders": 260 },
+        { "id": "brothery",    "name": "Brothery",           "gross_sales": 18000,  "discounts": 1620,  "margin1_pct": 0.55, "margin2_pct": 0.50, "margin3_pct": 0.44, "margin3_pending": false, "orders": 120 },
+        { "id": "others",      "name": "Others",             "gross_sales": 12000,  "discounts": 720,   "margin1_pct": 0.38, "margin2_pct": 0.33, "margin3_pct": 0.28, "margin3_pending": false, "orders": 95, "note": "Affiliates and minor channels." }
+      ]
+    }
   }
 }
