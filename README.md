@@ -37,18 +37,18 @@ The JSON is built so the ETL only has to overwrite `channels[period].corro` and 
 | `margin1_pct`, `margin2_pct`, `margin3_pct` | QuickBooks Online API | COGS by class/channel for Margin 1; add direct channel operating costs for Margin 2; add shipping/fulfillment for Margin 3. |
 | `margin3_pending` | — | `true` while the channel doesn't yet have a shipping cost loaded in QBO (typically physical channels). |
 
-### Shopify connections — 4 stores total
+### Shopify connections — 1 store per brand
 
-Two Shopify stores per brand feed this dashboard. Set these as **GitHub repo secrets**:
+Set these as **GitHub repo secrets** (Settings → Secrets and variables → Actions):
 
-| Secret | Store |
+| Secret | Value |
 |---|---|
-| `SHOPIFY_CORRO_STORE_1_DOMAIN` / `SHOPIFY_CORRO_STORE_1_TOKEN` | Corro — store 1 |
-| `SHOPIFY_CORRO_STORE_2_DOMAIN` / `SHOPIFY_CORRO_STORE_2_TOKEN` | Corro — store 2 |
-| `SHOPIFY_CAVALI_STORE_1_DOMAIN` / `SHOPIFY_CAVALI_STORE_1_TOKEN` | Cavali — store 1 |
-| `SHOPIFY_CAVALI_STORE_2_DOMAIN` / `SHOPIFY_CAVALI_STORE_2_TOKEN` | Cavali — store 2 |
+| `SHOPIFY_CORRO_DOMAIN` | `equestrian-labs.myshopify.com` |
+| `SHOPIFY_CORRO_TOKEN` | Corro's Shopify Admin API token |
+| `SHOPIFY_CAVALI_DOMAIN` | `cavali-club.myshopify.com` |
+| `SHOPIFY_CAVALI_TOKEN` | Cavali's Shopify Admin API token |
 
-The ETL script sums `gross_sales`, `discounts` and `orders` across both stores of a brand before writing that brand's channel rows — the dashboard itself only ever sees one combined figure per brand per channel, not per store.
+The ETL script calls each brand's store with its own domain/token pair and writes that brand's channel rows directly — no combining needed at the Shopify layer.
 
 QBO stays a single OAuth2 connection (reuse the refresh-token rotation already set up for the AP dashboard) — `QBO_CLIENT_ID`, `QBO_CLIENT_SECRET`, `QBO_REFRESH_TOKEN`, same as before.
 
