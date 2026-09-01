@@ -65,18 +65,13 @@ SHOPIFY_API_VERSION = "2024-10"
 # ---------------------------------------------------------------------------
 
 CHANNEL_ORDER = [
-    "ecommerce", "concierge", "trailer", "wellington",
-    "silo", "cavalli", "brothery", "others",
+    "ecommerce", "concierge", "trailer", "wellington"
 ]
 CHANNEL_NAMES = {
     "ecommerce": "E-Commerce",
     "concierge": "Concierge",
     "trailer": "HITS / Trailer",
     "wellington": "Wellington",
-    "silo": "New York (Silo)",
-    "cavalli": "Cavalli",
-    "brothery": "Brothery",
-    "others": "Others",
 }
 
 # Physical channels identified by Shopify Location (name match, case-insensitive).

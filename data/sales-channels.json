@@ -1,8 +1,8 @@
 {
   "meta": {
-    "note": "Live data from Shopify (gross_sales, discounts, orders) + QuickBooks Online (margins).",
+    "note": "SAMPLE DATA (demo). Replace via the GitHub Actions pipeline described in README.md, cross-referencing Shopify (order volume, gross sales, discounts) with QuickBooks Online (COGS, per-channel expenses, shipping).",
     "currency": "USD",
-    "last_updated": "2026-09-01",
+    "last_updated": "2026-08-29",
     "brands": {
       "corro": {
         "label": "Corro",
@@ -50,10 +50,6 @@
     {
       "id": "2026-08",
       "label": "Aug 2026"
-    },
-    {
-      "id": "2026-09",
-      "label": "Sep 2026"
     }
   ],
   "channels": {
@@ -840,7 +836,6 @@
           "note": "Physical channel, retains more value. No shipping to pull."
         }
       ]
-    },
-    "2026-09": {}
+    }
   }
 }
