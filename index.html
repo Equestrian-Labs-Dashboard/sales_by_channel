@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ventas por canal — Equestrian Labs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-theme="light">
+<div class="wrap">
+
+  <header class="masthead">
+    <div>
+      <h1>Ventas por canal</h1>
+      <p class="sub">Corro &amp; Cavali — Equestrian Labs</p>
+    </div>
+    <div class="masthead-right">
+      <div class="updated" id="updatedLabel">actualizado —</div>
+      <button class="toggle" id="themeToggle" aria-label="Cambiar entre modo claro y oscuro" aria-pressed="false">
+        <span class="knob" id="themeKnob">☀</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="controls">
+    <div class="periods" id="periodButtons"></div>
+    <div class="range-picker">
+      <label for="dateFrom">desde</label>
+      <input type="date" id="dateFrom">
+      <label for="dateTo">hasta</label>
+      <input type="date" id="dateTo">
+    </div>
+  </div>
+
+  <section class="kpis" id="kpiRow"></section>
+
+  <section>
+    <div class="table-head-row">
+      <h2>Participación por canal</h2>
+      <div class="legend"><span><span class="legend-dot"></span>Margin 3 pendiente (sin costo de shipping que jalar)</span></div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Canal</th>
+          <th class="share-cell">Share</th>
+          <th>Gross Sales</th>
+          <th>Net Sales</th>
+          <th>Margin 1</th>
+          <th>Margin 2</th>
+          <th>Margin 3</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+      <tfoot id="tableFoot"></tfoot>
+    </table>
+  </section>
+
+  <footer class="source-note">
+    Gross Sales y descuentos desde Shopify Admin API · COGS y márgenes desde QuickBooks Online ·
+    datos de muestra — ver README.md para el pipeline de reemplazo vía GitHub Actions.
+  </footer>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
