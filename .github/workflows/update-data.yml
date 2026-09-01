@@ -5,6 +5,9 @@ on:
     - cron: "0 9 * * *"   # daily at 09:00 UTC — adjust to the real cadence
   workflow_dispatch: {}
 
+permissions:
+  contents: write
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
