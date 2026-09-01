@@ -1,8 +1,8 @@
 {
   "meta": {
-    "note": "Live data from Shopify (gross_sales, discounts, orders) + QuickBooks Online (margins).",
+    "note": "SAMPLE DATA (demo). Replace via the GitHub Actions pipeline described in README.md, cross-referencing Shopify (order volume, gross sales, discounts) with QuickBooks Online (COGS, per-channel expenses, shipping).",
     "currency": "USD",
-    "last_updated": "2026-09-01",
+    "last_updated": "2026-08-29",
     "brands": {
       "corro": {
         "label": "Corro",
@@ -50,10 +50,6 @@
     {
       "id": "2026-08",
       "label": "Aug 2026"
-    },
-    {
-      "id": "2026-09",
-      "label": "Sep 2026"
     }
   ],
   "channels": {
@@ -110,48 +106,24 @@
         {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 80500,
-          "discounts": 6730,
-          "margin1_pct": 0.565,
-          "margin2_pct": 0.468,
-          "margin3_pct": 0.42,
+          "gross_sales": 122079.99999999999,
+          "discounts": 15532.999999999998,
+          "margin1_pct": 0.5,
+          "margin2_pct": 0.45,
+          "margin3_pct": 0.4,
           "margin3_pending": false,
-          "orders": 1012
+          "orders": 1500
         },
         {
-          "id": "concierge",
-          "name": "Concierge",
-          "gross_sales": 41000,
-          "discounts": 13390,
-          "margin1_pct": 0.507,
-          "margin2_pct": 0.452,
-          "margin3_pct": 0.377,
-          "margin3_pending": false,
-          "orders": 163
-        },
-        {
-          "id": "trailer",
-          "name": "HITS / Trailer",
-          "gross_sales": 31100,
-          "discounts": 1460,
-          "margin1_pct": 0.607,
-          "margin2_pct": 0.55,
+          "id": "box",
+          "name": "Seasonal Box",
+          "gross_sales": 52320.0,
+          "discounts": 6657.0,
+          "margin1_pct": 0.4,
+          "margin2_pct": 0.35,
           "margin3_pct": null,
           "margin3_pending": true,
-          "orders": 169,
-          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
-        },
-        {
-          "id": "wellington",
-          "name": "Wellington",
-          "gross_sales": 21800,
-          "discounts": 610,
-          "margin1_pct": 0.615,
-          "margin2_pct": 0.57,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 92,
-          "note": "Physical channel, retains more value. No shipping to pull."
+          "orders": 300
         }
       ]
     },
@@ -208,48 +180,24 @@
         {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 92500,
-          "discounts": 7880,
-          "margin1_pct": 0.549,
-          "margin2_pct": 0.486,
-          "margin3_pct": 0.411,
+          "gross_sales": 135520.0,
+          "discounts": 17332.0,
+          "margin1_pct": 0.5,
+          "margin2_pct": 0.45,
+          "margin3_pct": 0.4,
           "margin3_pending": false,
-          "orders": 1163
+          "orders": 1500
         },
         {
-          "id": "concierge",
-          "name": "Concierge",
-          "gross_sales": 45400,
-          "discounts": 14640,
-          "margin1_pct": 0.505,
-          "margin2_pct": 0.457,
-          "margin3_pct": 0.384,
-          "margin3_pending": false,
-          "orders": 180
-        },
-        {
-          "id": "trailer",
-          "name": "HITS / Trailer",
-          "gross_sales": 33400,
-          "discounts": 1580,
-          "margin1_pct": 0.59,
-          "margin2_pct": 0.557,
+          "id": "box",
+          "name": "Seasonal Box",
+          "gross_sales": 58080.0,
+          "discounts": 7428.0,
+          "margin1_pct": 0.4,
+          "margin2_pct": 0.35,
           "margin3_pct": null,
           "margin3_pending": true,
-          "orders": 181,
-          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
-        },
-        {
-          "id": "wellington",
-          "name": "Wellington",
-          "gross_sales": 22300,
-          "discounts": 660,
-          "margin1_pct": 0.62,
-          "margin2_pct": 0.574,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 94,
-          "note": "Physical channel, retains more value. No shipping to pull."
+          "orders": 300
         }
       ]
     },
@@ -306,48 +254,24 @@
         {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 100000,
-          "discounts": 9040,
-          "margin1_pct": 0.563,
-          "margin2_pct": 0.481,
-          "margin3_pct": 0.397,
+          "gross_sales": 148400.0,
+          "discounts": 19068.0,
+          "margin1_pct": 0.5,
+          "margin2_pct": 0.45,
+          "margin3_pct": 0.4,
           "margin3_pending": false,
-          "orders": 1257
+          "orders": 1500
         },
         {
-          "id": "concierge",
-          "name": "Concierge",
-          "gross_sales": 51500,
-          "discounts": 15600,
-          "margin1_pct": 0.516,
-          "margin2_pct": 0.447,
-          "margin3_pct": 0.389,
-          "margin3_pending": false,
-          "orders": 204
-        },
-        {
-          "id": "trailer",
-          "name": "HITS / Trailer",
-          "gross_sales": 36200,
-          "discounts": 1900,
-          "margin1_pct": 0.615,
-          "margin2_pct": 0.57,
+          "id": "box",
+          "name": "Seasonal Box",
+          "gross_sales": 63600.0,
+          "discounts": 8172.0,
+          "margin1_pct": 0.4,
+          "margin2_pct": 0.35,
           "margin3_pct": null,
           "margin3_pending": true,
-          "orders": 196,
-          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
-        },
-        {
-          "id": "wellington",
-          "name": "Wellington",
-          "gross_sales": 24300,
-          "discounts": 700,
-          "margin1_pct": 0.611,
-          "margin2_pct": 0.57,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 102,
-          "note": "Physical channel, retains more value. No shipping to pull."
+          "orders": 300
         }
       ]
     },
@@ -404,48 +328,24 @@
         {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 95200,
-          "discounts": 9210,
-          "margin1_pct": 0.559,
-          "margin2_pct": 0.492,
-          "margin3_pct": 0.418,
+          "gross_sales": 142240.0,
+          "discounts": 18746.0,
+          "margin1_pct": 0.5,
+          "margin2_pct": 0.45,
+          "margin3_pct": 0.4,
           "margin3_pending": false,
-          "orders": 1197
+          "orders": 1500
         },
         {
-          "id": "concierge",
-          "name": "Concierge",
-          "gross_sales": 49100,
-          "discounts": 15060,
-          "margin1_pct": 0.512,
-          "margin2_pct": 0.426,
-          "margin3_pct": 0.381,
-          "margin3_pending": false,
-          "orders": 195
-        },
-        {
-          "id": "trailer",
-          "name": "HITS / Trailer",
-          "gross_sales": 33400,
-          "discounts": 1780,
-          "margin1_pct": 0.594,
-          "margin2_pct": 0.557,
+          "id": "box",
+          "name": "Seasonal Box",
+          "gross_sales": 60960.0,
+          "discounts": 8034.0,
+          "margin1_pct": 0.4,
+          "margin2_pct": 0.35,
           "margin3_pct": null,
           "margin3_pending": true,
-          "orders": 181,
-          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
-        },
-        {
-          "id": "wellington",
-          "name": "Wellington",
-          "gross_sales": 25500,
-          "discounts": 730,
-          "margin1_pct": 0.611,
-          "margin2_pct": 0.572,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 107,
-          "note": "Physical channel, retains more value. No shipping to pull."
+          "orders": 300
         }
       ]
     },
@@ -502,48 +402,24 @@
         {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 94200,
-          "discounts": 8700,
-          "margin1_pct": 0.562,
-          "margin2_pct": 0.51,
-          "margin3_pct": 0.419,
+          "gross_sales": 145600.0,
+          "discounts": 18886.0,
+          "margin1_pct": 0.5,
+          "margin2_pct": 0.45,
+          "margin3_pct": 0.4,
           "margin3_pending": false,
-          "orders": 1184
+          "orders": 1500
         },
         {
-          "id": "concierge",
-          "name": "Concierge",
-          "gross_sales": 51800,
-          "discounts": 15680,
-          "margin1_pct": 0.496,
-          "margin2_pct": 0.44,
-          "margin3_pct": 0.402,
-          "margin3_pending": false,
-          "orders": 205
-        },
-        {
-          "id": "trailer",
-          "name": "HITS / Trailer",
-          "gross_sales": 34500,
-          "discounts": 1710,
-          "margin1_pct": 0.597,
-          "margin2_pct": 0.533,
+          "id": "box",
+          "name": "Seasonal Box",
+          "gross_sales": 62400.0,
+          "discounts": 8094.0,
+          "margin1_pct": 0.4,
+          "margin2_pct": 0.35,
           "margin3_pct": null,
           "margin3_pending": true,
-          "orders": 187,
-          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
-        },
-        {
-          "id": "wellington",
-          "name": "Wellington",
-          "gross_sales": 27500,
-          "discounts": 890,
-          "margin1_pct": 0.599,
-          "margin2_pct": 0.579,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 116,
-          "note": "Physical channel, retains more value. No shipping to pull."
+          "orders": 300
         }
       ]
     },
@@ -600,48 +476,24 @@
         {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 98000,
-          "discounts": 8470,
-          "margin1_pct": 0.55,
-          "margin2_pct": 0.485,
-          "margin3_pct": 0.416,
-          "margin3_pending": false,
-          "orders": 1232
-        },
-        {
-          "id": "concierge",
-          "name": "Concierge",
-          "gross_sales": 51000,
-          "discounts": 16310,
-          "margin1_pct": 0.52,
-          "margin2_pct": 0.426,
+          "gross_sales": 148470.0,
+          "discounts": 19208.0,
+          "margin1_pct": 0.5,
+          "margin2_pct": 0.45,
           "margin3_pct": 0.4,
           "margin3_pending": false,
-          "orders": 202
+          "orders": 1500
         },
         {
-          "id": "trailer",
-          "name": "HITS / Trailer",
-          "gross_sales": 38200,
-          "discounts": 1950,
-          "margin1_pct": 0.593,
-          "margin2_pct": 0.557,
+          "id": "box",
+          "name": "Seasonal Box",
+          "gross_sales": 63630.0,
+          "discounts": 8232.0,
+          "margin1_pct": 0.4,
+          "margin2_pct": 0.35,
           "margin3_pct": null,
           "margin3_pending": true,
-          "orders": 207,
-          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
-        },
-        {
-          "id": "wellington",
-          "name": "Wellington",
-          "gross_sales": 24900,
-          "discounts": 710,
-          "margin1_pct": 0.599,
-          "margin2_pct": 0.579,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 105,
-          "note": "Physical channel, retains more value. No shipping to pull."
+          "orders": 300
         }
       ]
     },
@@ -698,48 +550,24 @@
         {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 118700,
-          "discounts": 11350,
-          "margin1_pct": 0.57,
-          "margin2_pct": 0.499,
-          "margin3_pct": 0.412,
+          "gross_sales": 170590.0,
+          "discounts": 22988.0,
+          "margin1_pct": 0.5,
+          "margin2_pct": 0.45,
+          "margin3_pct": 0.4,
           "margin3_pending": false,
-          "orders": 1492
+          "orders": 1500
         },
         {
-          "id": "concierge",
-          "name": "Concierge",
-          "gross_sales": 57300,
-          "discounts": 18580,
-          "margin1_pct": 0.508,
-          "margin2_pct": 0.454,
-          "margin3_pct": 0.403,
-          "margin3_pending": false,
-          "orders": 227
-        },
-        {
-          "id": "trailer",
-          "name": "HITS / Trailer",
-          "gross_sales": 37000,
-          "discounts": 1950,
-          "margin1_pct": 0.59,
-          "margin2_pct": 0.549,
+          "id": "box",
+          "name": "Seasonal Box",
+          "gross_sales": 73110.0,
+          "discounts": 9852.0,
+          "margin1_pct": 0.4,
+          "margin2_pct": 0.35,
           "margin3_pct": null,
           "margin3_pending": true,
-          "orders": 201,
-          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
-        },
-        {
-          "id": "wellington",
-          "name": "Wellington",
-          "gross_sales": 30700,
-          "discounts": 960,
-          "margin1_pct": 0.62,
-          "margin2_pct": 0.566,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 129,
-          "note": "Physical channel, retains more value. No shipping to pull."
+          "orders": 300
         }
       ]
     },
@@ -796,51 +624,26 @@
         {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 96700,
-          "discounts": 8300,
-          "margin1_pct": 0.579,
-          "margin2_pct": 0.498,
-          "margin3_pct": 0.42,
+          "gross_sales": 152180.0,
+          "discounts": 20447.0,
+          "margin1_pct": 0.5,
+          "margin2_pct": 0.45,
+          "margin3_pct": 0.4,
           "margin3_pending": false,
-          "orders": 1216
+          "orders": 1500
         },
         {
-          "id": "concierge",
-          "name": "Concierge",
-          "gross_sales": 53700,
-          "discounts": 18250,
-          "margin1_pct": 0.518,
-          "margin2_pct": 0.424,
-          "margin3_pct": 0.404,
-          "margin3_pending": false,
-          "orders": 213
-        },
-        {
-          "id": "trailer",
-          "name": "HITS / Trailer",
-          "gross_sales": 38200,
-          "discounts": 1850,
-          "margin1_pct": 0.578,
-          "margin2_pct": 0.547,
+          "id": "box",
+          "name": "Seasonal Box",
+          "gross_sales": 65220.0,
+          "discounts": 8763.0,
+          "margin1_pct": 0.4,
+          "margin2_pct": 0.35,
           "margin3_pct": null,
           "margin3_pending": true,
-          "orders": 207,
-          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
-        },
-        {
-          "id": "wellington",
-          "name": "Wellington",
-          "gross_sales": 28800,
-          "discounts": 810,
-          "margin1_pct": 0.614,
-          "margin2_pct": 0.589,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 121,
-          "note": "Physical channel, retains more value. No shipping to pull."
+          "orders": 300
         }
       ]
-    },
-    "2026-09": {}
+    }
   }
 }

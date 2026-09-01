@@ -64,14 +64,17 @@ SHOPIFY_API_VERSION = "2024-10"
 # Still TODO / unconfirmed: Silo, Cavalli, Brothery.
 # ---------------------------------------------------------------------------
 
-CHANNEL_ORDER = [
-    "ecommerce", "concierge", "trailer", "wellington"
-]
+CHANNEL_ORDER = {
+    "corro": ["ecommerce", "concierge", "trailer", "wellington"],
+    "cavali": ["ecommerce", "box"]
+}
+
 CHANNEL_NAMES = {
     "ecommerce": "E-Commerce",
     "concierge": "Concierge",
     "trailer": "HITS / Trailer",
     "wellington": "Wellington",
+    "box": "Seasonal Box"
 }
 
 # Physical channels identified by Shopify Location (name match, case-insensitive).
@@ -267,6 +270,11 @@ def classify_order(order, brand, locations, product_tags_by_id):
         if tag in PRODUCT_TAG_TO_CHANNEL.get(brand, {}):
             return PRODUCT_TAG_TO_CHANNEL[brand][tag], None
 
+    # Cavali specific logic: if any product tag contains 'box', it's the Box channel.
+    if brand == "cavali":
+        if "box" in product_tags_joined:
+            return "box", None
+
     # 7: default, matches the Sheet formula's fallback.
     return "ecommerce", None
 
@@ -296,11 +304,11 @@ def build_brand_month_rows(domain, token, brand, year, month):
             t["notes"][note] += 1
 
     rows = []
-    for cid in CHANNEL_ORDER:
+    for cid in CHANNEL_ORDER.get(brand, []):
         t = totals.get(cid, {"gross_sales": 0.0, "discounts": 0.0, "orders": 0, "notes": {}})
         row = {
             "id": cid,
-            "name": CHANNEL_NAMES[cid],
+            "name": CHANNEL_NAMES.get(cid, cid.title()),
             "gross_sales": round(t["gross_sales"], 2),
             "discounts": round(t["discounts"], 2),
             "orders": t["orders"],
