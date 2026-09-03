@@ -2,7 +2,7 @@
   "meta": {
     "note": "Live data from Shopify (gross_sales, discounts, orders) + QuickBooks Online (margins).",
     "currency": "USD",
-    "last_updated": "2026-09-02",
+    "last_updated": "2026-09-03",
     "brands": {
       "corro": {
         "label": "Corro",
