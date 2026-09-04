@@ -81,17 +81,18 @@ function render(periodId) {
   const weightedM1 = totalNet > 0 ? totalGrossProfit / totalNet : 0;
   const totalOrders = enriched.reduce((s, c) => s + (c.orders || 0), 0);
 
-  renderKPIs(totalGross, totalNet, weightedM1, totalOrders);
+  renderKPIs(totalGross, totalNet, totalGrossProfit, weightedM1, totalOrders);
   renderTable(enriched, totalGross, totalNet, totalGrossProfit);
 }
 
-function renderKPIs(totalGross, totalNet, weightedM1, totalOrders) {
+function renderKPIs(totalGross, totalNet, totalGrossProfit, weightedM1, totalOrders) {
   const el = document.getElementById("kpiRow");
   if (!el) return;
   const cards = [
     { label: "Gross Sales", value: fmtUSD(totalGross) },
     { label: "Net Sales", value: fmtUSD(totalNet), sub: fmtPct(totalNet / totalGross) + " of gross" },
-    { label: "Gross Margin 1 (weighted)", value: fmtPct(weightedM1) },
+    { label: "Gross Profit", value: fmtUSD(totalGrossProfit) },
+    { label: "Gross Margin 1", value: fmtPct(weightedM1) },
     { label: "Orders", value: totalOrders.toLocaleString("en-US") },
   ];
   el.innerHTML = cards

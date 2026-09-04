@@ -1,8 +1,8 @@
 {
   "meta": {
-    "note": "Live data from Shopify (gross_sales, discounts, orders) + QuickBooks Online (margins).",
+    "note": "SAMPLE DATA (demo). Replace via the GitHub Actions pipeline described in README.md, cross-referencing Shopify (order volume, gross sales, discounts) with QuickBooks Online (COGS, per-channel expenses, shipping).",
     "currency": "USD",
-    "last_updated": "2026-09-04",
+    "last_updated": "2026-08-29",
     "brands": {
       "equestrian_labs": {
         "label": "Equestrian Labs",
@@ -46,10 +46,6 @@
     {
       "id": "2026-08",
       "label": "Aug 2026"
-    },
-    {
-      "id": "2026-09",
-      "label": "Sep 2026"
     }
   ],
   "channels": {
@@ -90,8 +86,8 @@
           "note": "Physical channel, retains more value. No shipping to pull."
         },
         {
-          "id": "cavalli",
-          "name": "Cavalli",
+          "id": "cavali",
+          "name": "cavali",
           "gross_sales": 3000,
           "discounts": 2000,
           "margin1_pct": 0.5,
@@ -144,8 +140,8 @@
           "note": "Physical channel, retains more value. No shipping to pull."
         },
         {
-          "id": "cavalli",
-          "name": "Cavalli",
+          "id": "cavali",
+          "name": "cavali",
           "gross_sales": 3000,
           "discounts": 2000,
           "margin1_pct": 0.5,
@@ -198,8 +194,8 @@
           "note": "Physical channel, retains more value. No shipping to pull."
         },
         {
-          "id": "cavalli",
-          "name": "Cavalli",
+          "id": "cavali",
+          "name": "cavali",
           "gross_sales": 3000,
           "discounts": 2000,
           "margin1_pct": 0.5,
@@ -252,8 +248,8 @@
           "note": "Physical channel, retains more value. No shipping to pull."
         },
         {
-          "id": "cavalli",
-          "name": "Cavalli",
+          "id": "cavali",
+          "name": "cavali",
           "gross_sales": 3000,
           "discounts": 2000,
           "margin1_pct": 0.5,
@@ -306,8 +302,8 @@
           "note": "Physical channel, retains more value. No shipping to pull."
         },
         {
-          "id": "cavalli",
-          "name": "Cavalli",
+          "id": "cavali",
+          "name": "cavali",
           "gross_sales": 3000,
           "discounts": 2000,
           "margin1_pct": 0.5,
@@ -360,8 +356,8 @@
           "note": "Physical channel, retains more value. No shipping to pull."
         },
         {
-          "id": "cavalli",
-          "name": "Cavalli",
+          "id": "cavali",
+          "name": "cavali",
           "gross_sales": 3000,
           "discounts": 2000,
           "margin1_pct": 0.5,
@@ -414,8 +410,8 @@
           "note": "Physical channel, retains more value. No shipping to pull."
         },
         {
-          "id": "cavalli",
-          "name": "Cavalli",
+          "id": "cavali",
+          "name": "cavali",
           "gross_sales": 3000,
           "discounts": 2000,
           "margin1_pct": 0.5,
@@ -468,8 +464,8 @@
           "note": "Physical channel, retains more value. No shipping to pull."
         },
         {
-          "id": "cavalli",
-          "name": "Cavalli",
+          "id": "cavali",
+          "name": "cavali",
           "gross_sales": 2726.57,
           "discounts": 1884.86,
           "margin1_pct": 0.5,
@@ -482,58 +478,6 @@
           "discounts": 500,
           "margin1_pct": 0.45,
           "orders": 80
-        }
-      ]
-    },
-    "2026-09": {
-      "equestrian_labs": [
-        {
-          "id": "cavalli",
-          "name": "Cavalli",
-          "gross_sales": 0.0,
-          "discounts": 0.0,
-          "orders": 0,
-          "margin1_pct": null
-        },
-        {
-          "id": "ecommerce",
-          "name": "E-Commerce",
-          "gross_sales": 0.0,
-          "discounts": 0.0,
-          "orders": 0,
-          "margin1_pct": null
-        },
-        {
-          "id": "concierge",
-          "name": "Concierge",
-          "gross_sales": 0.0,
-          "discounts": 0.0,
-          "orders": 0,
-          "margin1_pct": null
-        },
-        {
-          "id": "trailer",
-          "name": "HITS / Trailer",
-          "gross_sales": 0.0,
-          "discounts": 0.0,
-          "orders": 0,
-          "margin1_pct": null
-        },
-        {
-          "id": "wellington",
-          "name": "Wellington",
-          "gross_sales": 0.0,
-          "discounts": 0.0,
-          "orders": 0,
-          "margin1_pct": null
-        },
-        {
-          "id": "others",
-          "name": "Others",
-          "gross_sales": 0.0,
-          "discounts": 0.0,
-          "orders": 0,
-          "margin1_pct": null
         }
       ]
     }

@@ -65,11 +65,11 @@ SHOPIFY_API_VERSION = "2024-10"
 # ---------------------------------------------------------------------------
 
 CHANNEL_ORDER = {
-    "equestrian_labs": ["cavalli", "ecommerce", "concierge", "trailer", "wellington", "others"]
+    "equestrian_labs": ["cavali", "ecommerce", "concierge", "trailer", "wellington", "others"]
 }
 
 CHANNEL_NAMES = {
-    "cavalli": "Cavalli",
+    "cavali": "cavali",
     "ecommerce": "E-Commerce",
     "concierge": "Concierge",
     "trailer": "HITS / Trailer",
@@ -118,7 +118,7 @@ CUSTOMER_TAG_TO_CHANNEL = {
 }
 PRODUCT_TAG_TO_CHANNEL = {
     "corro": {
-        # "cavalli": "cavalli",   # TODO: confirm Cavalli product-line tag
+        # "cavali": "cavali",   # TODO: confirm Cavalli product-line tag
     },
     "cavali": {},
 }
@@ -272,7 +272,7 @@ def classify_order(order, brand, locations, product_tags_by_id):
 
     # Cavali store orders go to Cavalli channel
     if brand == "cavali":
-        return "cavalli", None
+        return "cavali", None
 
     # 7: default, matches the Sheet formula's fallback.
     return "ecommerce", None
