@@ -88,7 +88,8 @@ function render(periodId) {
 
   const totalGross = enriched.reduce((s, c) => s + c.gross_sales, 0);
   const totalNet = enriched.reduce((s, c) => s + (Number.isFinite(c.net_sales) ? c.net_sales : ((c.net_sales ?? (c.gross_sales - (c.discounts || 0) - (c.sales_reversals || 0))))), 0);
-  const totalGrossProfit = enriched.reduce((s, c) => s + (c.net_sales * (c.margin1_pct || 0)), 0);
+  const totalGrossProfit = enriched.reduce((s, c) =>
+    s + (c.gross_profit ?? ((c.net_sales || 0) * (c.margin1_pct || 0))), 0);
   const weightedM1 = totalNet > 0 ? totalGrossProfit / totalNet : 0;
   const totalOrders = enriched.reduce((s, c) => s + (c.orders || 0), 0);
 
@@ -126,7 +127,7 @@ function renderTable(rows, totalGross, totalNet, totalGrossProfit) {
     body.innerHTML = sorted
       .map((c) => {
         const share = c.gross_sales / totalGross;
-        const grossProfit = c.net_sales * (c.margin1_pct || 0);
+        const grossProfit = c.gross_profit ?? (c.net_sales * (c.margin1_pct || 0));
         return `
         <tr>
           <td>${c.name}${c.note ? `<span class="channel-note">${c.note}</span>` : ""}</td>

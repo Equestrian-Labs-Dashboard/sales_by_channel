@@ -71,3 +71,10 @@ Warm ivory/near-black base with a single gold accent (used for the toggle, activ
 - Net Sales now respects Shopify net sales when available and subtracts reversals in fallback mode.
 - Main dashboard accent aligned with the provided reference style.
 - Brand colors remain separated for Corro and Cavali.
+
+
+## Latest fixes
+- Premium lilac dark theme applied.
+- Gross Profit now uses Shopify/QBO provided value when available.
+- Margin calculations no longer overwrite real Gross Profit.
+- Ready for separate brand/channel reporting.

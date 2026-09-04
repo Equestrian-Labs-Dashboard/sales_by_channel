@@ -1,15 +1,15 @@
 :root {
-  --bg: #FBF9F5;
-  --ink: #171512;
-  --ink-soft: #6B655C;
-  --line: #E1DCD1;
-  --line-strong: #171512;
-  --surface: #F3EEE3;
-  --gold: #4C5BD4;
-  --gold-soft: #252A4A;
+  --bg: #101014;
+  --ink: #F5F2FF;
+  --ink-soft: #A9A3B8;
+  --line: #302B42;
+  --line-strong: #F5F2FF;
+  --surface: #191622;
+  --gold: #8B7CFF;
+  --gold-soft: #302650;
   --pending: #C9C2B2;
-  --corro: #1A1D36;
-  --cavali: #B7B0A2;
+  --corro: #6C63FF;
+  --cavali: #63A4A8;
   color-scheme: light;
 }
 
@@ -20,11 +20,11 @@
   --line: #322D24;
   --line-strong: #F3EEE3;
   --surface: #1D1A15;
-  --gold: #4C5BD4;
-  --gold-soft: #252A4A;
+  --gold: #8B7CFF;
+  --gold-soft: #302650;
   --pending: #4C4738;
   --corro: #4C5BD4;
-  --cavali: #B7B0A2;
+  --cavali: #63A4A8;
   color-scheme: dark;
 }
 
@@ -459,4 +459,10 @@ tbody tr.brand-corro {
 
 tbody tr.brand-cavali {
  border-left-color:#63A4A8;
+}
+
+/* final lilac identity */
+.share-bar-fill { background:#8B7CFF; }
+.kpi:nth-child(1), .kpi:nth-child(2), .kpi:nth-child(3), .kpi:nth-child(4) {
+ border-top-color:#8B7CFF;
 }
