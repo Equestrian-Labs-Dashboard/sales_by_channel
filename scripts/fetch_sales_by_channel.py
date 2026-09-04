@@ -61,7 +61,7 @@ SHOPIFY_API_VERSION = "2024-10"
 #      Drop ship / Shopify Collective / Legacy aren't in the dashboard's 8
 #      channels, so they're folded into "Others" (with the specific reason
 #      kept on the row's `note` field) until you tell us otherwise.
-# Still TODO / unconfirmed: Silo, Cavalli, Brothery.
+# Still TODO / unconfirmed: Silo, Brothery.
 # ---------------------------------------------------------------------------
 
 CHANNEL_ORDER = {
@@ -69,7 +69,7 @@ CHANNEL_ORDER = {
 }
 
 CHANNEL_NAMES = {
-    "cavali": "cavali",
+    "cavali": "Cavali",
     "ecommerce": "E-Commerce",
     "concierge": "Concierge",
     "trailer": "HITS / Trailer",
@@ -87,7 +87,8 @@ LOCATION_TO_CHANNEL = {
         # "silo new york": "silo",   # TODO: confirm Silo's location name/id
     },
     "cavali": {
-        # TODO: confirm equivalent location names for the Cavali store.
+        # Not used — Cavali orders are routed to "cavali" before any
+        # location/tag rule runs (see step 0 in classify_order).
     },
 }
 
@@ -117,9 +118,7 @@ CUSTOMER_TAG_TO_CHANNEL = {
     "cavali": {},
 }
 PRODUCT_TAG_TO_CHANNEL = {
-    "corro": {
-        # "cavali": "cavali",   # TODO: confirm Cavalli product-line tag
-    },
+    "corro": {},
     "cavali": {},
 }
 
@@ -206,6 +205,11 @@ def classify_order(order, brand, locations, product_tags_by_id):
     """Returns (channel_id, note) for a single Shopify order.
 
     Confirmed precedence (highest first):
+      0. Brand is Cavali                    -> Cavali (Cavali is its own
+         channel; none of Corro's tag/location rules below apply to it —
+         previously Cavali orders could get pulled into Concierge/HITS/
+         Wellington if they happened to share a tag or location name,
+         which is why Cavali's totals looked wrong)
       1. Product tag "Drop ship"            -> Others (note: Drop ship)
       2. Product tag "Shopify Collective"   -> Others (note: Shopify Collective)
       3. Order tag contains "Concierge"     -> Concierge
@@ -219,6 +223,9 @@ def classify_order(order, brand, locations, product_tags_by_id):
             IF(REGEXMATCH(order_tag,"(?i)Concierge"),"Concierge",
               IF(REGEXMATCH(product_tag,"(?i)Legacy"),"Legacy","e-commerce"))))
     """
+    if brand == "cavali":
+        return "cavali", None
+
     loc_id = str(order.get("location_id") or "")
     loc_name = locations.get(loc_id, "")
     order_tags = [t.strip().lower() for t in (order.get("tags") or "").split(",") if t.strip()]
@@ -259,8 +266,8 @@ def classify_order(order, brand, locations, product_tags_by_id):
     if loc_name and loc_name in LOCATION_TO_CHANNEL.get(brand, {}):
         return LOCATION_TO_CHANNEL[brand][loc_name], None
 
-    # Still-TODO channels (Cavalli, Brothery) via customer/product tag,
-    # checked before falling back to the e-commerce default.
+    # Still-TODO channels (Brothery) via customer/product tag, checked
+    # before falling back to the e-commerce default.
     customer = order.get("customer") or {}
     customer_tags = [t.strip().lower() for t in (customer.get("tags") or "").split(",") if t.strip()]
     for tag in customer_tags:
@@ -269,10 +276,6 @@ def classify_order(order, brand, locations, product_tags_by_id):
     for tag in all_product_tags:
         if tag in PRODUCT_TAG_TO_CHANNEL.get(brand, {}):
             return PRODUCT_TAG_TO_CHANNEL[brand][tag], None
-
-    # Cavali store orders go to Cavalli channel
-    if brand == "cavali":
-        return "cavali", None
 
     # 7: default, matches the Sheet formula's fallback.
     return "ecommerce", None
@@ -349,7 +352,7 @@ def main():
 
         print(f"[fetch] {brand} — {domain} — {period_id}")
         brand_totals = build_brand_month_rows(domain, token, brand, year, month)
-        
+
         for cid, t in brand_totals.items():
             combined_totals[cid]["gross_sales"] += t["gross_sales"]
             combined_totals[cid]["discounts"] += t["discounts"]
