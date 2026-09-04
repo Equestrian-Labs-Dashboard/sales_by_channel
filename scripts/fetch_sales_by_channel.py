@@ -27,12 +27,13 @@ physical/in-person sales), then order tag, then customer tag, then
 product tag. Anything that matches nothing falls into "others".
 """
 
+import calendar
 import json
 import os
 import sys
 import time
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import requests
@@ -40,6 +41,10 @@ import requests
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DATA_PATH = REPO_ROOT / "data" / "sales-channels.json"
 SHOPIFY_API_VERSION = "2024-10"
+# ShopifyQL (shopifyqlQuery) needs a newer Admin API version than the plain
+# REST calls above. Kept in its own constant so bumping one doesn't bump the
+# other by accident. Matches the version pipeline.py's GQL_VERSION uses.
+SHOPIFYQL_API_VERSION = "2025-10"
 
 # ---------------------------------------------------------------------------
 # CHANNEL MAPPING
@@ -309,6 +314,111 @@ def build_brand_month_rows(domain, token, brand, year, month):
 
 
 # ---------------------------------------------------------------------------
+# Shopify ShopifyQL — gross_profit / margin1_pct straight from Shopify
+#
+# Ported from pipeline.py's gql()/ql_run()/fetch_sales() (same ShopifyQL
+# "FROM sales" query, same numeric parsing), but this file keeps ITS OWN
+# field names throughout (gross_sales, discounts, net_sales, gross_profit,
+# margin1_pct, orders) instead of pipeline.py's (cogs, pct_gm, ...), so the
+# output matches what data/sales-channels.json and app.js already expect.
+# ---------------------------------------------------------------------------
+
+def shopify_graphql(domain, token, query):
+    """Minimal Admin GraphQL POST, only used to run ShopifyQL below."""
+    url = f"https://{domain}/admin/api/{SHOPIFYQL_API_VERSION}/graphql.json"
+    headers = {"X-Shopify-Access-Token": token, "Content-Type": "application/json"}
+    resp = requests.post(url, headers=headers, json={"query": query}, timeout=30)
+    resp.raise_for_status()
+    payload = resp.json()
+    if payload.get("errors"):
+        print(f"[warn] ShopifyQL GraphQL errors: {payload['errors']}", file=sys.stderr)
+        return None
+    return payload.get("data")
+
+
+def shopifyql_row(domain, token, ql_query):
+    """Run one ShopifyQL query, return its single summary row dict (or None)."""
+    escaped = ql_query.replace("\\", "\\\\").replace('"', '\\"')
+    gql_query = (
+        f'{{ shopifyqlQuery(query: "{escaped}") {{ '
+        f'tableData {{ rows }} parseErrors }} }}'
+    )
+    data = shopify_graphql(domain, token, gql_query)
+    if not data:
+        return None
+    ql = data.get("shopifyqlQuery") or {}
+    if ql.get("parseErrors"):
+        print(f"[warn] ShopifyQL parseErrors: {ql['parseErrors']}", file=sys.stderr)
+        return None
+    rows = (ql.get("tableData") or {}).get("rows") or []
+    return rows[-1] if rows else None
+
+
+def _num(v):
+    """Numeric coercion for ShopifyQL cell values (handles '1,234.00' style)."""
+    if v is None:
+        return 0.0
+    try:
+        return float(str(v).replace(",", "").strip())
+    except Exception:
+        return 0.0
+
+
+def fetch_shopify_sales_totals(domain, token, year, month):
+    """
+    STORE-LEVEL gross_sales / net_sales / gross_profit / margin1_pct, straight
+    from Shopify via ShopifyQL "FROM sales" — the same source and math
+    pipeline.py's fetch_sales() already uses for Corro and Cavali. This is
+    what fills in what fetch_qbo_margins() used to leave as None, without
+    touching the QBO stub itself: QBO can still override these values later
+    if/when it's wired (see main(), the QBO block still runs after this and
+    wins on any field it returns).
+
+    Returns None if ShopifyQL has no data for the period (e.g. brand-new
+    store, or the API version doesn't support shopifyqlQuery on this shop).
+    """
+    start = f"{year:04d}-{month:02d}-01"
+    last_day = calendar.monthrange(year, month)[1]
+    end_date = datetime(year, month, last_day, tzinfo=timezone.utc).date()
+
+    # ShopifyQL's UNTIL is exclusive on "today" — push it a day forward so an
+    # in-progress current month still includes today. Closed months are
+    # unaffected. Same fix as pipeline.py's _until().
+    today = datetime.now(timezone.utc).date()
+    until = end_date + timedelta(days=1) if end_date >= today else end_date
+
+    row = shopifyql_row(
+        domain, token,
+        f"FROM sales SHOW gross_sales, discounts, net_sales, "
+        f"cost_of_goods_sold, gross_profit, gross_margin, orders "
+        f"SINCE {start} UNTIL {until}"
+    )
+    if not row:
+        print(f"[warn] fetch_shopify_sales_totals: no ShopifyQL rows for {start}..{until}", file=sys.stderr)
+        return None
+
+    gross_sales = round(_num(row.get("gross_sales")), 2)
+    discounts = round(abs(_num(row.get("discounts"))), 2)
+    net_sales = round(_num(row.get("net_sales")), 2)
+    gross_profit = round(_num(row.get("gross_profit")), 2)
+
+    # gross_margin can come back as a fraction (0.583) or a percent (58.3).
+    # margin1_pct in sales-channels.json is stored as a fraction (0.585 -> "58.5%"
+    # via fmtPct in app.js), so normalize to that.
+    gm_raw = _num(row.get("gross_margin"))
+    margin1_pct = round(gm_raw, 4) if abs(gm_raw) <= 1 else round(gm_raw / 100, 4)
+
+    return {
+        "gross_sales": gross_sales,
+        "discounts": discounts,
+        "net_sales": net_sales,
+        "gross_profit": gross_profit,
+        "margin1_pct": margin1_pct,
+        "orders": int(abs(_num(row.get("orders")))),
+    }
+
+
+# ---------------------------------------------------------------------------
 # QuickBooks Online extraction (STUB)
 # ---------------------------------------------------------------------------
 
@@ -342,6 +452,11 @@ def main():
     data["channels"].setdefault(period_id, {})
 
     combined_totals = defaultdict(lambda: {"gross_sales": 0.0, "discounts": 0.0, "orders": 0, "notes": defaultdict(int)})
+    # Store-level gross_profit/net_sales/margin1_pct per brand, straight from
+    # Shopify ShopifyQL. Cavali = one channel = one store, so this is exact
+    # for it. Corro splits into 5 channels below, so its store total is
+    # applied uniformly (estimate) until QBO-by-class is wired.
+    sales_totals_by_brand = {}
 
     for brand, cfg in BRANDS.items():
         domain = os.environ.get(cfg["domain_env"])
@@ -352,6 +467,7 @@ def main():
 
         print(f"[fetch] {brand} — {domain} — {period_id}")
         brand_totals = build_brand_month_rows(domain, token, brand, year, month)
+        sales_totals_by_brand[brand] = fetch_shopify_sales_totals(domain, token, year, month)
 
         for cid, t in brand_totals.items():
             combined_totals[cid]["gross_sales"] += t["gross_sales"]
@@ -376,6 +492,36 @@ def main():
             row["note"] = f"Includes: {breakdown}"
         rows.append(row)
 
+    # ------------------------------------------------------------------
+    # Fill gross_profit / net_sales / margin1_pct from Shopify ShopifyQL.
+    # QBO (below) still runs after this and overrides any field it returns,
+    # so once fetch_qbo_margins() is wired for real per-class margins it
+    # takes priority automatically — nothing here needs to change then.
+    # ------------------------------------------------------------------
+    cavali_totals = sales_totals_by_brand.get("cavali")
+    corro_totals = sales_totals_by_brand.get("corro")
+
+    for row in rows:
+        if row["id"] == "cavali":
+            # Cavali IS the whole store for this channel -> use Shopify's
+            # exact numbers, not an estimate.
+            if cavali_totals:
+                row["gross_sales"] = cavali_totals["gross_sales"]
+                row["discounts"] = cavali_totals["discounts"]
+                row["net_sales"] = cavali_totals["net_sales"]
+                row["gross_profit"] = cavali_totals["gross_profit"]
+                row["margin1_pct"] = cavali_totals["margin1_pct"]
+                row["margin1_source"] = "Shopify ShopifyQL (exact — single-channel store)"
+        elif corro_totals:
+            # Corro splits into 5 channels; QBO-by-class isn't wired yet, so
+            # apply the store-wide margin uniformly and say so explicitly.
+            net_sales_est = round(row["gross_sales"] - row["discounts"], 2)
+            row["net_sales"] = net_sales_est
+            row["margin1_pct"] = corro_totals["margin1_pct"]
+            row["gross_profit"] = round(net_sales_est * corro_totals["margin1_pct"], 2)
+            row["margin1_is_estimate"] = True
+            row["margin1_source"] = "Shopify ShopifyQL store-wide margin applied uniformly (QBO by-class not wired yet)"
+
     margins = fetch_qbo_margins("equestrian_labs", year, month)
     for row in rows:
         m = margins.get(row["id"])
@@ -385,7 +531,12 @@ def main():
     data["channels"][period_id]["equestrian_labs"] = rows
 
     data["meta"]["last_updated"] = now.strftime("%Y-%m-%d")
-    data["meta"]["note"] = "Live data from Shopify (gross_sales, discounts, net_sales, orders) + QuickBooks Online (margins)."
+    data["meta"]["note"] = (
+        "Live data from Shopify (gross_sales, discounts, net_sales, orders). "
+        "gross_profit/margin1_pct via Shopify ShopifyQL — exact for Cavali "
+        "(single-channel store), store-wide estimate applied per Corro channel "
+        "until QuickBooks Online by-class margins are wired in fetch_qbo_margins()."
+    )
 
     DATA_PATH.write_text(json.dumps(data, indent=2))
     print(f"[done] wrote {DATA_PATH}")
