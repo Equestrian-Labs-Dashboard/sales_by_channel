@@ -36,10 +36,14 @@ fetch("data/sales-channels.json?v=" + new Date().getTime())
     const updateLabel = document.getElementById("updatedLabel");
     if (updateLabel) updateLabel.textContent = "updated " + json.meta.last_updated;
     buildMonthSelect();
+
+    // Default to the last CLOSED month, never the in-progress current month.
     const now = new Date();
     const currentId = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-    const initial =
-      json.periods.find((p) => p.id === currentId) || json.periods[json.periods.length - 1];
+    const closedPeriods = json.periods.filter((p) => p.id !== currentId);
+    const initial = closedPeriods.length
+      ? closedPeriods[closedPeriods.length - 1]
+      : json.periods[json.periods.length - 1];
     selectPeriod(initial.id);
   })
   .catch((err) => {
