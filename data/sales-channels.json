@@ -1,6 +1,6 @@
 {
   "meta": {
-    "note": "Live data from Shopify (gross_sales, discounts, net_sales, orders). gross_profit/margin1_pct via Shopify ShopifyQL \u2014 exact for Cavali (single-channel store), store-wide estimate applied per Corro channel until QuickBooks Online by-class margins are wired in fetch_qbo_margins().",
+    "note": "Live data from Shopify (gross_sales, discounts, net_sales, orders) + QuickBooks Online (margins).",
     "currency": "USD",
     "last_updated": "2026-09-04",
     "brands": {
@@ -91,7 +91,7 @@
         },
         {
           "id": "cavali",
-          "name": "cavali",
+          "name": "Cavali",
           "gross_sales": 3000,
           "discounts": 2000,
           "margin1_pct": 0.5,
@@ -145,7 +145,7 @@
         },
         {
           "id": "cavali",
-          "name": "cavali",
+          "name": "Cavali",
           "gross_sales": 3000,
           "discounts": 2000,
           "margin1_pct": 0.5,
@@ -199,7 +199,7 @@
         },
         {
           "id": "cavali",
-          "name": "cavali",
+          "name": "Cavali",
           "gross_sales": 3000,
           "discounts": 2000,
           "margin1_pct": 0.5,
@@ -253,7 +253,7 @@
         },
         {
           "id": "cavali",
-          "name": "cavali",
+          "name": "Cavali",
           "gross_sales": 3000,
           "discounts": 2000,
           "margin1_pct": 0.5,
@@ -307,7 +307,7 @@
         },
         {
           "id": "cavali",
-          "name": "cavali",
+          "name": "Cavali",
           "gross_sales": 3000,
           "discounts": 2000,
           "margin1_pct": 0.5,
@@ -361,7 +361,7 @@
         },
         {
           "id": "cavali",
-          "name": "cavali",
+          "name": "Cavali",
           "gross_sales": 3000,
           "discounts": 2000,
           "margin1_pct": 0.5,
@@ -415,7 +415,7 @@
         },
         {
           "id": "cavali",
-          "name": "cavali",
+          "name": "Cavali",
           "gross_sales": 3000,
           "discounts": 2000,
           "margin1_pct": 0.5,
@@ -469,7 +469,7 @@
         },
         {
           "id": "cavali",
-          "name": "cavali",
+          "name": "Cavali",
           "gross_sales": 2726.57,
           "discounts": 2022.71,
           "margin1_pct": 0.5,
@@ -490,13 +490,10 @@
         {
           "id": "cavali",
           "name": "Cavali",
-          "gross_sales": 36685.6,
-          "discounts": 1980.0,
+          "gross_sales": 39560.14,
+          "discounts": 2016.0,
           "orders": 273,
-          "margin1_pct": 0.001,
-          "net_sales": 34705.6,
-          "gross_profit": 0.01,
-          "margin1_source": "Shopify ShopifyQL (exact \u2014 single-channel store)"
+          "margin1_pct": null
         },
         {
           "id": "ecommerce",
@@ -504,11 +501,7 @@
           "gross_sales": 1255.61,
           "discounts": 1413.17,
           "orders": 12,
-          "margin1_pct": 0.28,
-          "net_sales": -157.56,
-          "gross_profit": -44.12,
-          "margin1_is_estimate": true,
-          "margin1_source": "Shopify ShopifyQL store-wide margin applied uniformly (QBO by-class not wired yet)"
+          "margin1_pct": null
         },
         {
           "id": "concierge",
@@ -516,11 +509,7 @@
           "gross_sales": 2041.93,
           "discounts": 20.2,
           "orders": 4,
-          "margin1_pct": 0.28,
-          "net_sales": 2021.73,
-          "gross_profit": 566.08,
-          "margin1_is_estimate": true,
-          "margin1_source": "Shopify ShopifyQL store-wide margin applied uniformly (QBO by-class not wired yet)"
+          "margin1_pct": null
         },
         {
           "id": "trailer",
@@ -528,11 +517,7 @@
           "gross_sales": 723.39,
           "discounts": 38.71,
           "orders": 6,
-          "margin1_pct": 0.28,
-          "net_sales": 684.68,
-          "gross_profit": 191.71,
-          "margin1_is_estimate": true,
-          "margin1_source": "Shopify ShopifyQL store-wide margin applied uniformly (QBO by-class not wired yet)"
+          "margin1_pct": null
         },
         {
           "id": "wellington",
@@ -540,11 +525,7 @@
           "gross_sales": 0.0,
           "discounts": 0.0,
           "orders": 0,
-          "margin1_pct": 0.28,
-          "net_sales": 0.0,
-          "gross_profit": 0.0,
-          "margin1_is_estimate": true,
-          "margin1_source": "Shopify ShopifyQL store-wide margin applied uniformly (QBO by-class not wired yet)"
+          "margin1_pct": null
         },
         {
           "id": "others",
@@ -552,12 +533,8 @@
           "gross_sales": 3678.05,
           "discounts": 771.8,
           "orders": 14,
-          "margin1_pct": 0.28,
-          "note": "Includes: Legacy: 9, Shopify Collective: 5",
-          "net_sales": 2906.25,
-          "gross_profit": 813.75,
-          "margin1_is_estimate": true,
-          "margin1_source": "Shopify ShopifyQL store-wide margin applied uniformly (QBO by-class not wired yet)"
+          "margin1_pct": null,
+          "note": "Includes: Legacy: 9, Shopify Collective: 5"
         }
       ]
     }
