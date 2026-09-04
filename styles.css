@@ -5,11 +5,11 @@
   --line: #E1DCD1;
   --line-strong: #171512;
   --surface: #F3EEE3;
-  --gold: #B8863E;
-  --gold-soft: #E8D5AE;
+  --gold: #1A1D36;
+  --gold-soft: #D3D6ED;
   --pending: #C9C2B2;
-  --corro: #9C5F3C;
-  --cavali: #3C6E71;
+  --corro: #1A1D36;
+  --cavali: #63A4A8;
   color-scheme: light;
 }
 
@@ -20,10 +20,10 @@
   --line: #322D24;
   --line-strong: #F3EEE3;
   --surface: #1D1A15;
-  --gold: #E3B764;
-  --gold-soft: #4A3D24;
+  --gold: #4C5BD4;
+  --gold-soft: #252A4A;
   --pending: #4C4738;
-  --corro: #C98A63;
+  --corro: #4C5BD4;
   --cavali: #63A4A8;
   color-scheme: dark;
 }

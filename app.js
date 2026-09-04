@@ -29,7 +29,7 @@ if (themeToggle) {
 setTheme(localStorage.getItem("spc-theme") || "light");
 
 // ---------- Data load ----------
-fetch("data/sales-channels.json")
+fetch("data/sales-channels.json?v=" + new Date().getTime())
   .then((r) => r.json())
   .then((json) => {
     DATA = json;
