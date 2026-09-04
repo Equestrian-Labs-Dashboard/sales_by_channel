@@ -36,7 +36,10 @@ fetch("data/sales-channels.json?v=" + new Date().getTime())
     const updateLabel = document.getElementById("updatedLabel");
     if (updateLabel) updateLabel.textContent = "updated " + json.meta.last_updated;
     buildMonthSelect();
-    const initial = json.periods[json.periods.length - 1];
+    const now = new Date();
+    const currentId = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    const initial =
+      json.periods.find((p) => p.id === currentId) || json.periods[json.periods.length - 1];
     selectPeriod(initial.id);
   })
   .catch((err) => {
