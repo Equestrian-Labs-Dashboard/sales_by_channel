@@ -501,9 +501,9 @@
         {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 1255.61,
+          "gross_sales": 1308.64,
           "discounts": 1413.17,
-          "orders": 12,
+          "orders": 13,
           "margin1_pct": null,
           "gross_profit": null,
           "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
