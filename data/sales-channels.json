@@ -1,16 +1,12 @@
 {
   "meta": {
-    "note": "Live data from Shopify (gross_sales, discounts, orders) + QuickBooks Online (margins).",
+    "note": "SAMPLE DATA (demo). Replace via the GitHub Actions pipeline described in README.md, cross-referencing Shopify (order volume, gross sales, discounts) with QuickBooks Online (COGS, per-channel expenses, shipping).",
     "currency": "USD",
-    "last_updated": "2026-09-03",
+    "last_updated": "2026-08-29",
     "brands": {
-      "corro": {
-        "label": "Corro",
-        "color": "#9C5F3C"
-      },
-      "cavali": {
-        "label": "Cavali",
-        "color": "#3C6E71"
+      "equestrian_labs": {
+        "label": "Equestrian Labs",
+        "color": "#D4AF37"
       }
     },
     "source": {
@@ -50,24 +46,17 @@
     {
       "id": "2026-08",
       "label": "Aug 2026"
-    },
-    {
-      "id": "2026-09",
-      "label": "Sep 2026"
     }
   ],
   "channels": {
     "2026-01": {
-      "corro": [
+      "equestrian_labs": [
         {
           "id": "ecommerce",
           "name": "E-Commerce",
           "gross_sales": 131600,
           "discounts": 13670,
           "margin1_pct": 0.585,
-          "margin2_pct": 0.497,
-          "margin3_pct": 0.441,
-          "margin3_pending": false,
           "orders": 1605
         },
         {
@@ -76,9 +65,6 @@
           "gross_sales": 93800,
           "discounts": 28050,
           "margin1_pct": 0.518,
-          "margin2_pct": 0.47,
-          "margin3_pct": 0.399,
-          "margin3_pending": false,
           "orders": 361
         },
         {
@@ -87,9 +73,6 @@
           "gross_sales": 60900,
           "discounts": 2820,
           "margin1_pct": 0.631,
-          "margin2_pct": 0.564,
-          "margin3_pct": null,
-          "margin3_pending": true,
           "orders": 321,
           "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
         },
@@ -99,49 +82,27 @@
           "gross_sales": 46200,
           "discounts": 1400,
           "margin1_pct": 0.644,
-          "margin2_pct": 0.596,
-          "margin3_pct": null,
-          "margin3_pending": true,
           "orders": 189,
           "note": "Physical channel, retains more value. No shipping to pull."
-        }
-      ],
-      "cavali": [
-        {
-          "id": "ecommerce",
-          "name": "E-Commerce",
-          "gross_sales": 122079.99999999999,
-          "discounts": 15532.999999999998,
-          "margin1_pct": 0.5,
-          "margin2_pct": 0.45,
-          "margin3_pct": 0.4,
-          "margin3_pending": false,
-          "orders": 1500
         },
         {
-          "id": "box",
-          "name": "Seasonal Box",
-          "gross_sales": 52320.0,
-          "discounts": 6657.0,
-          "margin1_pct": 0.4,
-          "margin2_pct": 0.35,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 300
+          "id": "cavalli",
+          "name": "Cavalli",
+          "gross_sales": 174400.0,
+          "discounts": 22190.0,
+          "margin1_pct": 0.5,
+          "orders": 1500
         }
       ]
     },
     "2026-02": {
-      "corro": [
+      "equestrian_labs": [
         {
           "id": "ecommerce",
           "name": "E-Commerce",
           "gross_sales": 149800,
           "discounts": 15910,
           "margin1_pct": 0.577,
-          "margin2_pct": 0.515,
-          "margin3_pct": 0.426,
-          "margin3_pending": false,
           "orders": 1827
         },
         {
@@ -150,9 +111,6 @@
           "gross_sales": 101400,
           "discounts": 31140,
           "margin1_pct": 0.517,
-          "margin2_pct": 0.471,
-          "margin3_pct": 0.397,
-          "margin3_pending": false,
           "orders": 390
         },
         {
@@ -161,9 +119,6 @@
           "gross_sales": 60200,
           "discounts": 2970,
           "margin1_pct": 0.616,
-          "margin2_pct": 0.582,
-          "margin3_pct": null,
-          "margin3_pending": true,
           "orders": 317,
           "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
         },
@@ -173,49 +128,27 @@
           "gross_sales": 49900,
           "discounts": 1490,
           "margin1_pct": 0.643,
-          "margin2_pct": 0.593,
-          "margin3_pct": null,
-          "margin3_pending": true,
           "orders": 204,
           "note": "Physical channel, retains more value. No shipping to pull."
-        }
-      ],
-      "cavali": [
-        {
-          "id": "ecommerce",
-          "name": "E-Commerce",
-          "gross_sales": 135520.0,
-          "discounts": 17332.0,
-          "margin1_pct": 0.5,
-          "margin2_pct": 0.45,
-          "margin3_pct": 0.4,
-          "margin3_pending": false,
-          "orders": 1500
         },
         {
-          "id": "box",
-          "name": "Seasonal Box",
-          "gross_sales": 58080.0,
-          "discounts": 7428.0,
-          "margin1_pct": 0.4,
-          "margin2_pct": 0.35,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 300
+          "id": "cavalli",
+          "name": "Cavalli",
+          "gross_sales": 193600.0,
+          "discounts": 24760.0,
+          "margin1_pct": 0.5,
+          "orders": 1500
         }
       ]
     },
     "2026-03": {
-      "corro": [
+      "equestrian_labs": [
         {
           "id": "ecommerce",
           "name": "E-Commerce",
           "gross_sales": 154300,
           "discounts": 16330,
           "margin1_pct": 0.59,
-          "margin2_pct": 0.5,
-          "margin3_pct": 0.426,
-          "margin3_pending": false,
           "orders": 1882
         },
         {
@@ -224,9 +157,6 @@
           "gross_sales": 116100,
           "discounts": 40000,
           "margin1_pct": 0.531,
-          "margin2_pct": 0.466,
-          "margin3_pct": 0.403,
-          "margin3_pending": false,
           "orders": 447
         },
         {
@@ -235,9 +165,6 @@
           "gross_sales": 66000,
           "discounts": 3150,
           "margin1_pct": 0.629,
-          "margin2_pct": 0.585,
-          "margin3_pct": null,
-          "margin3_pending": true,
           "orders": 347,
           "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
         },
@@ -247,49 +174,27 @@
           "gross_sales": 54300,
           "discounts": 1630,
           "margin1_pct": 0.636,
-          "margin2_pct": 0.586,
-          "margin3_pct": null,
-          "margin3_pending": true,
           "orders": 222,
           "note": "Physical channel, retains more value. No shipping to pull."
-        }
-      ],
-      "cavali": [
-        {
-          "id": "ecommerce",
-          "name": "E-Commerce",
-          "gross_sales": 148400.0,
-          "discounts": 19068.0,
-          "margin1_pct": 0.5,
-          "margin2_pct": 0.45,
-          "margin3_pct": 0.4,
-          "margin3_pending": false,
-          "orders": 1500
         },
         {
-          "id": "box",
-          "name": "Seasonal Box",
-          "gross_sales": 63600.0,
-          "discounts": 8172.0,
-          "margin1_pct": 0.4,
-          "margin2_pct": 0.35,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 300
+          "id": "cavalli",
+          "name": "Cavalli",
+          "gross_sales": 212000.0,
+          "discounts": 27240.0,
+          "margin1_pct": 0.5,
+          "orders": 1500
         }
       ]
     },
     "2026-04": {
-      "corro": [
+      "equestrian_labs": [
         {
           "id": "ecommerce",
           "name": "E-Commerce",
           "gross_sales": 161400,
           "discounts": 18200,
           "margin1_pct": 0.576,
-          "margin2_pct": 0.511,
-          "margin3_pct": 0.429,
-          "margin3_pending": false,
           "orders": 1968
         },
         {
@@ -298,9 +203,6 @@
           "gross_sales": 111400,
           "discounts": 37770,
           "margin1_pct": 0.53,
-          "margin2_pct": 0.451,
-          "margin3_pct": 0.403,
-          "margin3_pending": false,
           "orders": 428
         },
         {
@@ -309,9 +211,6 @@
           "gross_sales": 62500,
           "discounts": 3330,
           "margin1_pct": 0.616,
-          "margin2_pct": 0.569,
-          "margin3_pct": null,
-          "margin3_pending": true,
           "orders": 329,
           "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
         },
@@ -321,49 +220,27 @@
           "gross_sales": 54500,
           "discounts": 1640,
           "margin1_pct": 0.641,
-          "margin2_pct": 0.586,
-          "margin3_pct": null,
-          "margin3_pending": true,
           "orders": 222,
           "note": "Physical channel, retains more value. No shipping to pull."
-        }
-      ],
-      "cavali": [
-        {
-          "id": "ecommerce",
-          "name": "E-Commerce",
-          "gross_sales": 142240.0,
-          "discounts": 18746.0,
-          "margin1_pct": 0.5,
-          "margin2_pct": 0.45,
-          "margin3_pct": 0.4,
-          "margin3_pending": false,
-          "orders": 1500
         },
         {
-          "id": "box",
-          "name": "Seasonal Box",
-          "gross_sales": 60960.0,
-          "discounts": 8034.0,
-          "margin1_pct": 0.4,
-          "margin2_pct": 0.35,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 300
+          "id": "cavalli",
+          "name": "Cavalli",
+          "gross_sales": 203200.0,
+          "discounts": 26780.0,
+          "margin1_pct": 0.5,
+          "orders": 1500
         }
       ]
     },
     "2026-05": {
-      "corro": [
+      "equestrian_labs": [
         {
           "id": "ecommerce",
           "name": "E-Commerce",
           "gross_sales": 148800,
           "discounts": 16810,
           "margin1_pct": 0.589,
-          "margin2_pct": 0.522,
-          "margin3_pct": 0.43,
-          "margin3_pending": false,
           "orders": 1815
         },
         {
@@ -372,9 +249,6 @@
           "gross_sales": 111500,
           "discounts": 38260,
           "margin1_pct": 0.517,
-          "margin2_pct": 0.46,
-          "margin3_pct": 0.425,
-          "margin3_pending": false,
           "orders": 429
         },
         {
@@ -383,9 +257,6 @@
           "gross_sales": 64700,
           "discounts": 3140,
           "margin1_pct": 0.627,
-          "margin2_pct": 0.556,
-          "margin3_pct": null,
-          "margin3_pending": true,
           "orders": 341,
           "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
         },
@@ -395,49 +266,27 @@
           "gross_sales": 56800,
           "discounts": 1710,
           "margin1_pct": 0.627,
-          "margin2_pct": 0.607,
-          "margin3_pct": null,
-          "margin3_pending": true,
           "orders": 232,
           "note": "Physical channel, retains more value. No shipping to pull."
-        }
-      ],
-      "cavali": [
-        {
-          "id": "ecommerce",
-          "name": "E-Commerce",
-          "gross_sales": 145600.0,
-          "discounts": 18886.0,
-          "margin1_pct": 0.5,
-          "margin2_pct": 0.45,
-          "margin3_pct": 0.4,
-          "margin3_pending": false,
-          "orders": 1500
         },
         {
-          "id": "box",
-          "name": "Seasonal Box",
-          "gross_sales": 62400.0,
-          "discounts": 8094.0,
-          "margin1_pct": 0.4,
-          "margin2_pct": 0.35,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 300
+          "id": "cavalli",
+          "name": "Cavalli",
+          "gross_sales": 208000.0,
+          "discounts": 26980.0,
+          "margin1_pct": 0.5,
+          "orders": 1500
         }
       ]
     },
     "2026-06": {
-      "corro": [
+      "equestrian_labs": [
         {
           "id": "ecommerce",
           "name": "E-Commerce",
           "gross_sales": 166000,
           "discounts": 17650,
           "margin1_pct": 0.58,
-          "margin2_pct": 0.5,
-          "margin3_pct": 0.435,
-          "margin3_pending": false,
           "orders": 2024
         },
         {
@@ -446,9 +295,6 @@
           "gross_sales": 114000,
           "discounts": 36330,
           "margin1_pct": 0.533,
-          "margin2_pct": 0.448,
-          "margin3_pct": 0.42,
-          "margin3_pending": false,
           "orders": 438
         },
         {
@@ -457,9 +303,6 @@
           "gross_sales": 70600,
           "discounts": 3800,
           "margin1_pct": 0.615,
-          "margin2_pct": 0.58,
-          "margin3_pct": null,
-          "margin3_pending": true,
           "orders": 372,
           "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
         },
@@ -469,49 +312,27 @@
           "gross_sales": 54400,
           "discounts": 1540,
           "margin1_pct": 0.627,
-          "margin2_pct": 0.607,
-          "margin3_pct": null,
-          "margin3_pending": true,
           "orders": 222,
           "note": "Physical channel, retains more value. No shipping to pull."
-        }
-      ],
-      "cavali": [
-        {
-          "id": "ecommerce",
-          "name": "E-Commerce",
-          "gross_sales": 148470.0,
-          "discounts": 19208.0,
-          "margin1_pct": 0.5,
-          "margin2_pct": 0.45,
-          "margin3_pct": 0.4,
-          "margin3_pending": false,
-          "orders": 1500
         },
         {
-          "id": "box",
-          "name": "Seasonal Box",
-          "gross_sales": 63630.0,
-          "discounts": 8232.0,
-          "margin1_pct": 0.4,
-          "margin2_pct": 0.35,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 300
+          "id": "cavalli",
+          "name": "Cavalli",
+          "gross_sales": 212100.0,
+          "discounts": 27440.0,
+          "margin1_pct": 0.5,
+          "orders": 1500
         }
       ]
     },
     "2026-07": {
-      "corro": [
+      "equestrian_labs": [
         {
           "id": "ecommerce",
           "name": "E-Commerce",
           "gross_sales": 185300,
           "discounts": 19240,
           "margin1_pct": 0.587,
-          "margin2_pct": 0.514,
-          "margin3_pct": 0.426,
-          "margin3_pending": false,
           "orders": 2260
         },
         {
@@ -520,9 +341,6 @@
           "gross_sales": 123300,
           "discounts": 39610,
           "margin1_pct": 0.52,
-          "margin2_pct": 0.47,
-          "margin3_pct": 0.419,
-          "margin3_pending": false,
           "orders": 474
         },
         {
@@ -531,9 +349,6 @@
           "gross_sales": 72600,
           "discounts": 3360,
           "margin1_pct": 0.609,
-          "margin2_pct": 0.566,
-          "margin3_pct": null,
-          "margin3_pending": true,
           "orders": 382,
           "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
         },
@@ -543,49 +358,27 @@
           "gross_sales": 63500,
           "discounts": 1960,
           "margin1_pct": 0.64,
-          "margin2_pct": 0.585,
-          "margin3_pct": null,
-          "margin3_pending": true,
           "orders": 259,
           "note": "Physical channel, retains more value. No shipping to pull."
-        }
-      ],
-      "cavali": [
-        {
-          "id": "ecommerce",
-          "name": "E-Commerce",
-          "gross_sales": 170590.0,
-          "discounts": 22988.0,
-          "margin1_pct": 0.5,
-          "margin2_pct": 0.45,
-          "margin3_pct": 0.4,
-          "margin3_pending": false,
-          "orders": 1500
         },
         {
-          "id": "box",
-          "name": "Seasonal Box",
-          "gross_sales": 73110.0,
-          "discounts": 9852.0,
-          "margin1_pct": 0.4,
-          "margin2_pct": 0.35,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 300
+          "id": "cavalli",
+          "name": "Cavalli",
+          "gross_sales": 243700.0,
+          "discounts": 32840.0,
+          "margin1_pct": 0.5,
+          "orders": 1500
         }
       ]
     },
     "2026-08": {
-      "corro": [
+      "equestrian_labs": [
         {
           "id": "ecommerce",
           "name": "E-Commerce",
           "gross_sales": 159600,
           "discounts": 17440,
           "margin1_pct": 0.59,
-          "margin2_pct": 0.524,
-          "margin3_pct": 0.438,
-          "margin3_pending": false,
           "orders": 1946
         },
         {
@@ -594,9 +387,6 @@
           "gross_sales": 119300,
           "discounts": 38320,
           "margin1_pct": 0.534,
-          "margin2_pct": 0.449,
-          "margin3_pct": 0.42,
-          "margin3_pending": false,
           "orders": 459
         },
         {
@@ -605,9 +395,6 @@
           "gross_sales": 72500,
           "discounts": 3350,
           "margin1_pct": 0.605,
-          "margin2_pct": 0.57,
-          "margin3_pct": null,
-          "margin3_pending": true,
           "orders": 382,
           "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
         },
@@ -617,38 +404,18 @@
           "gross_sales": 59200,
           "discounts": 1870,
           "margin1_pct": 0.625,
-          "margin2_pct": 0.605,
-          "margin3_pct": null,
-          "margin3_pending": true,
           "orders": 242,
           "note": "Physical channel, retains more value. No shipping to pull."
-        }
-      ],
-      "cavali": [
-        {
-          "id": "ecommerce",
-          "name": "E-Commerce",
-          "gross_sales": 152180.0,
-          "discounts": 20447.0,
-          "margin1_pct": 0.5,
-          "margin2_pct": 0.45,
-          "margin3_pct": 0.4,
-          "margin3_pending": false,
-          "orders": 1500
         },
         {
-          "id": "box",
-          "name": "Seasonal Box",
-          "gross_sales": 65220.0,
-          "discounts": 8763.0,
-          "margin1_pct": 0.4,
-          "margin2_pct": 0.35,
-          "margin3_pct": null,
-          "margin3_pending": true,
-          "orders": 300
+          "id": "cavalli",
+          "name": "Cavalli",
+          "gross_sales": 217400.0,
+          "discounts": 29210.0,
+          "margin1_pct": 0.5,
+          "orders": 1500
         }
       ]
-    },
-    "2026-09": {}
+    }
   }
 }

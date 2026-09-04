@@ -65,16 +65,16 @@ SHOPIFY_API_VERSION = "2024-10"
 # ---------------------------------------------------------------------------
 
 CHANNEL_ORDER = {
-    "corro": ["ecommerce", "concierge", "trailer", "wellington"],
-    "cavali": ["ecommerce", "box"]
+    "equestrian_labs": ["cavalli", "ecommerce", "concierge", "trailer", "wellington", "others"]
 }
 
 CHANNEL_NAMES = {
+    "cavalli": "Cavalli",
     "ecommerce": "E-Commerce",
     "concierge": "Concierge",
     "trailer": "HITS / Trailer",
     "wellington": "Wellington",
-    "box": "Seasonal Box"
+    "others": "Others"
 }
 
 # Physical channels identified by Shopify Location (name match, case-insensitive).
@@ -270,10 +270,9 @@ def classify_order(order, brand, locations, product_tags_by_id):
         if tag in PRODUCT_TAG_TO_CHANNEL.get(brand, {}):
             return PRODUCT_TAG_TO_CHANNEL[brand][tag], None
 
-    # Cavali specific logic: if any product tag contains 'box', it's the Box channel.
+    # Cavali store orders go to Cavalli channel
     if brand == "cavali":
-        if "box" in product_tags_joined:
-            return "box", None
+        return "cavalli", None
 
     # 7: default, matches the Sheet formula's fallback.
     return "ecommerce", None
@@ -303,26 +302,7 @@ def build_brand_month_rows(domain, token, brand, year, month):
         if note:
             t["notes"][note] += 1
 
-    rows = []
-    for cid in CHANNEL_ORDER.get(brand, []):
-        t = totals.get(cid, {"gross_sales": 0.0, "discounts": 0.0, "orders": 0, "notes": {}})
-        row = {
-            "id": cid,
-            "name": CHANNEL_NAMES.get(cid, cid.title()),
-            "gross_sales": round(t["gross_sales"], 2),
-            "discounts": round(t["discounts"], 2),
-            "orders": t["orders"],
-            # margins filled in separately from QBO, see fetch_qbo_margins()
-            "margin1_pct": None,
-            "margin2_pct": None,
-            "margin3_pct": None,
-            "margin3_pending": True,
-        }
-        if t.get("notes"):
-            breakdown = ", ".join(f"{k}: {v}" for k, v in sorted(t["notes"].items()))
-            row["note"] = f"Includes: {breakdown}"
-        rows.append(row)
-    return rows
+    return totals
 
 
 # ---------------------------------------------------------------------------
@@ -358,6 +338,8 @@ def main():
     data.setdefault("channels", {})
     data["channels"].setdefault(period_id, {})
 
+    combined_totals = defaultdict(lambda: {"gross_sales": 0.0, "discounts": 0.0, "orders": 0, "notes": defaultdict(int)})
+
     for brand, cfg in BRANDS.items():
         domain = os.environ.get(cfg["domain_env"])
         token = os.environ.get(cfg["token_env"])
@@ -366,15 +348,38 @@ def main():
             continue
 
         print(f"[fetch] {brand} — {domain} — {period_id}")
-        rows = build_brand_month_rows(domain, token, brand, year, month)
+        brand_totals = build_brand_month_rows(domain, token, brand, year, month)
+        
+        for cid, t in brand_totals.items():
+            combined_totals[cid]["gross_sales"] += t["gross_sales"]
+            combined_totals[cid]["discounts"] += t["discounts"]
+            combined_totals[cid]["orders"] += t["orders"]
+            for note, count in t["notes"].items():
+                combined_totals[cid]["notes"][note] += count
 
-        margins = fetch_qbo_margins(brand, year, month)
-        for row in rows:
-            m = margins.get(row["id"])
-            if m:
-                row.update(m)
+    rows = []
+    for cid in CHANNEL_ORDER.get("equestrian_labs", []):
+        t = combined_totals.get(cid, {"gross_sales": 0.0, "discounts": 0.0, "orders": 0, "notes": {}})
+        row = {
+            "id": cid,
+            "name": CHANNEL_NAMES.get(cid, cid.title()),
+            "gross_sales": round(t["gross_sales"], 2),
+            "discounts": round(t["discounts"], 2),
+            "orders": t["orders"],
+            "margin1_pct": None,
+        }
+        if t.get("notes"):
+            breakdown = ", ".join(f"{k}: {v}" for k, v in sorted(t["notes"].items()))
+            row["note"] = f"Includes: {breakdown}"
+        rows.append(row)
 
-        data["channels"][period_id][brand] = rows
+    margins = fetch_qbo_margins("equestrian_labs", year, month)
+    for row in rows:
+        m = margins.get(row["id"])
+        if m:
+            row.update(m)
+
+    data["channels"][period_id]["equestrian_labs"] = rows
 
     data["meta"]["last_updated"] = now.strftime("%Y-%m-%d")
     data["meta"]["note"] = "Live data from Shopify (gross_sales, discounts, orders) + QuickBooks Online (margins)."

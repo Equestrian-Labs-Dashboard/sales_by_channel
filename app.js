@@ -7,7 +7,6 @@ const MOON_ICON = `<svg viewBox="0 0 24 24"><path d="M20 14.5a8.5 8.5 0 1 1-9.5-
 
 let DATA = null;
 let activePeriod = null;
-let activeBrand = "corro";
 
 // ---------- Theme ----------
 const themeToggle = document.getElementById("themeToggle");
@@ -36,7 +35,6 @@ fetch("data/sales-channels.json")
     DATA = json;
     const updateLabel = document.getElementById("updatedLabel");
     if (updateLabel) updateLabel.textContent = "updated " + json.meta.last_updated;
-    buildBrandSelect();
     buildMonthSelect();
     const initial = json.periods[json.periods.length - 1];
     selectPeriod(initial.id);
@@ -45,42 +43,9 @@ fetch("data/sales-channels.json")
     const errBody = document.getElementById("tableBody");
     if (errBody) {
       errBody.innerHTML =
-        `<tr><td colspan="7">Could not load data (${err.message}). Check data/sales-channels.json.</td></tr>`;
+        `<tr><td colspan="6">Could not load data (${err.message}). Check data/sales-channels.json.</td></tr>`;
     }
   });
-
-// ---------- Brand select ----------
-function buildBrandSelect() {
-  const select = document.getElementById("brandSelect");
-  if (!select) return;
-  const brands = Object.entries(DATA.meta.brands || {}).map(([id, b]) => ({ id, label: b.label }));
-  
-  if (brands.length === 0) {
-    brands.push({ id: "corro", label: "Corro" });
-    brands.push({ id: "cavali", label: "Cavali" });
-  }
-
-  select.innerHTML = brands
-    .map((b) => `<option value="${b.id}">${b.label}</option>`)
-    .join("");
-  
-  select.value = activeBrand;
-  select.addEventListener("change", () => selectBrand(select.value));
-}
-
-function selectBrand(brandId) {
-  activeBrand = brandId;
-  const select = document.getElementById("brandSelect");
-  if (select) select.value = brandId;
-  
-  const sub = document.getElementById("brandSubtitle");
-  if (sub) {
-    const brandLabel = DATA.meta.brands?.[brandId]?.label || (brandId === "corro" ? "Corro" : "Cavali");
-    sub.textContent = `${brandLabel} — channel-by-channel performance`;
-  }
-  
-  if (activePeriod) render(activePeriod);
-}
 
 // ---------- Month select ----------
 function buildMonthSelect() {
@@ -102,21 +67,22 @@ function selectPeriod(periodId) {
 // ---------- Data helpers ----------
 function getRowsForPeriod(periodId) {
   const periodData = DATA.channels[periodId] || DATA.channels[Object.keys(DATA.channels)[0]];
-  return (periodData[activeBrand] || []).map((c) => ({ ...c }));
+  return (periodData["equestrian_labs"] || []).map((c) => ({ ...c }));
 }
 
 // ---------- Render ----------
 function render(periodId) {
   const rows = getRowsForPeriod(periodId);
-  const enriched = rows.map((c) => ({ ...c, net_sales: c.gross_sales - c.discounts }));
+  const enriched = rows.map((c) => ({ ...c, net_sales: c.gross_sales - (c.discounts || 0) }));
 
   const totalGross = enriched.reduce((s, c) => s + c.gross_sales, 0);
   const totalNet = enriched.reduce((s, c) => s + c.net_sales, 0);
-  const weightedM1 = enriched.reduce((s, c) => s + c.net_sales * c.margin1_pct, 0) / totalNet;
+  const totalGrossProfit = enriched.reduce((s, c) => s + (c.net_sales * (c.margin1_pct || 0)), 0);
+  const weightedM1 = totalNet > 0 ? totalGrossProfit / totalNet : 0;
   const totalOrders = enriched.reduce((s, c) => s + (c.orders || 0), 0);
 
   renderKPIs(totalGross, totalNet, weightedM1, totalOrders);
-  renderTable(enriched, totalGross);
+  renderTable(enriched, totalGross, totalNet, totalGrossProfit);
 }
 
 function renderKPIs(totalGross, totalNet, weightedM1, totalOrders) {
@@ -140,7 +106,7 @@ function renderKPIs(totalGross, totalNet, weightedM1, totalOrders) {
     .join("");
 }
 
-function renderTable(rows, totalGross) {
+function renderTable(rows, totalGross, totalNet, totalGrossProfit) {
   const body = document.getElementById("tableBody");
   const sorted = [...rows].sort((a, b) => b.gross_sales - a.gross_sales);
 
@@ -148,9 +114,7 @@ function renderTable(rows, totalGross) {
     body.innerHTML = sorted
       .map((c) => {
         const share = c.gross_sales / totalGross;
-        const m3 = c.margin3_pending || c.margin3_pct === null
-          ? `<span class="pending">pending</span>`
-          : fmtPct(c.margin3_pct);
+        const grossProfit = c.net_sales * (c.margin1_pct || 0);
         return `
         <tr>
           <td>${c.name}${c.note ? `<span class="channel-note">${c.note}</span>` : ""}</td>
@@ -160,15 +124,13 @@ function renderTable(rows, totalGross) {
           </td>
           <td>${fmtUSD(c.gross_sales)}</td>
           <td>${fmtUSD(c.net_sales)}</td>
-          <td>${fmtPct(c.margin1_pct)}</td>
-          <td>${fmtPct(c.margin2_pct)}</td>
-          <td>${m3}</td>
+          <td>${fmtUSD(grossProfit)}</td>
+          <td>${fmtPct(c.margin1_pct || 0)}</td>
         </tr>`;
       })
       .join("");
   }
 
-  const totalNet = rows.reduce((s, c) => s + c.net_sales, 0);
   const foot = document.getElementById("tableFoot");
   if (foot) {
     foot.innerHTML = `
@@ -177,7 +139,8 @@ function renderTable(rows, totalGross) {
         <td class="share-cell">100.0%</td>
         <td>${fmtUSD(totalGross)}</td>
         <td>${fmtUSD(totalNet)}</td>
-        <td colspan="3"></td>
+        <td>${fmtUSD(totalGrossProfit)}</td>
+        <td></td>
       </tr>`;
   }
 }
