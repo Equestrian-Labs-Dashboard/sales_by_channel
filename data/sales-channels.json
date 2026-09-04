@@ -490,33 +490,33 @@
         {
           "id": "cavali",
           "name": "Cavali",
-          "gross_sales": 0.0,
-          "discounts": 0.0,
-          "orders": 0,
+          "gross_sales": 39560.14,
+          "discounts": 2016.0,
+          "orders": 273,
           "margin1_pct": null
         },
         {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 0.0,
-          "discounts": 0.0,
-          "orders": 0,
+          "gross_sales": 1255.61,
+          "discounts": 1413.17,
+          "orders": 12,
           "margin1_pct": null
         },
         {
           "id": "concierge",
           "name": "Concierge",
-          "gross_sales": 0.0,
-          "discounts": 0.0,
-          "orders": 0,
+          "gross_sales": 2041.93,
+          "discounts": 20.2,
+          "orders": 4,
           "margin1_pct": null
         },
         {
           "id": "trailer",
           "name": "HITS / Trailer",
-          "gross_sales": 0.0,
-          "discounts": 0.0,
-          "orders": 0,
+          "gross_sales": 723.39,
+          "discounts": 38.71,
+          "orders": 6,
           "margin1_pct": null
         },
         {
@@ -530,10 +530,11 @@
         {
           "id": "others",
           "name": "Others",
-          "gross_sales": 0.0,
-          "discounts": 0.0,
-          "orders": 0,
-          "margin1_pct": null
+          "gross_sales": 3678.05,
+          "discounts": 771.8,
+          "orders": 14,
+          "margin1_pct": null,
+          "note": "Includes: Legacy: 9, Shopify Collective: 5"
         }
       ]
     }
