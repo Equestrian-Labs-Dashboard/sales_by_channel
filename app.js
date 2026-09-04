@@ -83,11 +83,11 @@ function render(periodId) {
     // Fallback keeps old demo files working.
     net_sales: Number.isFinite(c.net_sales)
       ? c.net_sales
-      : c.gross_sales - (c.discounts || 0)
+      : (c.net_sales ?? (c.gross_sales - (c.discounts || 0) - (c.sales_reversals || 0)))
   }));
 
   const totalGross = enriched.reduce((s, c) => s + c.gross_sales, 0);
-  const totalNet = enriched.reduce((s, c) => s + (Number.isFinite(c.net_sales) ? c.net_sales : (c.gross_sales - (c.discounts || 0))), 0);
+  const totalNet = enriched.reduce((s, c) => s + (Number.isFinite(c.net_sales) ? c.net_sales : ((c.net_sales ?? (c.gross_sales - (c.discounts || 0) - (c.sales_reversals || 0))))), 0);
   const totalGrossProfit = enriched.reduce((s, c) => s + (c.net_sales * (c.margin1_pct || 0)), 0);
   const weightedM1 = totalNet > 0 ? totalGrossProfit / totalNet : 0;
   const totalOrders = enriched.reduce((s, c) => s + (c.orders || 0), 0);

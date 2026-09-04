@@ -5,8 +5,8 @@
   --line: #E1DCD1;
   --line-strong: #171512;
   --surface: #F3EEE3;
-  --gold: #C6BDA8;
-  --gold-soft: #D3D6ED;
+  --gold: #4C5BD4;
+  --gold-soft: #252A4A;
   --pending: #C9C2B2;
   --corro: #1A1D36;
   --cavali: #B7B0A2;
@@ -426,4 +426,37 @@ footer.source-note {
 }
 .brand-tag.corro {
   background: var(--corro);
+}
+
+/* Final dashboard identity */
+:root {
+  --accent-main: #4C5BD4;
+  --accent-soft: #252A4A;
+}
+
+.kpi:nth-child(1),
+.kpi:nth-child(2),
+.kpi:nth-child(3),
+.kpi:nth-child(4) {
+ border-top-color: var(--accent-main);
+}
+
+.share-bar-fill {
+ background: var(--accent-main);
+}
+
+.brand-tag.cavali {
+ background:#63A4A8;
+}
+
+.brand-tag.corro {
+ background:#4C5BD4;
+}
+
+tbody tr.brand-corro {
+ border-left-color:#4C5BD4;
+}
+
+tbody tr.brand-cavali {
+ border-left-color:#63A4A8;
 }

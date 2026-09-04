@@ -65,3 +65,9 @@ Warm ivory/near-black base with a single gold accent (used for the toggle, activ
 - Dashboard now supports multiple brands in the data structure (Corro/Cavali ready).
 - Net Sales calculation prioritizes Shopify ETL `net_sales` when available instead of only gross minus discounts.
 - Visual palette adjusted to match the supplied dark/neutral luxury dashboard reference.
+
+
+## Final corrections
+- Net Sales now respects Shopify net sales when available and subtracts reversals in fallback mode.
+- Main dashboard accent aligned with the provided reference style.
+- Brand colors remain separated for Corro and Cavali.
