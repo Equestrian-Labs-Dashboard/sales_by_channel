@@ -1,30 +1,31 @@
-:root {
-  --bg: #101014;
-  --ink: #F5F2FF;
-  --ink-soft: #A9A3B8;
-  --line: #302B42;
-  --line-strong: #F5F2FF;
-  --surface: #191622;
-  --gold: #8B7CFF;
-  --gold-soft: #302650;
-  --pending: #C9C2B2;
-  --corro: #6C63FF;
-  --cavali: #63A4A8;
+:root,
+[data-theme="light"] {
+  --bg: #FAFAFE;
+  --ink: #1E1E47;
+  --ink-soft: #6B6B8F;
+  --line: #E3E0F3;
+  --line-strong: #1E1E47;
+  --surface: #F2F0FB;
+  --gold: #4259DE;
+  --gold-soft: #E4E8FB;
+  --pending: #B8B4CE;
+  --corro: #4259DE;
+  --cavali: #8B5CF6;
   color-scheme: light;
 }
 
 [data-theme="dark"] {
-  --bg: #14120F;
-  --ink: #F3EEE3;
-  --ink-soft: #A79E8E;
-  --line: #322D24;
-  --line-strong: #F3EEE3;
-  --surface: #1D1A15;
+  --bg: #14121F;
+  --ink: #F1EFFB;
+  --ink-soft: #A79EC7;
+  --line: #2E2A45;
+  --line-strong: #F1EFFB;
+  --surface: #1D1A2E;
   --gold: #8B7CFF;
   --gold-soft: #302650;
-  --pending: #4C4738;
-  --corro: #4C5BD4;
-  --cavali: #63A4A8;
+  --pending: #4A4468;
+  --corro: #6C63FF;
+  --cavali: #B39DFF;
   color-scheme: dark;
 }
 
@@ -412,57 +413,8 @@ footer.source-note {
   .masthead { align-items: flex-start; }
 }
 
-
-/* Dashboard polish - closer to the provided reference */
-.kpis {
-  background: var(--line);
-}
+/* Dashboard polish */
 .kpi-value {
   font-size: 1.75rem;
   letter-spacing: .01em;
-}
-.brand-tag.cavali {
-  background: var(--cavali);
-}
-.brand-tag.corro {
-  background: var(--corro);
-}
-
-/* Final dashboard identity */
-:root {
-  --accent-main: #4C5BD4;
-  --accent-soft: #252A4A;
-}
-
-.kpi:nth-child(1),
-.kpi:nth-child(2),
-.kpi:nth-child(3),
-.kpi:nth-child(4) {
- border-top-color: var(--accent-main);
-}
-
-.share-bar-fill {
- background: var(--accent-main);
-}
-
-.brand-tag.cavali {
- background:#63A4A8;
-}
-
-.brand-tag.corro {
- background:#4C5BD4;
-}
-
-tbody tr.brand-corro {
- border-left-color:#4C5BD4;
-}
-
-tbody tr.brand-cavali {
- border-left-color:#63A4A8;
-}
-
-/* final lilac identity */
-.share-bar-fill { background:#8B7CFF; }
-.kpi:nth-child(1), .kpi:nth-child(2), .kpi:nth-child(3), .kpi:nth-child(4) {
- border-top-color:#8B7CFF;
 }
