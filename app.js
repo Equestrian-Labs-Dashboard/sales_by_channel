@@ -67,16 +67,27 @@ function selectPeriod(periodId) {
 // ---------- Data helpers ----------
 function getRowsForPeriod(periodId) {
   const periodData = DATA.channels[periodId] || DATA.channels[Object.keys(DATA.channels)[0]];
-  return (periodData["equestrian_labs"] || []).map((c) => ({ ...c }));
+  const all = [];
+  Object.entries(periodData).forEach(([brand, rows]) => {
+    (rows || []).forEach((c) => all.push({ ...c, brand }));
+  });
+  return all;
 }
 
 // ---------- Render ----------
 function render(periodId) {
   const rows = getRowsForPeriod(periodId);
-  const enriched = rows.map((c) => ({ ...c, net_sales: c.gross_sales - (c.discounts || 0) }));
+  const enriched = rows.map((c) => ({
+    ...c,
+    // Prefer Shopify calculated net sales when ETL provides it.
+    // Fallback keeps old demo files working.
+    net_sales: Number.isFinite(c.net_sales)
+      ? c.net_sales
+      : c.gross_sales - (c.discounts || 0)
+  }));
 
   const totalGross = enriched.reduce((s, c) => s + c.gross_sales, 0);
-  const totalNet = enriched.reduce((s, c) => s + c.net_sales, 0);
+  const totalNet = enriched.reduce((s, c) => s + (Number.isFinite(c.net_sales) ? c.net_sales : (c.gross_sales - (c.discounts || 0))), 0);
   const totalGrossProfit = enriched.reduce((s, c) => s + (c.net_sales * (c.margin1_pct || 0)), 0);
   const weightedM1 = totalNet > 0 ? totalGrossProfit / totalNet : 0;
   const totalOrders = enriched.reduce((s, c) => s + (c.orders || 0), 0);

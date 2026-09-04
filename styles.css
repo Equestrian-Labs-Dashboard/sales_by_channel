@@ -5,11 +5,11 @@
   --line: #E1DCD1;
   --line-strong: #171512;
   --surface: #F3EEE3;
-  --gold: #1A1D36;
+  --gold: #C6BDA8;
   --gold-soft: #D3D6ED;
   --pending: #C9C2B2;
   --corro: #1A1D36;
-  --cavali: #63A4A8;
+  --cavali: #B7B0A2;
   color-scheme: light;
 }
 
@@ -24,7 +24,7 @@
   --gold-soft: #252A4A;
   --pending: #4C4738;
   --corro: #4C5BD4;
-  --cavali: #63A4A8;
+  --cavali: #B7B0A2;
   color-scheme: dark;
 }
 
@@ -44,7 +44,7 @@ body {
 }
 
 .wrap {
-  max-width: 1180px;
+  max-width: 1320px;
   margin: 0 auto;
   padding: 56px 32px 96px;
 }
@@ -410,4 +410,20 @@ footer.source-note {
   table { font-size: 0.74rem; }
   thead th, tbody td { padding: 10px 6px; }
   .masthead { align-items: flex-start; }
+}
+
+
+/* Dashboard polish - closer to the provided reference */
+.kpis {
+  background: var(--line);
+}
+.kpi-value {
+  font-size: 1.75rem;
+  letter-spacing: .01em;
+}
+.brand-tag.cavali {
+  background: var(--cavali);
+}
+.brand-tag.corro {
+  background: var(--corro);
 }

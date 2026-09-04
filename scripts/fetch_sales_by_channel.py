@@ -13,7 +13,7 @@ Run locally for testing:
 
 In GitHub Actions these come from repo secrets (see update-data.yml).
 
-STATUS: Shopify extraction (gross_sales, discounts, orders) is implemented
+STATUS: Shopify extraction (gross_sales, discounts, net_sales, orders) is implemented
 below. QBO margin extraction (margin1_pct/margin2_pct/margin3_pct) is left
 as a stub — see fetch_qbo_margins() — because it needs the same OAuth2
 refresh-token flow already wired for the AP dashboard, which isn't in this
@@ -296,7 +296,7 @@ def build_brand_month_rows(domain, token, brand, year, month):
             continue
         channel, note = classify_order(order, brand, locations, product_tags_by_id)
         t = totals[channel]
-        t["gross_sales"] += float(order.get("total_price") or 0)
+        t["gross_sales"] += float(order.get("total_line_items_price") or order.get("total_price") or 0)
         t["discounts"] += float(order.get("total_discounts") or 0)
         t["orders"] += 1
         if note:
@@ -382,7 +382,7 @@ def main():
     data["channels"][period_id]["equestrian_labs"] = rows
 
     data["meta"]["last_updated"] = now.strftime("%Y-%m-%d")
-    data["meta"]["note"] = "Live data from Shopify (gross_sales, discounts, orders) + QuickBooks Online (margins)."
+    data["meta"]["note"] = "Live data from Shopify (gross_sales, discounts, net_sales, orders) + QuickBooks Online (margins)."
 
     DATA_PATH.write_text(json.dumps(data, indent=2))
     print(f"[done] wrote {DATA_PATH}")
