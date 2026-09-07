@@ -2,7 +2,7 @@
   "meta": {
     "note": "Live data from Shopify (gross_sales, discounts, net_sales, orders). gross_profit/margin1_pct are Shopify's own numbers via ShopifyQL, never calculated by this script: exact for Cavali (single-channel store) and for Wellington/HITS-Trailer (Gross Profit by Location). Concierge/E-Commerce/Others have no native per-tag Shopify report and stay blank until QuickBooks Online by-class margins are wired in fetch_qbo_margins().",
     "currency": "USD",
-    "last_updated": "2026-09-06",
+    "last_updated": "2026-09-07",
     "brands": {
       "equestrian_labs": {
         "label": "Equestrian Labs",
@@ -490,9 +490,9 @@
         {
           "id": "cavali",
           "name": "Cavali",
-          "gross_sales": 36685.6,
-          "discounts": 1980.0,
-          "orders": 273,
+          "gross_sales": 36884.6,
+          "discounts": 2179.0,
+          "orders": 274,
           "margin1_pct": 0.001,
           "net_sales": 34705.6,
           "gross_profit": 0.01,
@@ -501,9 +501,9 @@
         {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 1978.72,
+          "gross_sales": 2458.78,
           "discounts": 1422.09,
-          "orders": 21,
+          "orders": 25,
           "margin1_pct": null,
           "gross_profit": null,
           "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
@@ -511,9 +511,9 @@
         {
           "id": "concierge",
           "name": "Concierge",
-          "gross_sales": 2777.48,
+          "gross_sales": 2811.04,
           "discounts": 20.2,
-          "orders": 5,
+          "orders": 6,
           "margin1_pct": null,
           "gross_profit": null,
           "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
@@ -521,9 +521,9 @@
         {
           "id": "trailer",
           "name": "HITS / Trailer",
-          "gross_sales": 1994.51,
-          "discounts": 66.83,
-          "orders": 21,
+          "gross_sales": 4207.84,
+          "discounts": 218.51,
+          "orders": 35,
           "margin1_pct": null,
           "gross_profit": null,
           "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
@@ -541,11 +541,11 @@
         {
           "id": "others",
           "name": "Others",
-          "gross_sales": 5865.61,
-          "discounts": 794.3,
-          "orders": 23,
+          "gross_sales": 6541.73,
+          "discounts": 830.58,
+          "orders": 28,
           "margin1_pct": null,
-          "note": "Includes: Legacy: 12, Shopify Collective: 11",
+          "note": "Includes: Legacy: 16, Shopify Collective: 12",
           "gross_profit": null,
           "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
         }
