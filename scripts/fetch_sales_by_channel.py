@@ -470,7 +470,7 @@ def main():
     data.setdefault("channels", {})
     data["channels"].setdefault(period_id, {})
 
-    combined_totals = defaultdict(lambda: {"gross_sales": 0.0, "discounts": 0.0, "orders": 0, "notes": defaultdict(int)})
+    combined_totals = defaultdict(lambda: {"gross_sales": 0.0, "discounts": 0.0, "sales_reversals": 0.0, "orders": 0, "notes": defaultdict(int)})
     # Store-level gross_profit/net_sales/margin1_pct per brand, straight from
     # Shopify ShopifyQL. Cavali = one channel = one store, so this is exact
     # for it. Corro splits into 5 channels below, so its store total is
@@ -504,7 +504,7 @@ def main():
             }
 
             for cid, loc_name in [("wellington", "Corro Wellington"), ("trailer", "Corro Trailer 1")]:
-                loc_totals = fetch_shopify_sales_totals(domain, token, year, month, where=f"location = '{loc_name}'")
+                loc_totals = fetch_shopify_sales_totals(domain, token, year, month, where=f"location_name = '{loc_name}'")
                 if loc_totals:
                     corro_location_totals[cid] = loc_totals
 
