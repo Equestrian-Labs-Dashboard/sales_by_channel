@@ -36,14 +36,7 @@ fetch("data/sales-channels.json?v=" + new Date().getTime())
     const updateLabel = document.getElementById("updatedLabel");
     if (updateLabel) updateLabel.textContent = "updated " + json.meta.last_updated;
     buildMonthSelect();
-
-    // Default to the last CLOSED month, never the in-progress current month.
-    const now = new Date();
-    const currentId = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-    const closedPeriods = json.periods.filter((p) => p.id !== currentId);
-    const initial = closedPeriods.length
-      ? closedPeriods[closedPeriods.length - 1]
-      : json.periods[json.periods.length - 1];
+    const initial = json.periods[json.periods.length - 1];
     selectPeriod(initial.id);
   })
   .catch((err) => {
@@ -74,45 +67,36 @@ function selectPeriod(periodId) {
 // ---------- Data helpers ----------
 function getRowsForPeriod(periodId) {
   const periodData = DATA.channels[periodId] || DATA.channels[Object.keys(DATA.channels)[0]];
-  const all = [];
-  Object.entries(periodData).forEach(([brand, rows]) => {
-    (rows || []).forEach((c) => all.push({ ...c, brand }));
-  });
-  return all;
+  return (periodData["equestrian_labs"] || []).map((c) => ({ ...c }));
 }
 
 // ---------- Render ----------
 function render(periodId) {
   const rows = getRowsForPeriod(periodId);
-  const enriched = rows.map((c) => ({
-    ...c,
-    // Prefer Shopify calculated net sales when ETL provides it.
-    // Fallback keeps old demo files working.
-    net_sales: Number.isFinite(c.net_sales)
-      ? c.net_sales
-      : (c.net_sales ?? (c.gross_sales - (c.discounts || 0) - (c.sales_reversals || 0)))
-  }));
+  const enriched = rows.map((c) => {
+    const net_sales = c.gross_sales - (c.discounts || 0) - (c.refunds || 0);
+    const gross_profit = c.gross_profit !== undefined ? c.gross_profit : net_sales * (c.margin1_pct || 0);
+    return { ...c, net_sales, gross_profit };
+  });
 
   const totalGross = enriched.reduce((s, c) => s + c.gross_sales, 0);
-  const totalNet = enriched.reduce((s, c) => s + (Number.isFinite(c.net_sales) ? c.net_sales : ((c.net_sales ?? (c.gross_sales - (c.discounts || 0) - (c.sales_reversals || 0))))), 0);
-  const gpKnownRows = enriched.filter((c) => c.gross_profit !== null && c.gross_profit !== undefined);
-  const totalGrossProfit = gpKnownRows.reduce((s, c) => s + c.gross_profit, 0);
-  const isPartialGP = gpKnownRows.length < enriched.length;
+  const totalNet = enriched.reduce((s, c) => s + c.net_sales, 0);
+  const totalGrossProfit = enriched.reduce((s, c) => s + c.gross_profit, 0);
   const weightedM1 = totalNet > 0 ? totalGrossProfit / totalNet : 0;
   const totalOrders = enriched.reduce((s, c) => s + (c.orders || 0), 0);
 
-  renderKPIs(totalGross, totalNet, totalGrossProfit, weightedM1, totalOrders, isPartialGP);
+  renderKPIs(totalGross, totalNet, totalGrossProfit, weightedM1, totalOrders);
   renderTable(enriched, totalGross, totalNet, totalGrossProfit);
 }
 
-function renderKPIs(totalGross, totalNet, totalGrossProfit, weightedM1, totalOrders, isPartialGP) {
+function renderKPIs(totalGross, totalNet, totalGrossProfit, weightedM1, totalOrders) {
   const el = document.getElementById("kpiRow");
   if (!el) return;
   const cards = [
     { label: "Gross Sales", value: fmtUSD(totalGross) },
     { label: "Net Sales", value: fmtUSD(totalNet), sub: fmtPct(totalNet / totalGross) + " of gross" },
-    { label: "Gross Profit", value: fmtUSD(totalGrossProfit), sub: isPartialGP ? "partial — some channels pending QBO" : undefined },
-    { label: "Gross Margin 1", value: fmtPct(weightedM1), sub: isPartialGP ? "partial" : undefined },
+    { label: "Gross Profit", value: fmtUSD(totalGrossProfit) },
+    { label: "Gross Margin 1", value: fmtPct(weightedM1) },
     { label: "Orders", value: totalOrders.toLocaleString("en-US") },
   ];
   el.innerHTML = cards
@@ -135,25 +119,17 @@ function renderTable(rows, totalGross, totalNet, totalGrossProfit) {
     body.innerHTML = sorted
       .map((c) => {
         const share = c.gross_sales / totalGross;
-        // A row only gets $0 shown when we actually have a $0 value.
-        // If Shopify hasn't given us gross_profit/margin for this channel
-        // yet (no per-tag report — see fetch_sales_by_channel.py), show a
-        // dash instead of a calculated/fabricated number.
-        const hasGP = c.gross_profit !== null && c.gross_profit !== undefined;
-        const hasMargin = c.margin1_pct !== null && c.margin1_pct !== undefined;
-        const grossProfitLabel = hasGP ? fmtUSD(c.gross_profit) : "—";
-        const marginLabel = hasMargin ? fmtPct(c.margin1_pct) : "—";
         return `
         <tr>
-          <td>${c.name}${c.note ? `<span class="channel-note">${c.note}</span>` : ""}</td>
+          <td>${c.name}${c.note ? `<br><span class="channel-note">${c.note}</span>` : ""}</td>
           <td class="share-cell">
             <span class="share-pct">${fmtPct(share)}</span>
             <div class="share-bar-track"><div class="share-bar-fill" style="width:${(share * 100).toFixed(1)}%"></div></div>
           </td>
           <td>${fmtUSD(c.gross_sales)}</td>
           <td>${fmtUSD(c.net_sales)}</td>
-          <td>${grossProfitLabel}</td>
-          <td>${marginLabel}</td>
+          <td>${c.margin1_pct === null && c.gross_profit === undefined ? "&ndash;" : fmtUSD(c.gross_profit)}</td>
+          <td>${c.margin1_pct === null ? "&ndash;" : fmtPct(c.margin1_pct || 0)}</td>
         </tr>`;
       })
       .join("");

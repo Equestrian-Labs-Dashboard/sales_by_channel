@@ -59,22 +59,3 @@ QBO stays a single OAuth2 connection (reuse the refresh-token rotation already s
 ## Theme
 
 Warm ivory/near-black base with a single gold accent (used for the toggle, active period pill, and share bars), plus a brand color per row (Corro terracotta, Cavali teal) so a mixed "All brands" view stays easy to scan. The sun/moon toggle is a real icon, not text — swaps between a sun (rays) and a crescent moon.
-
-
-## Corrections applied
-- Dashboard now supports multiple brands in the data structure (Corro/Cavali ready).
-- Net Sales calculation prioritizes Shopify ETL `net_sales` when available instead of only gross minus discounts.
-- Visual palette adjusted to match the supplied dark/neutral luxury dashboard reference.
-
-
-## Final corrections
-- Net Sales now respects Shopify net sales when available and subtracts reversals in fallback mode.
-- Main dashboard accent aligned with the provided reference style.
-- Brand colors remain separated for Corro and Cavali.
-
-
-## Latest fixes
-- Premium lilac dark theme applied.
-- Gross Profit now uses Shopify/QBO provided value when available.
-- Margin calculations no longer overwrite real Gross Profit.
-- Ready for separate brand/channel reporting.
