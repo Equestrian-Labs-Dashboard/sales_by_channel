@@ -2,7 +2,7 @@
   "meta": {
     "note": "Live data from Shopify (gross_sales, discounts, net_sales, orders). gross_profit/margin1_pct are Shopify's own numbers via ShopifyQL, never calculated by this script: exact for Cavali (single-channel store) and for Wellington/HITS-Trailer (Gross Profit by Location). Concierge/E-Commerce/Others have no native per-tag Shopify report and stay blank until QuickBooks Online by-class margins are wired in fetch_qbo_margins().",
     "currency": "USD",
-    "last_updated": "2026-09-07",
+    "last_updated": "2026-09-08",
     "brands": {
       "equestrian_labs": {
         "label": "Equestrian Labs",
@@ -490,20 +490,20 @@
         {
           "id": "cavali",
           "name": "Cavali",
-          "gross_sales": 36884.6,
+          "gross_sales": 36887.6,
           "discounts": 2179.0,
-          "orders": 274,
-          "margin1_pct": 0.001,
-          "net_sales": 34705.6,
-          "gross_profit": 0.01,
+          "orders": 275,
+          "margin1_pct": -0.053,
+          "net_sales": 34708.6,
+          "gross_profit": -0.48,
           "margin1_source": "Shopify ShopifyQL (exact \u2014 single-channel store)"
         },
         {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 2458.78,
+          "gross_sales": 3700.99,
           "discounts": 1422.09,
-          "orders": 25,
+          "orders": 29,
           "margin1_pct": null,
           "gross_profit": null,
           "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
@@ -541,11 +541,11 @@
         {
           "id": "others",
           "name": "Others",
-          "gross_sales": 6541.73,
-          "discounts": 830.58,
-          "orders": 28,
+          "gross_sales": 7809.5,
+          "discounts": 872.54,
+          "orders": 35,
           "margin1_pct": null,
-          "note": "Includes: Legacy: 16, Shopify Collective: 12",
+          "note": "Includes: Legacy: 19, Shopify Collective: 16",
           "gross_profit": null,
           "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
         }
