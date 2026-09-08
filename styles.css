@@ -1,30 +1,31 @@
-:root {
-  --bg: #FBF9F5;
-  --ink: #171512;
-  --ink-soft: #6B655C;
-  --line: #E1DCD1;
-  --line-strong: #171512;
-  --surface: #F3EEE3;
-  --gold: #1A1D36;
-  --gold-soft: #D3D6ED;
-  --pending: #C9C2B2;
-  --corro: #1A1D36;
-  --cavali: #63A4A8;
+:root,
+[data-theme="light"] {
+  --bg: #FAFAFE;
+  --ink: #1E1E47;
+  --ink-soft: #6B6B8F;
+  --line: #E3E0F3;
+  --line-strong: #1E1E47;
+  --surface: #F2F0FB;
+  --gold: #4259DE;
+  --gold-soft: #E4E8FB;
+  --pending: #B8B4CE;
+  --corro: #4259DE;
+  --cavali: #8B5CF6;
   color-scheme: light;
 }
 
 [data-theme="dark"] {
-  --bg: #14120F;
-  --ink: #F3EEE3;
-  --ink-soft: #A79E8E;
-  --line: #322D24;
-  --line-strong: #F3EEE3;
-  --surface: #1D1A15;
-  --gold: #4C5BD4;
-  --gold-soft: #252A4A;
-  --pending: #4C4738;
-  --corro: #4C5BD4;
-  --cavali: #63A4A8;
+  --bg: #14121F;
+  --ink: #F1EFFB;
+  --ink-soft: #A79EC7;
+  --line: #2E2A45;
+  --line-strong: #F1EFFB;
+  --surface: #1D1A2E;
+  --gold: #8B7CFF;
+  --gold-soft: #302650;
+  --pending: #4A4468;
+  --corro: #6C63FF;
+  --cavali: #B39DFF;
   color-scheme: dark;
 }
 
@@ -44,7 +45,7 @@ body {
 }
 
 .wrap {
-  max-width: 1180px;
+  max-width: 1320px;
   margin: 0 auto;
   padding: 56px 32px 96px;
 }
@@ -212,7 +213,7 @@ body {
 
 .kpis {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 1px;
   background: var(--line);
   border: 1px solid var(--line);
@@ -222,13 +223,8 @@ body {
 .kpi {
   background: var(--bg);
   padding: 22px 20px;
-  border-top: 2px solid transparent;
+  border-top: 2px solid var(--gold);
 }
-
-.kpi:nth-child(1) { border-top-color: var(--gold); }
-.kpi:nth-child(2) { border-top-color: var(--gold); }
-.kpi:nth-child(3) { border-top-color: var(--gold); }
-.kpi:nth-child(4) { border-top-color: var(--gold); }
 
 .kpi-label {
   font-size: 0.68rem;
@@ -406,8 +402,18 @@ footer.source-note {
 
 @media (max-width: 760px) {
   .wrap { padding: 32px 18px 64px; }
-  .kpis { grid-template-columns: repeat(2, 1fr); }
+  .kpis { grid-template-columns: repeat(3, 1fr); }
   table { font-size: 0.74rem; }
   thead th, tbody td { padding: 10px 6px; }
   .masthead { align-items: flex-start; }
+}
+
+@media (max-width: 480px) {
+  .kpis { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Dashboard polish */
+.kpi-value {
+  font-size: 1.75rem;
+  letter-spacing: .01em;
 }

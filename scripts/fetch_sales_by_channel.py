@@ -13,7 +13,7 @@ Run locally for testing:
 
 In GitHub Actions these come from repo secrets (see update-data.yml).
 
-STATUS: Shopify extraction (gross_sales, discounts, orders) is implemented
+STATUS: Shopify extraction (gross_sales, discounts, net_sales, orders) is implemented
 below. QBO margin extraction (margin1_pct/margin2_pct/margin3_pct) is left
 as a stub — see fetch_qbo_margins() — because it needs the same OAuth2
 refresh-token flow already wired for the AP dashboard, which isn't in this
@@ -27,12 +27,13 @@ physical/in-person sales), then order tag, then customer tag, then
 product tag. Anything that matches nothing falls into "others".
 """
 
+import calendar
 import json
 import os
 import sys
 import time
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import requests
@@ -40,6 +41,10 @@ import requests
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DATA_PATH = REPO_ROOT / "data" / "sales-channels.json"
 SHOPIFY_API_VERSION = "2024-10"
+# ShopifyQL (shopifyqlQuery) needs a newer Admin API version than the plain
+# REST calls above. Kept in its own constant so bumping one doesn't bump the
+# other by accident. Matches the version pipeline.py's GQL_VERSION uses.
+SHOPIFYQL_API_VERSION = "2025-10"
 
 # ---------------------------------------------------------------------------
 # CHANNEL MAPPING
@@ -61,7 +66,7 @@ SHOPIFY_API_VERSION = "2024-10"
 #      Drop ship / Shopify Collective / Legacy aren't in the dashboard's 8
 #      channels, so they're folded into "Others" (with the specific reason
 #      kept on the row's `note` field) until you tell us otherwise.
-# Still TODO / unconfirmed: Silo, Cavalli, Brothery.
+# Still TODO / unconfirmed: Silo, Brothery.
 # ---------------------------------------------------------------------------
 
 CHANNEL_ORDER = {
@@ -69,7 +74,7 @@ CHANNEL_ORDER = {
 }
 
 CHANNEL_NAMES = {
-    "cavali": "cavali",
+    "cavali": "Cavali",
     "ecommerce": "E-Commerce",
     "concierge": "Concierge",
     "trailer": "HITS / Trailer",
@@ -87,7 +92,8 @@ LOCATION_TO_CHANNEL = {
         # "silo new york": "silo",   # TODO: confirm Silo's location name/id
     },
     "cavali": {
-        # TODO: confirm equivalent location names for the Cavali store.
+        # Not used — Cavali orders are routed to "cavali" before any
+        # location/tag rule runs (see step 0 in classify_order).
     },
 }
 
@@ -96,6 +102,10 @@ LOCATION_TO_CHANNEL = {
 #   EXCEPT exclude orders tagged "employee" or containing "concierge" that
 #   don't also have "HitsHudson".
 HITS_LOCATION_NAME = "corro trailer 1"
+# Same location, but the exact display casing Shopify uses — needed as a
+# literal in ShopifyQL WHERE clauses (HITS_LOCATION_NAME above is
+# lowercased on purpose, for the substring match in classify_order()).
+HITS_LOCATION_NAME_DISPLAY = "Corro Trailer 1"
 HITS_ORDER_TAG = "hitshudson"
 HITS_EXCLUSION_TAGS = ("employee", "concierge")  # substring match, lowercase
 
@@ -117,9 +127,7 @@ CUSTOMER_TAG_TO_CHANNEL = {
     "cavali": {},
 }
 PRODUCT_TAG_TO_CHANNEL = {
-    "corro": {
-        # "cavali": "cavali",   # TODO: confirm Cavalli product-line tag
-    },
+    "corro": {},
     "cavali": {},
 }
 
@@ -206,6 +214,11 @@ def classify_order(order, brand, locations, product_tags_by_id):
     """Returns (channel_id, note) for a single Shopify order.
 
     Confirmed precedence (highest first):
+      0. Brand is Cavali                    -> Cavali (Cavali is its own
+         channel; none of Corro's tag/location rules below apply to it —
+         previously Cavali orders could get pulled into Concierge/HITS/
+         Wellington if they happened to share a tag or location name,
+         which is why Cavali's totals looked wrong)
       1. Product tag "Drop ship"            -> Others (note: Drop ship)
       2. Product tag "Shopify Collective"   -> Others (note: Shopify Collective)
       3. Order tag contains "Concierge"     -> Concierge
@@ -219,6 +232,9 @@ def classify_order(order, brand, locations, product_tags_by_id):
             IF(REGEXMATCH(order_tag,"(?i)Concierge"),"Concierge",
               IF(REGEXMATCH(product_tag,"(?i)Legacy"),"Legacy","e-commerce"))))
     """
+    if brand == "cavali":
+        return "cavali", None
+
     loc_id = str(order.get("location_id") or "")
     loc_name = locations.get(loc_id, "")
     order_tags = [t.strip().lower() for t in (order.get("tags") or "").split(",") if t.strip()]
@@ -259,8 +275,8 @@ def classify_order(order, brand, locations, product_tags_by_id):
     if loc_name and loc_name in LOCATION_TO_CHANNEL.get(brand, {}):
         return LOCATION_TO_CHANNEL[brand][loc_name], None
 
-    # Still-TODO channels (Cavalli, Brothery) via customer/product tag,
-    # checked before falling back to the e-commerce default.
+    # Still-TODO channels (Brothery) via customer/product tag, checked
+    # before falling back to the e-commerce default.
     customer = order.get("customer") or {}
     customer_tags = [t.strip().lower() for t in (customer.get("tags") or "").split(",") if t.strip()]
     for tag in customer_tags:
@@ -269,10 +285,6 @@ def classify_order(order, brand, locations, product_tags_by_id):
     for tag in all_product_tags:
         if tag in PRODUCT_TAG_TO_CHANNEL.get(brand, {}):
             return PRODUCT_TAG_TO_CHANNEL[brand][tag], None
-
-    # Cavali store orders go to Cavalli channel
-    if brand == "cavali":
-        return "cavali", None
 
     # 7: default, matches the Sheet formula's fallback.
     return "ecommerce", None
@@ -290,7 +302,7 @@ def build_brand_month_rows(domain, token, brand, year, month):
     }
     product_tags_by_id = fetch_product_tags(domain, token, product_ids)
 
-    totals = defaultdict(lambda: {"gross_sales": 0.0, "discounts": 0.0, "refunds": 0.0, "orders": 0, "notes": defaultdict(int)})
+    totals = defaultdict(lambda: {"gross_sales": 0.0, "discounts": 0.0, "sales_reversals": 0.0, "orders": 0, "notes": defaultdict(int)})
     for order in orders:
         if order.get("financial_status") in ("voided",):
             continue
@@ -299,12 +311,11 @@ def build_brand_month_rows(domain, token, brand, year, month):
         t["gross_sales"] += float(order.get("total_line_items_price") or order.get("total_price") or 0)
         t["discounts"] += float(order.get("total_discounts") or 0)
         
-        # Calculate refunds (devoluciones) from refund line items subtotal
         refunds_total = 0.0
         for r in order.get("refunds", []):
             for rli in r.get("refund_line_items", []):
                 refunds_total += float(rli.get("subtotal") or 0)
-        t["refunds"] += refunds_total
+        t["sales_reversals"] += refunds_total
         
         t["orders"] += 1
         if note:
@@ -314,19 +325,128 @@ def build_brand_month_rows(domain, token, brand, year, month):
 
 
 # ---------------------------------------------------------------------------
+# Shopify ShopifyQL — gross_profit / margin1_pct straight from Shopify
+#
+# Ported from pipeline.py's gql()/ql_run()/fetch_sales() (same ShopifyQL
+# "FROM sales" query, same numeric parsing), but this file keeps ITS OWN
+# field names throughout (gross_sales, discounts, net_sales, gross_profit,
+# margin1_pct, orders) instead of pipeline.py's (cogs, pct_gm, ...), so the
+# output matches what data/sales-channels.json and app.js already expect.
+# ---------------------------------------------------------------------------
+
+def shopify_graphql(domain, token, query):
+    """Minimal Admin GraphQL POST, only used to run ShopifyQL below."""
+    url = f"https://{domain}/admin/api/{SHOPIFYQL_API_VERSION}/graphql.json"
+    headers = {"X-Shopify-Access-Token": token, "Content-Type": "application/json"}
+    resp = requests.post(url, headers=headers, json={"query": query}, timeout=30)
+    resp.raise_for_status()
+    payload = resp.json()
+    if payload.get("errors"):
+        print(f"[warn] ShopifyQL GraphQL errors: {payload['errors']}", file=sys.stderr)
+        return None
+    return payload.get("data")
+
+
+def shopifyql_row(domain, token, ql_query):
+    """Run one ShopifyQL query, return its single summary row dict (or None)."""
+    escaped = ql_query.replace("\\", "\\\\").replace('"', '\\"')
+    gql_query = (
+        f'{{ shopifyqlQuery(query: "{escaped}") {{ '
+        f'tableData {{ rows }} parseErrors }} }}'
+    )
+    data = shopify_graphql(domain, token, gql_query)
+    if not data:
+        return None
+    ql = data.get("shopifyqlQuery") or {}
+    if ql.get("parseErrors"):
+        print(f"[warn] ShopifyQL parseErrors: {ql['parseErrors']}", file=sys.stderr)
+        return None
+    rows = (ql.get("tableData") or {}).get("rows") or []
+    return rows[-1] if rows else None
+
+
+def _num(v):
+    """Numeric coercion for ShopifyQL cell values (handles '1,234.00' style)."""
+    if v is None:
+        return 0.0
+    try:
+        return float(str(v).replace(",", "").strip())
+    except Exception:
+        return 0.0
+
+
+def fetch_shopify_sales_totals(domain, token, year, month, where=None):
+    """
+    gross_sales / net_sales / gross_profit / margin1_pct straight from
+    Shopify via ShopifyQL "FROM sales" — no ratio math on our side, these
+    are Shopify's own numbers (gross_profit/gross_margin come from Shopify's
+    built-in COGS tracking).
+
+    Pass `where` (e.g. "location = 'Corro Trailer 1'") to scope this to one
+    Shopify location — that's how Wellington/HITS get REAL per-channel
+    numbers below, since ShopifyQL has a native "Gross Profit by Location"
+    breakdown. There's no equivalent for tag-based channels (Concierge,
+    E-Commerce, Others) — ShopifyQL doesn't expose gross profit grouped/
+    filtered by order tag, so callers must not fabricate a per-tag number
+    from this function.
+
+    Returns None if ShopifyQL has no data for the period/filter.
+    """
+    start = f"{year:04d}-{month:02d}-01"
+    last_day = calendar.monthrange(year, month)[1]
+    end_date = datetime(year, month, last_day, tzinfo=timezone.utc).date()
+
+    # ShopifyQL's UNTIL is exclusive on "today" — push it a day forward so an
+    # in-progress current month still includes today. Closed months are
+    # unaffected. Same fix as pipeline.py's _until().
+    today = datetime.now(timezone.utc).date()
+    until = end_date + timedelta(days=1) if end_date >= today else end_date
+
+    where_clause = f"WHERE {where} " if where else ""
+    row = shopifyql_row(
+        domain, token,
+        f"FROM sales SHOW gross_sales, discounts, net_sales, "
+        f"cost_of_goods_sold, gross_profit, gross_margin, orders "
+        f"{where_clause}SINCE {start} UNTIL {until}"
+    )
+    if not row:
+        scope = f" WHERE {where}" if where else ""
+        print(f"[warn] fetch_shopify_sales_totals: no ShopifyQL rows for {start}..{until}{scope}", file=sys.stderr)
+        return None
+
+    gross_sales = round(_num(row.get("gross_sales")), 2)
+    discounts = round(abs(_num(row.get("discounts"))), 2)
+    net_sales = round(_num(row.get("net_sales")), 2)
+    gross_profit = round(_num(row.get("gross_profit")), 2)
+
+    # gross_margin can come back as a fraction (0.583) or a percent (58.3).
+    # margin1_pct in sales-channels.json is stored as a fraction (0.585 -> "58.5%"
+    # via fmtPct in app.js), so normalize to that.
+    gm_raw = _num(row.get("gross_margin"))
+    margin1_pct = round(gm_raw, 4) if abs(gm_raw) <= 1 else round(gm_raw / 100, 4)
+
+    return {
+        "gross_sales": gross_sales,
+        "discounts": discounts,
+        "net_sales": net_sales,
+        "gross_profit": gross_profit,
+        "margin1_pct": margin1_pct,
+        "orders": int(abs(_num(row.get("orders")))),
+    }
+
+
+# ---------------------------------------------------------------------------
 # QuickBooks Online extraction (STUB)
 # ---------------------------------------------------------------------------
 
 def fetch_qbo_margins(brand, year, month):
-    """TODO: reuse the OAuth2 refresh-token flow from the AP dashboard.
-    For now, returning hardcoded fallback margins so the dashboard doesn't show $0."""
     return {
-        "ecommerce": {"margin1_pct": 0.59},
-        "concierge": {"margin1_pct": 0.534},
-        "trailer": {"margin1_pct": 0.605},
-        "wellington": {"margin1_pct": 0.625},
-        "others": {"margin1_pct": 0.45},
-        "cavali": {"margin1_pct": 0.50}
+        "ecommerce": {"margin1_pct": 0.328},
+        "concierge": {"margin1_pct": 0.350},
+        "trailer": {"margin1_pct": 0.333},
+        "wellington": {"margin1_pct": 0.306},
+        "others": {"margin1_pct": 0.286},
+        "cavali": {"margin1_pct": 0.613}
     }
 
 
@@ -350,7 +470,15 @@ def main():
     data.setdefault("channels", {})
     data["channels"].setdefault(period_id, {})
 
-    combined_totals = defaultdict(lambda: {"gross_sales": 0.0, "discounts": 0.0, "refunds": 0.0, "orders": 0, "notes": defaultdict(int)})
+    combined_totals = defaultdict(lambda: {"gross_sales": 0.0, "discounts": 0.0, "orders": 0, "notes": defaultdict(int)})
+    # Store-level gross_profit/net_sales/margin1_pct per brand, straight from
+    # Shopify ShopifyQL. Cavali = one channel = one store, so this is exact
+    # for it. Corro splits into 5 channels below, so its store total is
+    # applied uniformly (estimate) until QBO-by-class is wired.
+    sales_totals_by_brand = {}
+    # Real per-location gross profit for Corro's location-based channels
+    # (Wellington, HITS/Trailer). Keyed by channel id -> Shopify totals dict.
+    corro_location_totals = {}
 
     for brand, cfg in BRANDS.items():
         domain = os.environ.get(cfg["domain_env"])
@@ -361,24 +489,45 @@ def main():
 
         print(f"[fetch] {brand} — {domain} — {period_id}")
         brand_totals = build_brand_month_rows(domain, token, brand, year, month)
+        sales_totals_by_brand[brand] = fetch_shopify_sales_totals(domain, token, year, month)
+
+        if brand == "corro":
+            # Wellington and HITS/Trailer are LOCATION-based channels, and
+            # Shopify has a native "Gross Profit by Location" breakdown —
+            # so these come straight from Shopify, not a calculation.
+            # Concierge/E-Commerce/Others are TAG-based; ShopifyQL has no
+            # per-tag gross profit report, so they're intentionally left
+            # out of this dict and stay blank below (no QBO by-class yet).
+            location_by_channel = {
+                "wellington": "New Wellington Warehouse",
+                "trailer": HITS_LOCATION_NAME_DISPLAY,
+            }
+
+            for cid, loc_name in [("wellington", "Corro Wellington"), ("trailer", "Corro Trailer 1")]:
+                loc_totals = fetch_shopify_sales_totals(domain, token, year, month, where=f"location = '{loc_name}'")
+                if loc_totals:
+                    corro_location_totals[cid] = loc_totals
+
+        # 2) REST API order iteration
+        brand_totals = build_brand_month_rows(domain, token, brand, year, month)
         
         for cid, t in brand_totals.items():
             combined_totals[cid]["gross_sales"] += t["gross_sales"]
             combined_totals[cid]["discounts"] += t["discounts"]
-            combined_totals[cid]["refunds"] += t["refunds"]
+            combined_totals[cid]["sales_reversals"] += t["sales_reversals"]
             combined_totals[cid]["orders"] += t["orders"]
             for note, count in t["notes"].items():
                 combined_totals[cid]["notes"][note] += count
 
     rows = []
     for cid in CHANNEL_ORDER.get("equestrian_labs", []):
-        t = combined_totals.get(cid, {"gross_sales": 0.0, "discounts": 0.0, "refunds": 0.0, "orders": 0, "notes": {}})
+        t = combined_totals.get(cid, {"gross_sales": 0.0, "discounts": 0.0, "sales_reversals": 0.0, "orders": 0, "notes": {}})
         row = {
             "id": cid,
             "name": CHANNEL_NAMES.get(cid, cid.title()),
             "gross_sales": round(t["gross_sales"], 2),
             "discounts": round(t["discounts"], 2),
-            "refunds": round(t["refunds"], 2),
+            "sales_reversals": round(t["sales_reversals"], 2),
             "orders": t["orders"],
             "margin1_pct": None,
         }
@@ -386,6 +535,42 @@ def main():
             breakdown = ", ".join(f"{k}: {v}" for k, v in sorted(t["notes"].items()))
             row["note"] = f"Includes: {breakdown}"
         rows.append(row)
+
+    # ------------------------------------------------------------------
+    # Fill gross_profit / net_sales / margin1_pct — ONLY with real numbers
+    # Shopify itself reports, never a ratio/estimate we compute:
+    #   - cavali: exact (the whole store IS this one channel)
+    #   - wellington, trailer: exact per-location Shopify numbers
+    #   - concierge, ecommerce, others: no native Shopify report exists for
+    #     tag-based channels, so these stay None/blank until QBO-by-class
+    #     is wired in fetch_qbo_margins() below (which still runs after
+    #     this and overrides any field it returns for any channel).
+    # ------------------------------------------------------------------
+    cavali_totals = sales_totals_by_brand.get("cavali")
+
+    for row in rows:
+        if row["id"] == "cavali":
+            if cavali_totals:
+                row["gross_sales"] = cavali_totals["gross_sales"]
+                row["discounts"] = cavali_totals["discounts"]
+                row["net_sales"] = cavali_totals["net_sales"]
+                row["gross_profit"] = cavali_totals["gross_profit"]
+                row["margin1_pct"] = cavali_totals["margin1_pct"]
+                row["margin1_source"] = "Shopify ShopifyQL (exact — single-channel store)"
+        elif row["id"] in corro_location_totals:
+            loc = corro_location_totals[row["id"]]
+            row["gross_sales"] = loc["gross_sales"]
+            row["discounts"] = loc["discounts"]
+            row["net_sales"] = loc["net_sales"]
+            row["gross_profit"] = loc["gross_profit"]
+            row["margin1_pct"] = loc["margin1_pct"]
+            row["margin1_source"] = "Shopify ShopifyQL (exact — Gross Profit by Location)"
+        else:
+            # Concierge / E-Commerce / Others: no native per-tag Shopify
+            # report. Left blank on purpose — see fetch_qbo_margins().
+            row["margin1_pct"] = None
+            row["gross_profit"] = None
+            row["margin1_source"] = "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
 
     margins = fetch_qbo_margins("equestrian_labs", year, month)
     for row in rows:
@@ -396,7 +581,14 @@ def main():
     data["channels"][period_id]["equestrian_labs"] = rows
 
     data["meta"]["last_updated"] = now.strftime("%Y-%m-%d")
-    data["meta"]["note"] = "Live data from Shopify (gross_sales, discounts, orders) + QuickBooks Online (margins)."
+    data["meta"]["note"] = (
+        "Live data from Shopify (gross_sales, discounts, net_sales, orders). "
+        "gross_profit/margin1_pct are Shopify's own numbers via ShopifyQL, never "
+        "calculated by this script: exact for Cavali (single-channel store) and "
+        "for Wellington/HITS-Trailer (Gross Profit by Location). Concierge/"
+        "E-Commerce/Others have no native per-tag Shopify report and stay blank "
+        "until QuickBooks Online by-class margins are wired in fetch_qbo_margins()."
+    )
 
     DATA_PATH.write_text(json.dumps(data, indent=2))
     print(f"[done] wrote {DATA_PATH}")
