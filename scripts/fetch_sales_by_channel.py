@@ -518,10 +518,10 @@ def main():
                 "trailer": HITS_LOCATION_NAME_DISPLAY,
             }
 
-            for cid, loc_name in [("trailer", "Corro Trailer 1")]:
-                loc_totals = fetch_shopify_sales_totals(domain, token, year, month, where=f"location_name = '{loc_name}'")
-                if loc_totals:
-                    corro_location_totals[cid] = loc_totals
+            # We no longer overwrite Wellington or HITS/Trailer with ShopifyQL.
+            # Both physical channels require complex REST API filtering (fulfillments or tags)
+            # that ShopifyQL location_name cannot do. They will use the fallback margin instead
+            # of Shopify's native gross_profit.
 
         # 2) REST API order iteration
         brand_totals = build_brand_month_rows(domain, token, brand, year, month)

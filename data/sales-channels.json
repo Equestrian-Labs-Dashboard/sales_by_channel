@@ -2,7 +2,7 @@
   "meta": {
     "note": "Live data from Shopify (gross_sales, discounts, net_sales, orders). gross_profit/margin1_pct are Shopify's own numbers via ShopifyQL, never calculated by this script: exact for Cavali (single-channel store) and for Wellington/HITS-Trailer (Gross Profit by Location). Concierge/E-Commerce/Others have no native per-tag Shopify report and stay blank until QuickBooks Online by-class margins are wired in fetch_qbo_margins().",
     "currency": "USD",
-    "last_updated": "2026-09-09",
+    "last_updated": "2026-09-07",
     "brands": {
       "equestrian_labs": {
         "label": "Equestrian Labs",
@@ -61,7 +61,8 @@
           "gross_sales": 131600,
           "discounts": 13670,
           "margin1_pct": 0.585,
-          "orders": 1605
+          "orders": 1605,
+          "gross_profit": 68989.05
         },
         {
           "id": "concierge",
@@ -69,7 +70,8 @@
           "gross_sales": 93800,
           "discounts": 28050,
           "margin1_pct": 0.518,
-          "orders": 361
+          "orders": 361,
+          "gross_profit": 34058.5
         },
         {
           "id": "trailer",
@@ -78,7 +80,8 @@
           "discounts": 2820,
           "margin1_pct": 0.631,
           "orders": 321,
-          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
+          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel).",
+          "gross_profit": 36648.48
         },
         {
           "id": "wellington",
@@ -87,7 +90,8 @@
           "discounts": 1400,
           "margin1_pct": 0.644,
           "orders": 189,
-          "note": "Physical channel, retains more value. No shipping to pull."
+          "note": "Physical channel, retains more value. No shipping to pull.",
+          "gross_profit": 28851.2
         },
         {
           "id": "cavali",
@@ -95,7 +99,8 @@
           "gross_sales": 3000,
           "discounts": 2000,
           "margin1_pct": 0.5,
-          "orders": 15
+          "orders": 15,
+          "gross_profit": 500.0
         },
         {
           "id": "others",
@@ -103,7 +108,8 @@
           "gross_sales": 12000,
           "discounts": 500,
           "margin1_pct": 0.45,
-          "orders": 80
+          "orders": 80,
+          "gross_profit": 5175.0
         }
       ]
     },
@@ -115,7 +121,8 @@
           "gross_sales": 149800,
           "discounts": 15910,
           "margin1_pct": 0.577,
-          "orders": 1827
+          "orders": 1827,
+          "gross_profit": 77254.53
         },
         {
           "id": "concierge",
@@ -123,7 +130,8 @@
           "gross_sales": 101400,
           "discounts": 31140,
           "margin1_pct": 0.517,
-          "orders": 390
+          "orders": 390,
+          "gross_profit": 36324.42
         },
         {
           "id": "trailer",
@@ -132,7 +140,8 @@
           "discounts": 2970,
           "margin1_pct": 0.616,
           "orders": 317,
-          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
+          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel).",
+          "gross_profit": 35253.68
         },
         {
           "id": "wellington",
@@ -141,7 +150,8 @@
           "discounts": 1490,
           "margin1_pct": 0.643,
           "orders": 204,
-          "note": "Physical channel, retains more value. No shipping to pull."
+          "note": "Physical channel, retains more value. No shipping to pull.",
+          "gross_profit": 31127.63
         },
         {
           "id": "cavali",
@@ -149,7 +159,8 @@
           "gross_sales": 3000,
           "discounts": 2000,
           "margin1_pct": 0.5,
-          "orders": 15
+          "orders": 15,
+          "gross_profit": 500.0
         },
         {
           "id": "others",
@@ -157,7 +168,8 @@
           "gross_sales": 12000,
           "discounts": 500,
           "margin1_pct": 0.45,
-          "orders": 80
+          "orders": 80,
+          "gross_profit": 5175.0
         }
       ]
     },
@@ -169,7 +181,8 @@
           "gross_sales": 154300,
           "discounts": 16330,
           "margin1_pct": 0.59,
-          "orders": 1882
+          "orders": 1882,
+          "gross_profit": 81402.3
         },
         {
           "id": "concierge",
@@ -177,7 +190,8 @@
           "gross_sales": 116100,
           "discounts": 40000,
           "margin1_pct": 0.531,
-          "orders": 447
+          "orders": 447,
+          "gross_profit": 40409.1
         },
         {
           "id": "trailer",
@@ -186,7 +200,8 @@
           "discounts": 3150,
           "margin1_pct": 0.629,
           "orders": 347,
-          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
+          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel).",
+          "gross_profit": 39532.65
         },
         {
           "id": "wellington",
@@ -195,7 +210,8 @@
           "discounts": 1630,
           "margin1_pct": 0.636,
           "orders": 222,
-          "note": "Physical channel, retains more value. No shipping to pull."
+          "note": "Physical channel, retains more value. No shipping to pull.",
+          "gross_profit": 33498.12
         },
         {
           "id": "cavali",
@@ -203,7 +219,8 @@
           "gross_sales": 3000,
           "discounts": 2000,
           "margin1_pct": 0.5,
-          "orders": 15
+          "orders": 15,
+          "gross_profit": 500.0
         },
         {
           "id": "others",
@@ -211,7 +228,8 @@
           "gross_sales": 12000,
           "discounts": 500,
           "margin1_pct": 0.45,
-          "orders": 80
+          "orders": 80,
+          "gross_profit": 5175.0
         }
       ]
     },
@@ -223,7 +241,8 @@
           "gross_sales": 161400,
           "discounts": 18200,
           "margin1_pct": 0.576,
-          "orders": 1968
+          "orders": 1968,
+          "gross_profit": 82483.2
         },
         {
           "id": "concierge",
@@ -231,7 +250,8 @@
           "gross_sales": 111400,
           "discounts": 37770,
           "margin1_pct": 0.53,
-          "orders": 428
+          "orders": 428,
+          "gross_profit": 39023.9
         },
         {
           "id": "trailer",
@@ -240,7 +260,8 @@
           "discounts": 3330,
           "margin1_pct": 0.616,
           "orders": 329,
-          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
+          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel).",
+          "gross_profit": 36448.72
         },
         {
           "id": "wellington",
@@ -249,7 +270,8 @@
           "discounts": 1640,
           "margin1_pct": 0.641,
           "orders": 222,
-          "note": "Physical channel, retains more value. No shipping to pull."
+          "note": "Physical channel, retains more value. No shipping to pull.",
+          "gross_profit": 33883.26
         },
         {
           "id": "cavali",
@@ -257,7 +279,8 @@
           "gross_sales": 3000,
           "discounts": 2000,
           "margin1_pct": 0.5,
-          "orders": 15
+          "orders": 15,
+          "gross_profit": 500.0
         },
         {
           "id": "others",
@@ -265,7 +288,8 @@
           "gross_sales": 12000,
           "discounts": 500,
           "margin1_pct": 0.45,
-          "orders": 80
+          "orders": 80,
+          "gross_profit": 5175.0
         }
       ]
     },
@@ -277,7 +301,8 @@
           "gross_sales": 148800,
           "discounts": 16810,
           "margin1_pct": 0.589,
-          "orders": 1815
+          "orders": 1815,
+          "gross_profit": 77742.11
         },
         {
           "id": "concierge",
@@ -285,7 +310,8 @@
           "gross_sales": 111500,
           "discounts": 38260,
           "margin1_pct": 0.517,
-          "orders": 429
+          "orders": 429,
+          "gross_profit": 37865.08
         },
         {
           "id": "trailer",
@@ -294,7 +320,8 @@
           "discounts": 3140,
           "margin1_pct": 0.627,
           "orders": 341,
-          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
+          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel).",
+          "gross_profit": 38598.12
         },
         {
           "id": "wellington",
@@ -303,7 +330,8 @@
           "discounts": 1710,
           "margin1_pct": 0.627,
           "orders": 232,
-          "note": "Physical channel, retains more value. No shipping to pull."
+          "note": "Physical channel, retains more value. No shipping to pull.",
+          "gross_profit": 34541.43
         },
         {
           "id": "cavali",
@@ -311,7 +339,8 @@
           "gross_sales": 3000,
           "discounts": 2000,
           "margin1_pct": 0.5,
-          "orders": 15
+          "orders": 15,
+          "gross_profit": 500.0
         },
         {
           "id": "others",
@@ -319,7 +348,8 @@
           "gross_sales": 12000,
           "discounts": 500,
           "margin1_pct": 0.45,
-          "orders": 80
+          "orders": 80,
+          "gross_profit": 5175.0
         }
       ]
     },
@@ -331,7 +361,8 @@
           "gross_sales": 166000,
           "discounts": 17650,
           "margin1_pct": 0.58,
-          "orders": 2024
+          "orders": 2024,
+          "gross_profit": 86043.0
         },
         {
           "id": "concierge",
@@ -339,7 +370,8 @@
           "gross_sales": 114000,
           "discounts": 36330,
           "margin1_pct": 0.533,
-          "orders": 438
+          "orders": 438,
+          "gross_profit": 41398.11
         },
         {
           "id": "trailer",
@@ -348,7 +380,8 @@
           "discounts": 3800,
           "margin1_pct": 0.615,
           "orders": 372,
-          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
+          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel).",
+          "gross_profit": 41082.0
         },
         {
           "id": "wellington",
@@ -357,7 +390,8 @@
           "discounts": 1540,
           "margin1_pct": 0.627,
           "orders": 222,
-          "note": "Physical channel, retains more value. No shipping to pull."
+          "note": "Physical channel, retains more value. No shipping to pull.",
+          "gross_profit": 33143.22
         },
         {
           "id": "cavali",
@@ -365,7 +399,8 @@
           "gross_sales": 3000,
           "discounts": 2000,
           "margin1_pct": 0.5,
-          "orders": 15
+          "orders": 15,
+          "gross_profit": 500.0
         },
         {
           "id": "others",
@@ -373,7 +408,8 @@
           "gross_sales": 12000,
           "discounts": 500,
           "margin1_pct": 0.45,
-          "orders": 80
+          "orders": 80,
+          "gross_profit": 5175.0
         }
       ]
     },
@@ -385,7 +421,8 @@
           "gross_sales": 185300,
           "discounts": 19240,
           "margin1_pct": 0.587,
-          "orders": 2260
+          "orders": 2260,
+          "gross_profit": 97477.22
         },
         {
           "id": "concierge",
@@ -393,7 +430,8 @@
           "gross_sales": 123300,
           "discounts": 39610,
           "margin1_pct": 0.52,
-          "orders": 474
+          "orders": 474,
+          "gross_profit": 43518.8
         },
         {
           "id": "trailer",
@@ -402,7 +440,8 @@
           "discounts": 3360,
           "margin1_pct": 0.609,
           "orders": 382,
-          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel)."
+          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel).",
+          "gross_profit": 42167.16
         },
         {
           "id": "wellington",
@@ -411,15 +450,18 @@
           "discounts": 1960,
           "margin1_pct": 0.64,
           "orders": 259,
-          "note": "Physical channel, retains more value. No shipping to pull."
+          "note": "Physical channel, retains more value. No shipping to pull.",
+          "gross_profit": 39385.6
         },
         {
           "id": "cavali",
           "name": "Cavali",
-          "gross_sales": 3000,
-          "discounts": 2000,
+          "gross_sales": 2879.0,
+          "discounts": 1785.0,
           "margin1_pct": 0.5,
-          "orders": 15
+          "orders": 23,
+          "gross_profit": -40.0,
+          "net_sales": 1094.0
         },
         {
           "id": "others",
@@ -427,7 +469,8 @@
           "gross_sales": 12000,
           "discounts": 500,
           "margin1_pct": 0.45,
-          "orders": 80
+          "orders": 80,
+          "gross_profit": 5175.0
         }
       ]
     },
@@ -506,68 +549,62 @@
         {
           "id": "cavali",
           "name": "Cavali",
-          "gross_sales": 36887.6,
+          "gross_sales": 36884.6,
           "discounts": 2179.0,
-          "sales_reversals": 0.0,
-          "orders": 275,
-          "margin1_pct": 0.613,
-          "net_sales": 34708.6,
-          "gross_profit": -0.48,
+          "orders": 274,
+          "margin1_pct": 0.001,
+          "net_sales": 34705.6,
+          "gross_profit": 0.01,
           "margin1_source": "Shopify ShopifyQL (exact \u2014 single-channel store)"
         },
         {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 924.44,
-          "discounts": 502.48,
-          "sales_reversals": 0.0,
-          "orders": 6,
-          "margin1_pct": 0.328,
+          "gross_sales": 2458.78,
+          "discounts": 1422.09,
+          "orders": 25,
+          "margin1_pct": null,
           "gross_profit": null,
           "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
         },
         {
           "id": "concierge",
           "name": "Concierge",
-          "gross_sales": 145.48,
+          "gross_sales": 2811.04,
           "discounts": 20.2,
-          "sales_reversals": 0.0,
-          "orders": 3,
-          "margin1_pct": 0.35,
+          "orders": 6,
+          "margin1_pct": null,
           "gross_profit": null,
           "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
         },
         {
           "id": "trailer",
           "name": "HITS / Trailer",
-          "gross_sales": 4143.44,
+          "gross_sales": 4207.84,
           "discounts": 218.51,
-          "sales_reversals": 0.0,
           "orders": 35,
-          "margin1_pct": 0.333,
+          "margin1_pct": null,
           "gross_profit": null,
           "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
         },
         {
           "id": "wellington",
           "name": "Wellington",
-          "gross_sales": 13045.98,
-          "discounts": 1724.82,
-          "sales_reversals": 92.0,
-          "orders": 51,
-          "margin1_pct": 0.306,
+          "gross_sales": 0.0,
+          "discounts": 0.0,
+          "orders": 0,
+          "margin1_pct": null,
           "gross_profit": null,
           "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
         },
         {
           "id": "others",
           "name": "Others",
-          "gross_sales": 2527.37,
-          "discounts": 101.84,
-          "sales_reversals": 0.0,
-          "orders": 16,
-          "margin1_pct": 0.286,
-          "note": "Includes: Legacy: 4, Shopify Collective: 12",
+          "gross_sales": 6541.73,
+          "discounts": 830.58,
+          "orders": 28,
+          "margin1_pct": null,
+          "note": "Includes: Legacy: 16, Shopify Collective: 12",
           "gross_profit": null,
           "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
         }
