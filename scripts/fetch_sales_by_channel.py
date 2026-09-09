@@ -172,7 +172,7 @@ def fetch_orders_for_month(domain, token, year, month):
         "created_at_min": start.isoformat(),
         "created_at_max": end.isoformat(),
         "limit": 250,
-        "fields": "id,tags,total_price,total_line_items_price,total_discounts,refunds,customer,line_items,location_id,financial_status",
+        "fields": "id,tags,total_price,total_line_items_price,total_discounts,refunds,customer,line_items,location_id,financial_status,fulfillments",
     }
     path = "orders.json"
     while True:
@@ -237,6 +237,21 @@ def classify_order(order, brand, locations, product_tags_by_id):
 
     loc_id = str(order.get("location_id") or "")
     loc_name = locations.get(loc_id, "")
+    
+    # NEW WELLINGTON RULE (Top priority for Corro):
+    # Orders are Wellington if placed in the Wellington POS OR if any line item was fulfilled from Wellington.
+    wellington_loc_name = "new wellington warehouse"
+    has_wellington_fulfillment = False
+    for f in order.get("fulfillments", []):
+        fid = str(f.get("location_id") or "")
+        fname = locations.get(fid, "")
+        if fname == wellington_loc_name:
+            has_wellington_fulfillment = True
+            break
+            
+    if loc_name == wellington_loc_name or has_wellington_fulfillment:
+        return "wellington", None
+
     order_tags = [t.strip().lower() for t in (order.get("tags") or "").split(",") if t.strip()]
     order_tags_joined = " ".join(order_tags)
 
@@ -271,8 +286,8 @@ def classify_order(order, brand, locations, product_tags_by_id):
     if (has_hits_tag or at_hits_location) and not clearly_non_hits:
         return "trailer", None
 
-    # 6: Wellington and any other confirmed plain-location channel.
-    if loc_name and loc_name in LOCATION_TO_CHANNEL.get(brand, {}):
+    # 6: Removed, now handled at the top (priority 1).
+    if loc_name and loc_name in LOCATION_TO_CHANNEL.get(brand, {}) and loc_name != "new wellington warehouse":
         return LOCATION_TO_CHANNEL[brand][loc_name], None
 
     # Still-TODO channels (Brothery) via customer/product tag, checked
@@ -503,7 +518,7 @@ def main():
                 "trailer": HITS_LOCATION_NAME_DISPLAY,
             }
 
-            for cid, loc_name in [("wellington", "Corro Wellington"), ("trailer", "Corro Trailer 1")]:
+            for cid, loc_name in [("trailer", "Corro Trailer 1")]:
                 loc_totals = fetch_shopify_sales_totals(domain, token, year, month, where=f"location_name = '{loc_name}'")
                 if loc_totals:
                     corro_location_totals[cid] = loc_totals
