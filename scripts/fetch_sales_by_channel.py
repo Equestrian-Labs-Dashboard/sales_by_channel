@@ -571,16 +571,22 @@ def process_month(year, month, data):
             row["margin1_source"] = "Shopify ShopifyQL (exact — Gross Profit by Location)"
         else:
             # Concierge / E-Commerce / Others: no native per-tag Shopify
-            # report. Left blank on purpose — see fetch_qbo_margins().
             row["margin1_pct"] = None
             row["gross_profit"] = None
-            row["margin1_source"] = "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+            row["margin1_source"] = "Pending QuickBooks Online by-class"
 
     margins = fetch_qbo_margins("equestrian_labs", year, month)
     for row in rows:
         m = margins.get(row["id"])
         if m:
             row.update(m)
+        
+        # fallback calculations
+        if row.get("net_sales") is None:
+            row["net_sales"] = round(row.get("gross_sales", 0.0) - row.get("discounts", 0.0) - row.get("sales_reversals", 0.0), 2)
+            
+        if row.get("gross_profit") is None and row.get("margin1_pct") is not None:
+            row["gross_profit"] = round(row["net_sales"] * row["margin1_pct"], 2)
 
     data["channels"][period_id]["equestrian_labs"] = rows
 

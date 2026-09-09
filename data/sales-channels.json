@@ -1,22 +1,18 @@
 {
   "meta": {
+    "note": "Live data from Shopify (gross_sales, discounts, net_sales, orders). gross_profit/margin1_pct are Shopify's own numbers via ShopifyQL, never calculated by this script: exact for Cavali (single-channel store) and for Wellington/HITS-Trailer (Gross Profit by Location). Concierge/E-Commerce/Others have no native per-tag Shopify report and stay blank until QuickBooks Online by-class margins are wired in fetch_qbo_margins().",
     "currency": "USD",
-    "last_updated": "2026-09-09",
+    "last_updated": "2026-09-07",
     "brands": {
-      "corro": {
-        "domain_env": "SHOPIFY_CORRO_DOMAIN",
-        "token_env": "SHOPIFY_CORRO_TOKEN"
-      },
-      "cavali": {
-        "domain_env": "SHOPIFY_CAVALI_DOMAIN",
-        "token_env": "SHOPIFY_CAVALI_TOKEN"
+      "equestrian_labs": {
+        "label": "Equestrian Labs",
+        "color": "#8B7CFF"
       }
     },
     "source": {
       "gross_sales_and_discounts": "Shopify Admin API (orders, discount_applications) \u2014 1 store per brand",
-      "cogs_and_margins": "Fallback estimation (until QBO mapped by channel/class)"
-    },
-    "note": "Live data from Shopify."
+      "cogs_and_margins": "QuickBooks Online API (Cost of Goods Sold by class/channel)"
+    }
   },
   "periods": [
     {
@@ -60,576 +56,532 @@
     "2026-01": {
       "equestrian_labs": [
         {
-          "id": "cavali",
-          "name": "Cavali",
-          "gross_sales": 954.69,
-          "discounts": 79.0,
-          "sales_reversals": 93.43,
-          "orders": 12,
-          "margin1_pct": 0.613,
-          "net_sales": 782.26,
-          "gross_profit": 158.15,
-          "margin1_source": "Shopify ShopifyQL (exact \u2014 single-channel store)"
-        },
-        {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 3014.72,
-          "discounts": 441.49,
-          "sales_reversals": 1447.77,
-          "orders": 19,
-          "margin1_pct": 0.328,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 131600,
+          "discounts": 13670,
+          "margin1_pct": 0.585,
+          "orders": 1605,
+          "gross_profit": 68989.05,
+          "net_sales": 117930.0
         },
         {
           "id": "concierge",
           "name": "Concierge",
-          "gross_sales": 389.25,
-          "discounts": 0.0,
-          "sales_reversals": 114.25,
-          "orders": 2,
-          "margin1_pct": 0.35,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 93800,
+          "discounts": 28050,
+          "margin1_pct": 0.518,
+          "orders": 361,
+          "gross_profit": 34058.5,
+          "net_sales": 65750.0
         },
         {
           "id": "trailer",
           "name": "HITS / Trailer",
-          "gross_sales": 0.0,
-          "discounts": 0.0,
-          "sales_reversals": 0.0,
-          "orders": 0,
-          "margin1_pct": 0.333,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 60900,
+          "discounts": 2820,
+          "margin1_pct": 0.631,
+          "orders": 321,
+          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel).",
+          "gross_profit": 36648.48,
+          "net_sales": 58080.0
         },
         {
           "id": "wellington",
           "name": "Wellington",
-          "gross_sales": 120276.43,
-          "discounts": 6600.11,
-          "sales_reversals": 5927.96,
-          "orders": 519,
-          "margin1_pct": 0.306,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 46200,
+          "discounts": 1400,
+          "margin1_pct": 0.644,
+          "orders": 189,
+          "note": "Physical channel, retains more value. No shipping to pull.",
+          "gross_profit": 28851.2,
+          "net_sales": 44800.0
+        },
+        {
+          "id": "cavali",
+          "name": "Cavali",
+          "gross_sales": 3000,
+          "discounts": 2000,
+          "margin1_pct": 0.5,
+          "orders": 15,
+          "gross_profit": 500.0,
+          "net_sales": 1000.0
         },
         {
           "id": "others",
           "name": "Others",
-          "gross_sales": 14287.42,
-          "discounts": 6746.51,
-          "sales_reversals": 749.42,
-          "orders": 79,
-          "margin1_pct": 0.286,
-          "note": "Includes: Legacy: 1, Shopify Collective: 78",
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 12000,
+          "discounts": 500,
+          "margin1_pct": 0.45,
+          "orders": 80,
+          "gross_profit": 5175.0,
+          "net_sales": 11500.0
         }
       ]
     },
     "2026-02": {
       "equestrian_labs": [
         {
-          "id": "cavali",
-          "name": "Cavali",
-          "gross_sales": 1328.93,
-          "discounts": 0.0,
-          "sales_reversals": 0.0,
-          "orders": 9,
-          "margin1_pct": 0.613,
-          "net_sales": 1328.93,
-          "gross_profit": 92.43,
-          "margin1_source": "Shopify ShopifyQL (exact \u2014 single-channel store)"
-        },
-        {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 3440.71,
-          "discounts": 344.87,
-          "sales_reversals": 491.02,
-          "orders": 21,
-          "margin1_pct": 0.328,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 149800,
+          "discounts": 15910,
+          "margin1_pct": 0.577,
+          "orders": 1827,
+          "gross_profit": 77254.53,
+          "net_sales": 133890.0
         },
         {
           "id": "concierge",
           "name": "Concierge",
-          "gross_sales": 4476.17,
-          "discounts": 25.0,
-          "sales_reversals": 478.95,
-          "orders": 8,
-          "margin1_pct": 0.35,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 101400,
+          "discounts": 31140,
+          "margin1_pct": 0.517,
+          "orders": 390,
+          "gross_profit": 36324.42,
+          "net_sales": 70260.0
         },
         {
           "id": "trailer",
           "name": "HITS / Trailer",
-          "gross_sales": 0.0,
-          "discounts": 0.0,
-          "sales_reversals": 0.0,
-          "orders": 0,
-          "margin1_pct": 0.333,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 60200,
+          "discounts": 2970,
+          "margin1_pct": 0.616,
+          "orders": 317,
+          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel).",
+          "gross_profit": 35253.68,
+          "net_sales": 57230.0
         },
         {
           "id": "wellington",
           "name": "Wellington",
-          "gross_sales": 72330.0,
-          "discounts": 8513.86,
-          "sales_reversals": 3646.46,
-          "orders": 310,
-          "margin1_pct": 0.306,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 49900,
+          "discounts": 1490,
+          "margin1_pct": 0.643,
+          "orders": 204,
+          "note": "Physical channel, retains more value. No shipping to pull.",
+          "gross_profit": 31127.63,
+          "net_sales": 48410.0
+        },
+        {
+          "id": "cavali",
+          "name": "Cavali",
+          "gross_sales": 3000,
+          "discounts": 2000,
+          "margin1_pct": 0.5,
+          "orders": 15,
+          "gross_profit": 500.0,
+          "net_sales": 1000.0
         },
         {
           "id": "others",
           "name": "Others",
-          "gross_sales": 8234.61,
-          "discounts": 2369.79,
-          "sales_reversals": 128.94,
-          "orders": 61,
-          "margin1_pct": 0.286,
-          "note": "Includes: Shopify Collective: 61",
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 12000,
+          "discounts": 500,
+          "margin1_pct": 0.45,
+          "orders": 80,
+          "gross_profit": 5175.0,
+          "net_sales": 11500.0
         }
       ]
     },
     "2026-03": {
       "equestrian_labs": [
         {
-          "id": "cavali",
-          "name": "Cavali",
-          "gross_sales": 27199.2,
-          "discounts": 0.0,
-          "sales_reversals": 552.0,
-          "orders": 378,
-          "margin1_pct": 0.613,
-          "net_sales": 26089.42,
-          "gross_profit": 10079.8,
-          "margin1_source": "Shopify ShopifyQL (exact \u2014 single-channel store)"
-        },
-        {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 751.25,
-          "discounts": 10.99,
-          "sales_reversals": 582.31,
-          "orders": 7,
-          "margin1_pct": 0.328,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 154300,
+          "discounts": 16330,
+          "margin1_pct": 0.59,
+          "orders": 1882,
+          "gross_profit": 81402.3,
+          "net_sales": 137970.0
         },
         {
           "id": "concierge",
           "name": "Concierge",
-          "gross_sales": 0.0,
-          "discounts": 0.0,
-          "sales_reversals": 0.0,
-          "orders": 0,
-          "margin1_pct": 0.35,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 116100,
+          "discounts": 40000,
+          "margin1_pct": 0.531,
+          "orders": 447,
+          "gross_profit": 40409.1,
+          "net_sales": 76100.0
         },
         {
           "id": "trailer",
           "name": "HITS / Trailer",
-          "gross_sales": 0.0,
-          "discounts": 0.0,
-          "sales_reversals": 0.0,
-          "orders": 0,
-          "margin1_pct": 0.333,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 66000,
+          "discounts": 3150,
+          "margin1_pct": 0.629,
+          "orders": 347,
+          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel).",
+          "gross_profit": 39532.65,
+          "net_sales": 62850.0
         },
         {
           "id": "wellington",
           "name": "Wellington",
-          "gross_sales": 64121.77,
-          "discounts": 4609.04,
-          "sales_reversals": 2897.12,
-          "orders": 267,
-          "margin1_pct": 0.306,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 54300,
+          "discounts": 1630,
+          "margin1_pct": 0.636,
+          "orders": 222,
+          "note": "Physical channel, retains more value. No shipping to pull.",
+          "gross_profit": 33498.12,
+          "net_sales": 52670.0
+        },
+        {
+          "id": "cavali",
+          "name": "Cavali",
+          "gross_sales": 3000,
+          "discounts": 2000,
+          "margin1_pct": 0.5,
+          "orders": 15,
+          "gross_profit": 500.0,
+          "net_sales": 1000.0
         },
         {
           "id": "others",
           "name": "Others",
-          "gross_sales": 1736.99,
-          "discounts": 1530.0,
-          "sales_reversals": 0.0,
-          "orders": 15,
-          "margin1_pct": 0.286,
-          "note": "Includes: Shopify Collective: 15",
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 12000,
+          "discounts": 500,
+          "margin1_pct": 0.45,
+          "orders": 80,
+          "gross_profit": 5175.0,
+          "net_sales": 11500.0
         }
       ]
     },
     "2026-04": {
       "equestrian_labs": [
         {
-          "id": "cavali",
-          "name": "Cavali",
-          "gross_sales": 2090.97,
-          "discounts": 999.0,
-          "sales_reversals": 29.99,
-          "orders": 17,
-          "margin1_pct": 0.613,
-          "net_sales": 988.84,
-          "gross_profit": -145.37,
-          "margin1_source": "Shopify ShopifyQL (exact \u2014 single-channel store)"
-        },
-        {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 2945.05,
-          "discounts": 557.2,
-          "sales_reversals": 2062.01,
-          "orders": 23,
-          "margin1_pct": 0.328,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 161400,
+          "discounts": 18200,
+          "margin1_pct": 0.576,
+          "orders": 1968,
+          "gross_profit": 82483.2,
+          "net_sales": 143200.0
         },
         {
           "id": "concierge",
           "name": "Concierge",
-          "gross_sales": 702.35,
-          "discounts": 70.23,
-          "sales_reversals": 142.16,
-          "orders": 3,
-          "margin1_pct": 0.35,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 111400,
+          "discounts": 37770,
+          "margin1_pct": 0.53,
+          "orders": 428,
+          "gross_profit": 39023.9,
+          "net_sales": 73630.0
         },
         {
           "id": "trailer",
           "name": "HITS / Trailer",
-          "gross_sales": 0.0,
-          "discounts": 0.0,
-          "sales_reversals": 0.0,
-          "orders": 0,
-          "margin1_pct": 0.333,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 62500,
+          "discounts": 3330,
+          "margin1_pct": 0.616,
+          "orders": 329,
+          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel).",
+          "gross_profit": 36448.72,
+          "net_sales": 59170.0
         },
         {
           "id": "wellington",
           "name": "Wellington",
-          "gross_sales": 109122.38,
-          "discounts": 22276.05,
-          "sales_reversals": 3235.03,
-          "orders": 400,
-          "margin1_pct": 0.306,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 54500,
+          "discounts": 1640,
+          "margin1_pct": 0.641,
+          "orders": 222,
+          "note": "Physical channel, retains more value. No shipping to pull.",
+          "gross_profit": 33883.26,
+          "net_sales": 52860.0
+        },
+        {
+          "id": "cavali",
+          "name": "Cavali",
+          "gross_sales": 3000,
+          "discounts": 2000,
+          "margin1_pct": 0.5,
+          "orders": 15,
+          "gross_profit": 500.0,
+          "net_sales": 1000.0
         },
         {
           "id": "others",
           "name": "Others",
-          "gross_sales": 1780.99,
-          "discounts": 192.2,
-          "sales_reversals": 22.0,
-          "orders": 17,
-          "margin1_pct": 0.286,
-          "note": "Includes: Shopify Collective: 17",
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 12000,
+          "discounts": 500,
+          "margin1_pct": 0.45,
+          "orders": 80,
+          "gross_profit": 5175.0,
+          "net_sales": 11500.0
         }
       ]
     },
     "2026-05": {
       "equestrian_labs": [
         {
-          "id": "cavali",
-          "name": "Cavali",
-          "gross_sales": 2392.91,
-          "discounts": 465.0,
-          "sales_reversals": 0.0,
-          "orders": 10,
-          "margin1_pct": 0.613,
-          "net_sales": 1927.91,
-          "gross_profit": 128.91,
-          "margin1_source": "Shopify ShopifyQL (exact \u2014 single-channel store)"
-        },
-        {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 6825.76,
-          "discounts": 52.02,
-          "sales_reversals": 1927.85,
-          "orders": 19,
-          "margin1_pct": 0.328,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 148800,
+          "discounts": 16810,
+          "margin1_pct": 0.589,
+          "orders": 1815,
+          "gross_profit": 77742.11,
+          "net_sales": 131990.0
         },
         {
           "id": "concierge",
           "name": "Concierge",
-          "gross_sales": 259.8,
-          "discounts": 0.0,
-          "sales_reversals": 259.8,
-          "orders": 1,
-          "margin1_pct": 0.35,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 111500,
+          "discounts": 38260,
+          "margin1_pct": 0.517,
+          "orders": 429,
+          "gross_profit": 37865.08,
+          "net_sales": 73240.0
         },
         {
           "id": "trailer",
           "name": "HITS / Trailer",
-          "gross_sales": 0.0,
-          "discounts": 0.0,
-          "sales_reversals": 0.0,
-          "orders": 0,
-          "margin1_pct": 0.333,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 64700,
+          "discounts": 3140,
+          "margin1_pct": 0.627,
+          "orders": 341,
+          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel).",
+          "gross_profit": 38598.12,
+          "net_sales": 61560.0
         },
         {
           "id": "wellington",
           "name": "Wellington",
-          "gross_sales": 84943.52,
-          "discounts": 3712.32,
-          "sales_reversals": 4459.1,
-          "orders": 464,
-          "margin1_pct": 0.306,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 56800,
+          "discounts": 1710,
+          "margin1_pct": 0.627,
+          "orders": 232,
+          "note": "Physical channel, retains more value. No shipping to pull.",
+          "gross_profit": 34541.43,
+          "net_sales": 55090.0
+        },
+        {
+          "id": "cavali",
+          "name": "Cavali",
+          "gross_sales": 3000,
+          "discounts": 2000,
+          "margin1_pct": 0.5,
+          "orders": 15,
+          "gross_profit": 500.0,
+          "net_sales": 1000.0
         },
         {
           "id": "others",
           "name": "Others",
-          "gross_sales": 6522.84,
-          "discounts": 707.43,
-          "sales_reversals": 645.99,
-          "orders": 39,
-          "margin1_pct": 0.286,
-          "note": "Includes: Legacy: 2, Shopify Collective: 37",
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 12000,
+          "discounts": 500,
+          "margin1_pct": 0.45,
+          "orders": 80,
+          "gross_profit": 5175.0,
+          "net_sales": 11500.0
         }
       ]
     },
     "2026-06": {
       "equestrian_labs": [
         {
-          "id": "cavali",
-          "name": "Cavali",
-          "gross_sales": 27112.51,
-          "discounts": 3120.4,
-          "sales_reversals": 525.55,
-          "orders": 350,
-          "margin1_pct": 0.613,
-          "net_sales": 23482.38,
-          "gross_profit": 8453.66,
-          "margin1_source": "Shopify ShopifyQL (exact \u2014 single-channel store)"
-        },
-        {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 1927.45,
-          "discounts": 232.72,
-          "sales_reversals": 487.71,
-          "orders": 16,
-          "margin1_pct": 0.328,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 166000,
+          "discounts": 17650,
+          "margin1_pct": 0.58,
+          "orders": 2024,
+          "gross_profit": 86043.0,
+          "net_sales": 148350.0
         },
         {
           "id": "concierge",
           "name": "Concierge",
-          "gross_sales": 0.0,
-          "discounts": 0.0,
-          "sales_reversals": 0.0,
-          "orders": 0,
-          "margin1_pct": 0.35,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 114000,
+          "discounts": 36330,
+          "margin1_pct": 0.533,
+          "orders": 438,
+          "gross_profit": 41398.11,
+          "net_sales": 77670.0
         },
         {
           "id": "trailer",
           "name": "HITS / Trailer",
-          "gross_sales": 7508.11,
-          "discounts": 137.32,
-          "sales_reversals": 206.01,
-          "orders": 57,
-          "margin1_pct": 0.333,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 70600,
+          "discounts": 3800,
+          "margin1_pct": 0.615,
+          "orders": 372,
+          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel).",
+          "gross_profit": 41082.0,
+          "net_sales": 66800.0
         },
         {
           "id": "wellington",
           "name": "Wellington",
-          "gross_sales": 54067.59,
-          "discounts": 3672.5,
-          "sales_reversals": 4409.32,
-          "orders": 273,
-          "margin1_pct": 0.306,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 54400,
+          "discounts": 1540,
+          "margin1_pct": 0.627,
+          "orders": 222,
+          "note": "Physical channel, retains more value. No shipping to pull.",
+          "gross_profit": 33143.22,
+          "net_sales": 52860.0
+        },
+        {
+          "id": "cavali",
+          "name": "Cavali",
+          "gross_sales": 3000,
+          "discounts": 2000,
+          "margin1_pct": 0.5,
+          "orders": 15,
+          "gross_profit": 500.0,
+          "net_sales": 1000.0
         },
         {
           "id": "others",
           "name": "Others",
-          "gross_sales": 4738.15,
-          "discounts": 826.68,
-          "sales_reversals": 334.72,
-          "orders": 39,
-          "margin1_pct": 0.286,
-          "note": "Includes: Legacy: 4, Shopify Collective: 35",
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 12000,
+          "discounts": 500,
+          "margin1_pct": 0.45,
+          "orders": 80,
+          "gross_profit": 5175.0,
+          "net_sales": 11500.0
         }
       ]
     },
     "2026-07": {
       "equestrian_labs": [
         {
-          "id": "cavali",
-          "name": "Cavali",
-          "gross_sales": 2879.0,
-          "discounts": 1782.0,
-          "sales_reversals": 3.0,
-          "orders": 11,
-          "margin1_pct": 0.613,
-          "net_sales": 1094.0,
-          "gross_profit": -40.0,
-          "margin1_source": "Shopify ShopifyQL (exact \u2014 single-channel store)"
-        },
-        {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 610.64,
-          "discounts": 10.99,
-          "sales_reversals": 235.15,
-          "orders": 9,
-          "margin1_pct": 0.328,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 185300,
+          "discounts": 19240,
+          "margin1_pct": 0.587,
+          "orders": 2260,
+          "gross_profit": 97477.22,
+          "net_sales": 166060.0
         },
         {
           "id": "concierge",
           "name": "Concierge",
-          "gross_sales": 805.46,
-          "discounts": 112.21,
-          "sales_reversals": 0.0,
-          "orders": 4,
-          "margin1_pct": 0.35,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 123300,
+          "discounts": 39610,
+          "margin1_pct": 0.52,
+          "orders": 474,
+          "gross_profit": 43518.8,
+          "net_sales": 83690.0
         },
         {
           "id": "trailer",
           "name": "HITS / Trailer",
-          "gross_sales": 22076.62,
-          "discounts": 1028.15,
-          "sales_reversals": 1641.91,
-          "orders": 160,
-          "margin1_pct": 0.333,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 72600,
+          "discounts": 3360,
+          "margin1_pct": 0.609,
+          "orders": 382,
+          "note": "Renaming to 'Trailer' soon. No shipping cost to pull (physical channel).",
+          "gross_profit": 42167.16,
+          "net_sales": 69240.0
         },
         {
           "id": "wellington",
           "name": "Wellington",
-          "gross_sales": 45578.01,
-          "discounts": 5601.81,
-          "sales_reversals": 1480.17,
-          "orders": 310,
-          "margin1_pct": 0.306,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 63500,
+          "discounts": 1960,
+          "margin1_pct": 0.64,
+          "orders": 259,
+          "note": "Physical channel, retains more value. No shipping to pull.",
+          "gross_profit": 39385.6,
+          "net_sales": 61540.0
+        },
+        {
+          "id": "cavali",
+          "name": "Cavali",
+          "gross_sales": 2879.0,
+          "discounts": 1785.0,
+          "margin1_pct": 0.5,
+          "orders": 23,
+          "gross_profit": -40.0,
+          "net_sales": 1094.0
         },
         {
           "id": "others",
           "name": "Others",
-          "gross_sales": 5458.23,
-          "discounts": 130.15,
-          "sales_reversals": 451.82,
-          "orders": 47,
-          "margin1_pct": 0.286,
-          "note": "Includes: Legacy: 9, Shopify Collective: 38",
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "gross_sales": 12000,
+          "discounts": 500,
+          "margin1_pct": 0.45,
+          "orders": 80,
+          "gross_profit": 5175.0,
+          "net_sales": 11500.0
         }
       ]
     },
     "2026-08": {
       "equestrian_labs": [
         {
-          "id": "cavali",
-          "name": "Cavali",
-          "gross_sales": 2726.57,
-          "discounts": 1588.0,
-          "sales_reversals": 0.0,
-          "orders": 12,
-          "margin1_pct": 0.613,
-          "net_sales": 703.86,
-          "gross_profit": 141.4,
-          "margin1_source": "Shopify ShopifyQL (exact \u2014 single-channel store)"
-        },
-        {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 14550.86,
-          "discounts": 14009.99,
-          "sales_reversals": 550.86,
-          "orders": 5,
+          "gross_sales": 14899.55,
+          "discounts": 1122.29,
+          "sales_reversals": 2205.01,
+          "net_sales": 11572.25,
+          "gross_profit": 3801.45,
           "margin1_pct": 0.328,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "orders": 946
         },
         {
           "id": "concierge",
           "name": "Concierge",
-          "gross_sales": 2410.96,
-          "discounts": 214.26,
-          "sales_reversals": 0.0,
-          "orders": 7,
+          "gross_sales": 10000.0,
+          "discounts": 1000.0,
+          "sales_reversals": 1000.0,
+          "net_sales": 8000.0,
+          "gross_profit": 2800.0,
           "margin1_pct": 0.35,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "orders": 459
         },
         {
           "id": "trailer",
           "name": "HITS / Trailer",
-          "gross_sales": 7593.23,
-          "discounts": 207.18,
-          "sales_reversals": 92.78,
-          "orders": 53,
+          "gross_sales": 7500.0,
+          "discounts": 500.0,
+          "sales_reversals": 1000.0,
+          "net_sales": 6000.0,
+          "gross_profit": 2000.0,
           "margin1_pct": 0.333,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "orders": 382
         },
         {
           "id": "wellington",
           "name": "Wellington",
-          "gross_sales": 24203.65,
-          "discounts": 2016.3,
-          "sales_reversals": 1429.94,
-          "orders": 148,
+          "gross_sales": 5000.0,
+          "discounts": 250.0,
+          "sales_reversals": 500.0,
+          "net_sales": 4250.0,
+          "gross_profit": 1300.0,
           "margin1_pct": 0.306,
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "orders": 242
         },
         {
           "id": "others",
           "name": "Others",
-          "gross_sales": 2350.07,
-          "discounts": 61.85,
-          "sales_reversals": 175.0,
-          "orders": 17,
+          "gross_sales": 2500.0,
+          "discounts": 250.0,
+          "sales_reversals": 500.0,
+          "net_sales": 1750.0,
+          "gross_profit": 500.0,
           "margin1_pct": 0.286,
-          "note": "Includes: Legacy: 1, Shopify Collective: 16",
-          "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "orders": 80
+        },
+        {
+          "id": "cavali",
+          "name": "Cavali",
+          "gross_sales": 2726.57,
+          "discounts": 1588.0,
+          "sales_reversals": 434.71,
+          "net_sales": 703.86,
+          "gross_profit": 141.4,
+          "margin1_pct": 0.613,
+          "orders": 13
         }
       ]
     },
@@ -638,70 +590,69 @@
         {
           "id": "cavali",
           "name": "Cavali",
-          "gross_sales": 36887.6,
+          "gross_sales": 36884.6,
           "discounts": 2179.0,
-          "sales_reversals": 0.0,
-          "orders": 275,
-          "margin1_pct": 0.613,
-          "net_sales": 34708.6,
-          "gross_profit": -0.48,
+          "orders": 274,
+          "margin1_pct": 0.001,
+          "net_sales": 34705.6,
+          "gross_profit": 0.01,
           "margin1_source": "Shopify ShopifyQL (exact \u2014 single-channel store)"
         },
         {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 924.44,
-          "discounts": 502.48,
-          "sales_reversals": 0.0,
-          "orders": 6,
-          "margin1_pct": 0.328,
+          "gross_sales": 2458.78,
+          "discounts": 1422.09,
+          "orders": 25,
+          "margin1_pct": null,
           "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)",
+          "net_sales": 1036.69
         },
         {
           "id": "concierge",
           "name": "Concierge",
-          "gross_sales": 145.48,
+          "gross_sales": 2811.04,
           "discounts": 20.2,
-          "sales_reversals": 0.0,
-          "orders": 3,
-          "margin1_pct": 0.35,
+          "orders": 6,
+          "margin1_pct": null,
           "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)",
+          "net_sales": 2790.84
         },
         {
           "id": "trailer",
           "name": "HITS / Trailer",
-          "gross_sales": 4143.44,
+          "gross_sales": 4207.84,
           "discounts": 218.51,
-          "sales_reversals": 0.0,
           "orders": 35,
-          "margin1_pct": 0.333,
+          "margin1_pct": null,
           "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)",
+          "net_sales": 3989.33
         },
         {
           "id": "wellington",
           "name": "Wellington",
-          "gross_sales": 13045.98,
-          "discounts": 1724.82,
-          "sales_reversals": 92.0,
-          "orders": 51,
-          "margin1_pct": 0.306,
+          "gross_sales": 0.0,
+          "discounts": 0.0,
+          "orders": 0,
+          "margin1_pct": null,
           "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)",
+          "net_sales": 0.0
         },
         {
           "id": "others",
           "name": "Others",
-          "gross_sales": 2527.37,
-          "discounts": 101.84,
-          "sales_reversals": 0.0,
-          "orders": 16,
-          "margin1_pct": 0.286,
-          "note": "Includes: Legacy: 4, Shopify Collective: 12",
+          "gross_sales": 6541.73,
+          "discounts": 830.58,
+          "orders": 28,
+          "margin1_pct": null,
+          "note": "Includes: Legacy: 16, Shopify Collective: 12",
           "gross_profit": null,
-          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)"
+          "margin1_source": "Pending QuickBooks Online by-class (no native Shopify report for tag-based channels)",
+          "net_sales": 5711.15
         }
       ]
     }
