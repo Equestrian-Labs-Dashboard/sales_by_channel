@@ -469,15 +469,10 @@ def fetch_qbo_margins(brand, year, month):
 # Main
 # ---------------------------------------------------------------------------
 
-def main():
-    now = datetime.now(timezone.utc)
-    year, month = now.year, now.month  # current month; re-run for backfill
-
-    data = json.loads(DATA_PATH.read_text()) if DATA_PATH.exists() else {
-        "meta": {}, "periods": [], "channels": {},
-    }
+def process_month(year, month, data):
     period_id = f"{year:04d}-{month:02d}"
-    period_label = now.strftime("%b %Y")
+    dt = datetime(year, month, 1)
+    period_label = dt.strftime("%b %Y")
 
     if period_id not in [p["id"] for p in data.get("periods", [])]:
         data.setdefault("periods", []).append({"id": period_id, "label": period_label})
@@ -486,13 +481,7 @@ def main():
     data["channels"].setdefault(period_id, {})
 
     combined_totals = defaultdict(lambda: {"gross_sales": 0.0, "discounts": 0.0, "sales_reversals": 0.0, "orders": 0, "notes": defaultdict(int)})
-    # Store-level gross_profit/net_sales/margin1_pct per brand, straight from
-    # Shopify ShopifyQL. Cavali = one channel = one store, so this is exact
-    # for it. Corro splits into 5 channels below, so its store total is
-    # applied uniformly (estimate) until QBO-by-class is wired.
     sales_totals_by_brand = {}
-    # Real per-location gross profit for Corro's location-based channels
-    # (Wellington, HITS/Trailer). Keyed by channel id -> Shopify totals dict.
     corro_location_totals = {}
 
     for brand, cfg in BRANDS.items():
@@ -502,7 +491,7 @@ def main():
             print(f"[skip] missing {cfg['domain_env']}/{cfg['token_env']} for {brand}", file=sys.stderr)
             continue
 
-        print(f"[fetch] {brand} — {domain} — {period_id}")
+        print(f"[fetch] {brand} — {domain} — {period_id}", file=sys.stderr)
         brand_totals = build_brand_month_rows(domain, token, brand, year, month)
         sales_totals_by_brand[brand] = fetch_shopify_sales_totals(domain, token, year, month)
 
@@ -595,19 +584,31 @@ def main():
 
     data["channels"][period_id]["equestrian_labs"] = rows
 
-    data["meta"]["last_updated"] = now.strftime("%Y-%m-%d")
-    data["meta"]["note"] = (
-        "Live data from Shopify (gross_sales, discounts, net_sales, orders). "
-        "gross_profit/margin1_pct are Shopify's own numbers via ShopifyQL, never "
-        "calculated by this script: exact for Cavali (single-channel store) and "
-        "for Wellington/HITS-Trailer (Gross Profit by Location). Concierge/"
-        "E-Commerce/Others have no native per-tag Shopify report and stay blank "
-        "until QuickBooks Online by-class margins are wired in fetch_qbo_margins()."
-    )
+    data["meta"] = {
+        "currency": "USD",
+        "last_updated": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "brands": BRANDS,
+        "source": {
+            "gross_sales_and_discounts": "Shopify Admin API (orders, discount_applications) — 1 store per brand",
+            "cogs_and_margins": "Fallback estimation (until QBO mapped by channel/class)",
+        },
+        "note": "Live data from Shopify.",
+    }
 
-    DATA_PATH.write_text(json.dumps(data, indent=2))
-    print(f"[done] wrote {DATA_PATH}")
-
+def main():
+    now = datetime.now(timezone.utc)
+    data = json.loads(DATA_PATH.read_text()) if DATA_PATH.exists() else {
+        "meta": {}, "periods": [], "channels": {},
+    }
+    
+    # Process from Jan 2026 to current month
+    start_month = 1
+    end_month = now.month
+    
+    for month in range(start_month, end_month + 1):
+        process_month(2026, month, data)
+        
+    DATA_PATH.write_text(json.dumps(data, indent=2) + "\n")
 
 if __name__ == "__main__":
     main()
