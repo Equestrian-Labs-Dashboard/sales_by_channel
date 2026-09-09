@@ -692,12 +692,12 @@
           "name": "E-Commerce",
           "gross_sales": 1027.42,
           "discounts": 502.48,
-          "sales_reversals": 0.0,
+          "sales_reversals": 17.99,
           "orders": 8,
           "margin1_pct": 0.328,
-          "gross_profit": 172.18,
+          "gross_profit": 166.28,
           "margin1_source": "Pending QuickBooks Online by-class",
-          "net_sales": 524.94
+          "net_sales": 506.95
         },
         {
           "id": "concierge",
