@@ -70,15 +70,16 @@ SHOPIFYQL_API_VERSION = "2025-10"
 # ---------------------------------------------------------------------------
 
 CHANNEL_ORDER = {
-    "equestrian_labs": ["cavali", "online_store", "point_of_sale", "draft_orders", "others"]
+    "equestrian_labs": ["ecommerce", "concierge", "trailer", "wellington", "others", "cavali"]
 }
 
 CHANNEL_NAMES = {
     "cavali": "Cavali",
-    "online_store": "Online Store",
-    "point_of_sale": "Point of Sale",
-    "draft_orders": "Draft Orders",
-    "others": "Others"
+    "ecommerce": "E-Commerce",
+    "concierge": "Concierge",
+    "trailer": "HITS / Trailer",
+    "wellington": "Wellington",
+    "others": "Others",
 }
 
 # Physical channels identified by Shopify Location (name match, case-insensitive).
@@ -210,22 +211,67 @@ def fetch_product_tags(domain, token, product_ids):
 
 
 def classify_order(order, brand, locations, product_tags_by_id):
-    """Returns (channel_id, note) for a single Shopify order."""
+    """Returns (channel_id, note) for a single Shopify order.
+
+    Priority (highest first):
+      0. Brand is Cavali                    -> cavali
+      1. Wellington POS or fulfillment      -> wellington
+      2. Product tag "Drop ship"            -> others
+      3. Product tag "Shopify Collective"   -> others
+      4. Order tag contains "Concierge"     -> concierge
+      5. Product tag "Legacy"               -> others
+      6. HITS/Trailer (location OR tag)     -> trailer
+      7. Default                            -> ecommerce
+    """
     if brand == "cavali":
         return "cavali", None
 
-    source = str(order.get("source_name") or "").lower()
-    app_id = str(order.get("app_id") or "")
-    
-    # Common Shopify sources
-    if source == "web" or source == "browser":
-        return "online_store", None
-    elif source == "pos" or app_id == "129321":
-        return "point_of_sale", None
-    elif "draft" in source or app_id == "135476":
-        return "draft_orders", None
-    else:
-        return "others", f"Source: {source} (App: {app_id})"
+    loc_id = str(order.get("location_id") or "")
+    loc_name = locations.get(loc_id, "")
+
+    # 1: Wellington — POS location OR fulfillment from Wellington warehouse
+    wellington_loc_name = "new wellington warehouse"
+    if loc_name == wellington_loc_name:
+        return "wellington", None
+    for f in order.get("fulfillments", []):
+        fid = str(f.get("location_id") or "")
+        if locations.get(fid, "") == wellington_loc_name:
+            return "wellington", None
+
+    order_tags = [t.strip().lower() for t in (order.get("tags") or "").split(",") if t.strip()]
+    order_tags_joined = " ".join(order_tags)
+
+    all_product_tags = []
+    for item in order.get("line_items", []):
+        pid = str(item.get("product_id") or "")
+        all_product_tags.extend(product_tags_by_id.get(pid, []))
+    product_tags_joined = " ".join(all_product_tags)
+
+    # 2-3: Drop ship / Shopify Collective -> Others
+    for substring, note in PRODUCT_TAG_OTHERS_RULES[:2]:
+        if substring in product_tags_joined:
+            return "others", note
+
+    # 4: Concierge order tag
+    if CONCIERGE_ORDER_TAG_SUBSTRING in order_tags_joined:
+        return "concierge", None
+
+    # 5: Legacy -> Others
+    legacy_substring, legacy_note = PRODUCT_TAG_OTHERS_RULES[2]
+    if legacy_substring in product_tags_joined:
+        return "others", legacy_note
+
+    # 6: HITS/Trailer — location OR tag, minus Concierge/Employee exclusion
+    has_hits_tag = HITS_ORDER_TAG in order_tags
+    at_hits_location = HITS_LOCATION_NAME in (loc_name or "")
+    clearly_non_hits = (not has_hits_tag) and any(
+        excl in order_tags_joined for excl in HITS_EXCLUSION_TAGS
+    )
+    if (has_hits_tag or at_hits_location) and not clearly_non_hits:
+        return "trailer", None
+
+    # 7: Default -> E-Commerce
+    return "ecommerce", None
 
 
 def build_brand_month_rows(domain, token, brand, year, month):
@@ -248,9 +294,15 @@ def build_brand_month_rows(domain, token, brand, year, month):
             continue
         seen_order_ids.add(oid)
 
-        if order.get("test") or order.get("financial_status") in ("voided",):
+        # Only count orders Shopify Analytics counts:
+        # paid, partially_paid, partially_refunded, refunded
+        # Exclude: pending, voided, cancelled (these are not in Shopify Analytics gross sales)
+        COUNTABLE_STATUSES = {"paid", "partially_paid", "partially_refunded", "refunded"}
+        if order.get("test"):
             continue
-            
+        if order.get("financial_status") not in COUNTABLE_STATUSES:
+            continue
+
         channel, note = classify_order(order, brand, locations, product_tags_by_id)
         t = totals[channel]
         t["gross_sales"] += float(order.get("total_line_items_price") or order.get("total_price") or 0)
@@ -386,15 +438,18 @@ def fetch_shopify_sales_totals(domain, token, year, month, where=None):
 
 def fetch_qbo_margins(brand, year, month):
     """
-    Mock integration for QuickBooks Online COGS / margin by class.
-    Returns {channel_id: {"margin1_pct": float}}
+    Fallback margin estimates per channel. These are used for channels where
+    Shopify ShopifyQL doesn't have per-channel gross profit natively
+    (Concierge, E-Commerce, Others are tag-based, not location-based).
+    Replace with real QBO data once the OAuth flow is wired up.
     """
     return {
-        "online_store": {"margin1_pct": 0.328},
-        "point_of_sale": {"margin1_pct": 0.306},
-        "draft_orders": {"margin1_pct": 0.350},
-        "others": {"margin1_pct": 0.286},
-        "cavali": {"margin1_pct": 0.613}
+        "ecommerce":  {"margin1_pct": 0.328},
+        "concierge":  {"margin1_pct": 0.350},
+        "trailer":    {"margin1_pct": 0.333},
+        "wellington": {"margin1_pct": 0.306},
+        "others":     {"margin1_pct": 0.286},
+        "cavali":     {"margin1_pct": 0.613},
     }
 
 
@@ -428,17 +483,6 @@ def process_month(year, month, data):
         brand_totals = build_brand_month_rows(domain, token, brand, year, month)
         sales_totals_by_brand[brand] = fetch_shopify_sales_totals(domain, token, year, month)
 
-        if brand == "corro":
-            location_by_channel = {
-                "wellington": "New Wellington Warehouse",
-                "trailer": HITS_LOCATION_NAME_DISPLAY,
-            }
-
-            # We no longer overwrite Wellington or HITS/Trailer with ShopifyQL.
-
-        # 2) REST API order iteration
-        brand_totals = build_brand_month_rows(domain, token, brand, year, month)
-        
         for cid, t in brand_totals.items():
             combined_totals[cid]["gross_sales"] += t["gross_sales"]
             combined_totals[cid]["discounts"] += t["discounts"]
