@@ -172,7 +172,7 @@ def fetch_orders_for_month(domain, token, year, month):
         "created_at_min": start.isoformat(),
         "created_at_max": end.isoformat(),
         "limit": 250,
-        "fields": "id,tags,total_price,total_line_items_price,total_discounts,refunds,customer,line_items,location_id,financial_status,fulfillments,source_name,app_id,test",
+        "fields": "id,tags,total_price,total_line_items_price,total_discounts,refunds,customer,line_items,location_id,financial_status,fulfillments,source_name,app_id,test,cancelled_at",
     }
     path = "orders.json"
     while True:
@@ -297,9 +297,13 @@ def build_brand_month_rows(domain, token, brand, year, month):
 
         # Only count orders Shopify Analytics counts:
         # paid, partially_paid, partially_refunded, refunded
-        # Exclude: pending, voided, cancelled (these are not in Shopify Analytics gross sales)
+        # Exclude: pending, voided, authorized (not yet captured)
+        # Exclude: cancelled orders — Shopify Analytics excludes these from gross sales
+        #          even if financial_status was "paid" at time of cancellation.
         COUNTABLE_STATUSES = {"paid", "partially_paid", "partially_refunded", "refunded"}
         if order.get("test"):
+            continue
+        if order.get("cancelled_at"):
             continue
         if order.get("financial_status") not in COUNTABLE_STATUSES:
             continue
