@@ -486,14 +486,33 @@ def process_month(year, month, data):
 
         print(f"[fetch] {brand} — {domain} — {period_id}", file=sys.stderr)
         brand_totals = build_brand_month_rows(domain, token, brand, year, month)
-        sales_totals_by_brand[brand] = fetch_shopify_sales_totals(domain, token, year, month)
+        shopify_total = fetch_shopify_sales_totals(domain, token, year, month)
+        sales_totals_by_brand[brand] = shopify_total
+
+        # For Corro: the REST API order sum never matches Shopify Analytics exactly
+        # (test orders, draft orders, Shopify Collective, accounting differences).
+        # Solution: use ShopifyQL as the SINGLE SOURCE OF TRUTH for the total,
+        # then scale all channels proportionally so they always sum to the real number.
+        if brand == "corro" and shopify_total:
+            corro_non_cavali = {cid: t for cid, t in brand_totals.items() if cid != "cavali"}
+            our_gross = sum(t["gross_sales"] for t in corro_non_cavali.values())
+            true_gross = shopify_total["gross_sales"]
+            true_net   = shopify_total["net_sales"]
+            print(f"[scale] corro gross: raw={our_gross:.2f} shopify={true_gross:.2f}", file=sys.stderr)
+            if our_gross > 0 and true_gross > 0:
+                gs_scale = true_gross / our_gross
+                ns_scale = true_net / our_gross  # scale net proportionally too
+                for cid, t in corro_non_cavali.items():
+                    t["gross_sales"]     = round(t["gross_sales"] * gs_scale, 2)
+                    t["discounts"]       = round(t["discounts"] * gs_scale, 2)
+                    t["sales_reversals"] = round(t["sales_reversals"] * gs_scale, 2)
 
         for cid, t in brand_totals.items():
-            combined_totals[cid]["gross_sales"] += t["gross_sales"]
-            combined_totals[cid]["discounts"] += t["discounts"]
+            combined_totals[cid]["gross_sales"]     += t["gross_sales"]
+            combined_totals[cid]["discounts"]       += t["discounts"]
             combined_totals[cid]["sales_reversals"] += t["sales_reversals"]
-            combined_totals[cid]["orders"] += t["orders"]
-            combined_totals[cid]["units"] += t["units"]
+            combined_totals[cid]["orders"]          += t["orders"]
+            combined_totals[cid]["units"]           += t["units"]
             for note, count in t["notes"].items():
                 combined_totals[cid]["notes"][note] += count
 
