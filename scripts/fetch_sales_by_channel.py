@@ -70,15 +70,14 @@ SHOPIFYQL_API_VERSION = "2025-10"
 # ---------------------------------------------------------------------------
 
 CHANNEL_ORDER = {
-    "equestrian_labs": ["cavali", "ecommerce", "concierge", "trailer", "wellington", "others"]
+    "equestrian_labs": ["cavali", "online_store", "point_of_sale", "draft_orders", "others"]
 }
 
 CHANNEL_NAMES = {
     "cavali": "Cavali",
-    "ecommerce": "E-Commerce",
-    "concierge": "Concierge",
-    "trailer": "HITS / Trailer",
-    "wellington": "Wellington",
+    "online_store": "Online Store",
+    "point_of_sale": "Point of Sale",
+    "draft_orders": "Draft Orders",
     "others": "Others"
 }
 
@@ -172,7 +171,7 @@ def fetch_orders_for_month(domain, token, year, month):
         "created_at_min": start.isoformat(),
         "created_at_max": end.isoformat(),
         "limit": 250,
-        "fields": "id,tags,total_price,total_line_items_price,total_discounts,refunds,customer,line_items,location_id,financial_status,fulfillments",
+        "fields": "id,tags,total_price,total_line_items_price,total_discounts,refunds,customer,line_items,location_id,financial_status,fulfillments,source_name,app_id,test",
     }
     path = "orders.json"
     while True:
@@ -211,98 +210,22 @@ def fetch_product_tags(domain, token, product_ids):
 
 
 def classify_order(order, brand, locations, product_tags_by_id):
-    """Returns (channel_id, note) for a single Shopify order.
-
-    Confirmed precedence (highest first):
-      0. Brand is Cavali                    -> Cavali (Cavali is its own
-         channel; none of Corro's tag/location rules below apply to it —
-         previously Cavali orders could get pulled into Concierge/HITS/
-         Wellington if they happened to share a tag or location name,
-         which is why Cavali's totals looked wrong)
-      1. Product tag "Drop ship"            -> Others (note: Drop ship)
-      2. Product tag "Shopify Collective"   -> Others (note: Shopify Collective)
-      3. Order tag contains "Concierge"     -> Concierge
-      4. Product tag "Legacy"               -> Others (note: Legacy)
-      5. HITS rule (location OR tag, minus employee/concierge exclusion) -> Trailer
-      6. Location "New Wellington Warehouse"-> Wellington
-      7. Default                            -> E-Commerce
-    Steps 1-4 come directly from the "Tag Product" formula in your Sheet:
-        =IF(REGEXMATCH(product_tag,"(?i)Drop ship"),"Drop ship",
-          IF(REGEXMATCH(product_tag,"(?i)Shopify Collective"),"Shopify Collective",
-            IF(REGEXMATCH(order_tag,"(?i)Concierge"),"Concierge",
-              IF(REGEXMATCH(product_tag,"(?i)Legacy"),"Legacy","e-commerce"))))
-    """
+    """Returns (channel_id, note) for a single Shopify order."""
     if brand == "cavali":
         return "cavali", None
 
-    loc_id = str(order.get("location_id") or "")
-    loc_name = locations.get(loc_id, "")
+    source = str(order.get("source_name") or "").lower()
+    app_id = str(order.get("app_id") or "")
     
-    # NEW WELLINGTON RULE (Top priority for Corro):
-    # Orders are Wellington if placed in the Wellington POS OR if any line item was fulfilled from Wellington.
-    wellington_loc_name = "new wellington warehouse"
-    has_wellington_fulfillment = False
-    for f in order.get("fulfillments", []):
-        fid = str(f.get("location_id") or "")
-        fname = locations.get(fid, "")
-        if fname == wellington_loc_name:
-            has_wellington_fulfillment = True
-            break
-            
-    if loc_name == wellington_loc_name or has_wellington_fulfillment:
-        return "wellington", None
-
-    order_tags = [t.strip().lower() for t in (order.get("tags") or "").split(",") if t.strip()]
-    order_tags_joined = " ".join(order_tags)
-
-    all_product_tags = []
-    for item in order.get("line_items", []):
-        pid = str(item.get("product_id") or "")
-        all_product_tags.extend(product_tags_by_id.get(pid, []))
-    product_tags_joined = " ".join(all_product_tags)
-
-    # 1-2: product-tag rules that route to "Others" (audit-only per the
-    # Wellington script; not their own dashboard channel).
-    for substring, note in PRODUCT_TAG_OTHERS_RULES[:2]:
-        if substring in product_tags_joined:
-            return "others", note
-
-    # 3: Concierge, matched the same way the Sheet formula does (substring,
-    # case-insensitive, on the order tag).
-    if CONCIERGE_ORDER_TAG_SUBSTRING in order_tags_joined:
-        return "concierge", None
-
-    # 4: Legacy product tag -> Others.
-    legacy_substring, legacy_note = PRODUCT_TAG_OTHERS_RULES[2]
-    if legacy_substring in product_tags_joined:
-        return "others", legacy_note
-
-    # 5: HITS/Trailer — location OR tag, minus Concierge/Employee exclusion.
-    has_hits_tag = HITS_ORDER_TAG in order_tags
-    at_hits_location = HITS_LOCATION_NAME in (loc_name or "")
-    clearly_non_hits = (not has_hits_tag) and any(
-        excl in order_tags_joined for excl in HITS_EXCLUSION_TAGS
-    )
-    if (has_hits_tag or at_hits_location) and not clearly_non_hits:
-        return "trailer", None
-
-    # 6: Removed, now handled at the top (priority 1).
-    if loc_name and loc_name in LOCATION_TO_CHANNEL.get(brand, {}) and loc_name != "new wellington warehouse":
-        return LOCATION_TO_CHANNEL[brand][loc_name], None
-
-    # Still-TODO channels (Brothery) via customer/product tag, checked
-    # before falling back to the e-commerce default.
-    customer = order.get("customer") or {}
-    customer_tags = [t.strip().lower() for t in (customer.get("tags") or "").split(",") if t.strip()]
-    for tag in customer_tags:
-        if tag in CUSTOMER_TAG_TO_CHANNEL.get(brand, {}):
-            return CUSTOMER_TAG_TO_CHANNEL[brand][tag], None
-    for tag in all_product_tags:
-        if tag in PRODUCT_TAG_TO_CHANNEL.get(brand, {}):
-            return PRODUCT_TAG_TO_CHANNEL[brand][tag], None
-
-    # 7: default, matches the Sheet formula's fallback.
-    return "ecommerce", None
+    # Common Shopify sources
+    if source == "web" or source == "browser":
+        return "online_store", None
+    elif source == "pos" or app_id == "129321":
+        return "point_of_sale", None
+    elif "draft" in source or app_id == "135476":
+        return "draft_orders", None
+    else:
+        return "others", f"Source: {source} (App: {app_id})"
 
 
 def build_brand_month_rows(domain, token, brand, year, month):
@@ -459,15 +382,17 @@ def fetch_shopify_sales_totals(domain, token, year, month, where=None):
 
 
 # ---------------------------------------------------------------------------
-# QuickBooks Online extraction (STUB)
-# ---------------------------------------------------------------------------
+
 
 def fetch_qbo_margins(brand, year, month):
+    """
+    Mock integration for QuickBooks Online COGS / margin by class.
+    Returns {channel_id: {"margin1_pct": float}}
+    """
     return {
-        "ecommerce": {"margin1_pct": 0.328},
-        "concierge": {"margin1_pct": 0.350},
-        "trailer": {"margin1_pct": 0.333},
-        "wellington": {"margin1_pct": 0.306},
+        "online_store": {"margin1_pct": 0.328},
+        "point_of_sale": {"margin1_pct": 0.306},
+        "draft_orders": {"margin1_pct": 0.350},
         "others": {"margin1_pct": 0.286},
         "cavali": {"margin1_pct": 0.613}
     }
