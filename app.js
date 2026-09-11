@@ -100,9 +100,10 @@ function render(periodId) {
   const isPartialGP = gpKnownRows.length < enriched.length;
   const weightedM1 = totalNet > 0 ? totalGrossProfit / totalNet : 0;
   const totalOrders = enriched.reduce((s, c) => s + (c.orders || 0), 0);
+  const totalUnits = enriched.reduce((s, c) => s + (c.units || 0), 0);
 
   renderKPIs(totalGross, totalNet, totalGrossProfit, weightedM1, totalOrders, isPartialGP);
-  renderTable(enriched, totalGross, totalNet, totalGrossProfit);
+  renderTable(enriched, totalGross, totalNet, totalGrossProfit, totalOrders, totalUnits);
 }
 
 function renderKPIs(totalGross, totalNet, totalGrossProfit, weightedM1, totalOrders, isPartialGP) {
@@ -127,7 +128,7 @@ function renderKPIs(totalGross, totalNet, totalGrossProfit, weightedM1, totalOrd
     .join("");
 }
 
-function renderTable(rows, totalGross, totalNet, totalGrossProfit) {
+function renderTable(rows, totalGross, totalNet, totalGrossProfit, totalOrders, totalUnits) {
   const body = document.getElementById("tableBody");
   const sorted = [...rows].sort((a, b) => b.gross_sales - a.gross_sales);
 
@@ -143,6 +144,11 @@ function renderTable(rows, totalGross, totalNet, totalGrossProfit) {
         const hasMargin = c.margin1_pct !== null && c.margin1_pct !== undefined;
         const grossProfitLabel = hasGP ? fmtUSD(c.gross_profit) : "—";
         const marginLabel = hasMargin ? fmtPct(c.margin1_pct) : "—";
+        const orders = c.orders || 0;
+        const units = c.units || 0;
+        const aov = orders > 0 ? fmtUSD(c.gross_sales / orders) : "—";
+        const upo = orders > 0 ? (units / orders).toFixed(2) : "—";
+        
         return `
         <tr>
           <td>${c.name}${c.note ? `<span class="channel-note">${c.note}</span>` : ""}</td>
@@ -154,6 +160,9 @@ function renderTable(rows, totalGross, totalNet, totalGrossProfit) {
           <td>${fmtUSD(c.net_sales)}</td>
           <td>${grossProfitLabel}</td>
           <td>${marginLabel}</td>
+          <td>${orders.toLocaleString("en-US")}</td>
+          <td>${aov}</td>
+          <td>${upo}</td>
         </tr>`;
       })
       .join("");
@@ -169,6 +178,9 @@ function renderTable(rows, totalGross, totalNet, totalGrossProfit) {
         <td>${fmtUSD(totalNet)}</td>
         <td>${fmtUSD(totalGrossProfit)}</td>
         <td></td>
+        <td>${totalOrders.toLocaleString("en-US")}</td>
+        <td>${totalOrders > 0 ? fmtUSD(totalGross / totalOrders) : "—"}</td>
+        <td>${totalOrders > 0 ? (totalUnits / totalOrders).toFixed(2) : "—"}</td>
       </tr>`;
   }
 }

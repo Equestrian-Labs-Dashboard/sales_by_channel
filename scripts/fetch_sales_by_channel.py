@@ -317,10 +317,17 @@ def build_brand_month_rows(domain, token, brand, year, month):
     }
     product_tags_by_id = fetch_product_tags(domain, token, product_ids)
 
-    totals = defaultdict(lambda: {"gross_sales": 0.0, "discounts": 0.0, "sales_reversals": 0.0, "orders": 0, "notes": defaultdict(int)})
+    totals = defaultdict(lambda: {"gross_sales": 0.0, "discounts": 0.0, "sales_reversals": 0.0, "orders": 0, "notes": defaultdict(int), "units": 0})
+    seen_order_ids = set()
     for order in orders:
-        if order.get("financial_status") in ("voided",):
+        oid = order.get("id")
+        if oid in seen_order_ids:
             continue
+        seen_order_ids.add(oid)
+
+        if order.get("test") or order.get("financial_status") in ("voided",):
+            continue
+            
         channel, note = classify_order(order, brand, locations, product_tags_by_id)
         t = totals[channel]
         t["gross_sales"] += float(order.get("total_line_items_price") or order.get("total_price") or 0)
@@ -333,6 +340,7 @@ def build_brand_month_rows(domain, token, brand, year, month):
         t["sales_reversals"] += refunds_total
         
         t["orders"] += 1
+        t["units"] += sum(item.get("quantity", 0) for item in order.get("line_items", []))
         if note:
             t["notes"][note] += 1
 
@@ -480,7 +488,7 @@ def process_month(year, month, data):
     data.setdefault("channels", {})
     data["channels"].setdefault(period_id, {})
 
-    combined_totals = defaultdict(lambda: {"gross_sales": 0.0, "discounts": 0.0, "sales_reversals": 0.0, "orders": 0, "notes": defaultdict(int)})
+    combined_totals = defaultdict(lambda: {"gross_sales": 0.0, "discounts": 0.0, "sales_reversals": 0.0, "orders": 0, "units": 0, "notes": defaultdict(int)})
     sales_totals_by_brand = {}
     corro_location_totals = {}
 
@@ -496,21 +504,12 @@ def process_month(year, month, data):
         sales_totals_by_brand[brand] = fetch_shopify_sales_totals(domain, token, year, month)
 
         if brand == "corro":
-            # Wellington and HITS/Trailer are LOCATION-based channels, and
-            # Shopify has a native "Gross Profit by Location" breakdown —
-            # so these come straight from Shopify, not a calculation.
-            # Concierge/E-Commerce/Others are TAG-based; ShopifyQL has no
-            # per-tag gross profit report, so they're intentionally left
-            # out of this dict and stay blank below (no QBO by-class yet).
             location_by_channel = {
                 "wellington": "New Wellington Warehouse",
                 "trailer": HITS_LOCATION_NAME_DISPLAY,
             }
 
             # We no longer overwrite Wellington or HITS/Trailer with ShopifyQL.
-            # Both physical channels require complex REST API filtering (fulfillments or tags)
-            # that ShopifyQL location_name cannot do. They will use the fallback margin instead
-            # of Shopify's native gross_profit.
 
         # 2) REST API order iteration
         brand_totals = build_brand_month_rows(domain, token, brand, year, month)
@@ -520,12 +519,13 @@ def process_month(year, month, data):
             combined_totals[cid]["discounts"] += t["discounts"]
             combined_totals[cid]["sales_reversals"] += t["sales_reversals"]
             combined_totals[cid]["orders"] += t["orders"]
+            combined_totals[cid]["units"] += t["units"]
             for note, count in t["notes"].items():
                 combined_totals[cid]["notes"][note] += count
 
     rows = []
     for cid in CHANNEL_ORDER.get("equestrian_labs", []):
-        t = combined_totals.get(cid, {"gross_sales": 0.0, "discounts": 0.0, "sales_reversals": 0.0, "orders": 0, "notes": {}})
+        t = combined_totals.get(cid, {"gross_sales": 0.0, "discounts": 0.0, "sales_reversals": 0.0, "orders": 0, "units": 0, "notes": {}})
         row = {
             "id": cid,
             "name": CHANNEL_NAMES.get(cid, cid.title()),
@@ -533,6 +533,7 @@ def process_month(year, month, data):
             "discounts": round(t["discounts"], 2),
             "sales_reversals": round(t["sales_reversals"], 2),
             "orders": t["orders"],
+            "units": t["units"],
             "margin1_pct": None,
         }
         if t.get("notes"):
