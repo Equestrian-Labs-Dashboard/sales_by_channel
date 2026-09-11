@@ -229,14 +229,15 @@ def classify_order(order, brand, locations, product_tags_by_id):
     loc_id = str(order.get("location_id") or "")
     loc_name = locations.get(loc_id, "")
 
-    # 1: Wellington — POS location OR fulfillment from Wellington warehouse
+    # 1: Wellington — ONLY orders placed AT the Wellington POS register.
+    # NOTE: Do NOT check fulfillment location here. The Wellington warehouse
+    # is Corro's main shipping warehouse, so nearly every online order gets
+    # FULFILLED from Wellington — but that doesn't make it a Wellington sale.
+    # A Wellington sale = a customer walked into the Wellington store and
+    # purchased at the POS terminal there.
     wellington_loc_name = "new wellington warehouse"
     if loc_name == wellington_loc_name:
         return "wellington", None
-    for f in order.get("fulfillments", []):
-        fid = str(f.get("location_id") or "")
-        if locations.get(fid, "") == wellington_loc_name:
-            return "wellington", None
 
     order_tags = [t.strip().lower() for t in (order.get("tags") or "").split(",") if t.strip()]
     order_tags_joined = " ".join(order_tags)
@@ -573,17 +574,21 @@ def process_month(year, month, data):
 
 def main():
     now = datetime.now(timezone.utc)
-    data = json.loads(DATA_PATH.read_text()) if DATA_PATH.exists() else {
-        "meta": {}, "periods": [], "channels": {},
-    }
-    
-    # Process from Jan 2026 to current month
+    # Start fresh each run so old/out-of-order data doesn't accumulate
+    data = {"meta": {}, "periods": [], "channels": {}}
+
+    # Process all months Jan 2026 → current month, in order
     start_month = 1
     end_month = now.month
-    
+
     for month in range(start_month, end_month + 1):
         process_month(2026, month, data)
-        
+
+    # Ensure periods are sorted chronologically so the dashboard
+    # dropdown and default-month logic work correctly
+    data["periods"].sort(key=lambda p: p["id"])
+    data["channels"] = {k: data["channels"][k] for k in sorted(data["channels"].keys())}
+
     DATA_PATH.write_text(json.dumps(data, indent=2) + "\n")
 
 if __name__ == "__main__":
