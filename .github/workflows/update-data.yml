@@ -2,7 +2,7 @@ name: Update sales-by-channel data
 
 on:
   schedule:
-    - cron: "0 9 * * *"   # daily at 09:00 UTC — adjust to the real cadence
+    - cron: "0 9 * * 6"   # every Saturday at 09:00 UTC
   workflow_dispatch: {}
 
 permissions:
