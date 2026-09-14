@@ -417,3 +417,40 @@ footer.source-note {
   font-size: 1.75rem;
   letter-spacing: .01em;
 }
+
+/* ---------- Two-level filter bar (Year + Period) ---------- */
+.filter-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.btn-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.year-btn {
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+  padding: 7px 14px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.year-btn:hover {
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.year-btn.active {
+  background: var(--gold);
+  color: var(--bg);
+  border-color: var(--gold);
+}

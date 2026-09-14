@@ -2,30 +2,28 @@
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 const fmtPct = (n) => (n * 100).toFixed(1) + "%";
 
-const SUN_ICON = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"></path></svg>`;
+const SUN_ICON  = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"></path></svg>`;
 const MOON_ICON = `<svg viewBox="0 0 24 24"><path d="M20 14.5a8.5 8.5 0 1 1-9.5-9.4 7 7 0 0 0 9.5 9.4z"></path></svg>`;
 
-let DATA = null;
-let activePeriod = null;
+let DATA          = null;
+let activePeriod  = null;
+let activeYear    = null;
 
 // ---------- Theme ----------
 const themeToggle = document.getElementById("themeToggle");
-const themeKnob = document.getElementById("themeKnob");
+const themeKnob   = document.getElementById("themeKnob");
 
 function setTheme(mode) {
   document.body.setAttribute("data-theme", mode);
-  if (themeKnob) themeKnob.innerHTML = mode === "dark" ? MOON_ICON : SUN_ICON;
+  if (themeKnob)   themeKnob.innerHTML = mode === "dark" ? MOON_ICON : SUN_ICON;
   if (themeToggle) themeToggle.setAttribute("aria-pressed", mode === "dark");
   localStorage.setItem("spc-theme", mode);
 }
-
 if (themeToggle) {
   themeToggle.addEventListener("click", () => {
-    const current = document.body.getAttribute("data-theme");
-    setTheme(current === "dark" ? "light" : "dark");
+    setTheme(document.body.getAttribute("data-theme") === "dark" ? "light" : "dark");
   });
 }
-
 setTheme(localStorage.getItem("spc-theme") || "light");
 
 // ---------- Data load ----------
@@ -35,67 +33,114 @@ fetch("data/sales-channels.json?v=" + new Date().getTime())
     DATA = json;
     const updateLabel = document.getElementById("updatedLabel");
     if (updateLabel) updateLabel.textContent = "updated " + json.meta.last_updated;
-    buildPeriodSelect();
 
-    // Default: last closed month
+    buildYearButtons();
+
+    // Default: most recent CLOSED month
     const now = new Date();
     const currentId = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
     const closedPeriods = json.periods.filter((p) => p.id !== currentId);
-    const initial = closedPeriods.length
+    const defaultPeriod = closedPeriods.length
       ? closedPeriods[closedPeriods.length - 1]
       : json.periods[json.periods.length - 1];
-    selectPeriod(initial.id);
+
+    const defaultYear = defaultPeriod.id.slice(0, 4);
+    selectYear(defaultYear, defaultPeriod.id);
   })
   .catch((err) => {
     const errBody = document.getElementById("tableBody");
-    if (errBody) {
+    if (errBody)
       errBody.innerHTML = `<tr><td colspan="9">Could not load data (${err.message}). Check data/sales-channels.json.</td></tr>`;
-    }
   });
 
-// ---------- Period selector (Month + YTD) ----------
-function buildPeriodSelect() {
+// ---------- Year buttons ----------
+function buildYearButtons() {
+  const container = document.getElementById("yearButtons");
+  if (!container) return;
+
+  // Show all years in data, plus 2025 placeholder if not present, starting from 2025
+  const yearsInData = [...new Set(DATA.periods.map((p) => p.id.slice(0, 4)))].sort();
+  const allYears    = yearsInData.filter((y) => parseInt(y) >= 2025);
+
+  container.innerHTML = allYears
+    .map((yr) => `<button class="year-btn" data-year="${yr}" onclick="selectYear('${yr}')">${yr}</button>`)
+    .join("");
+}
+
+function selectYear(year, keepPeriod) {
+  activeYear = year;
+
+  // Highlight active year button
+  document.querySelectorAll(".year-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.year === year);
+  });
+
+  // Rebuild period dropdown for this year
+  buildPeriodSelect(year);
+
+  // If a specific period was requested, use it; otherwise default to first option
+  if (keepPeriod && keepPeriod.startsWith(year)) {
+    selectPeriod(keepPeriod);
+  } else {
+    const select = document.getElementById("monthSelect");
+    if (select && select.options.length > 0) {
+      selectPeriod(select.options[0].value);
+    }
+  }
+}
+
+// ---------- Period dropdown (scoped to selected year) ----------
+function buildPeriodSelect(year) {
   const select = document.getElementById("monthSelect");
   if (!select) return;
 
-  const now = new Date();
+  const now       = new Date();
   const currentId = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  const years = [...new Set(DATA.periods.map((p) => p.id.slice(0, 4)))].sort().reverse();
+
+  const yrPeriods    = DATA.periods.filter((p) => p.id.startsWith(year));
+  const closedInYear = yrPeriods.filter((p) => p.id !== currentId);
+  const currentInYear = yrPeriods.find((p) => p.id === currentId);
 
   let options = "";
-  years.forEach((yr) => {
-    const yrPeriods = DATA.periods.filter((p) => p.id.startsWith(yr));
-    const closedInYear = yrPeriods.filter((p) => p.id !== currentId);
-    const currentInYear = yrPeriods.find((p) => p.id === currentId);
 
-    if (closedInYear.length > 0) {
-      const lastMonthName = closedInYear[closedInYear.length - 1].label.split(" ")[0];
-      options += `<option value="ytd-${yr}">YTD ${yr}  (Jan - ${lastMonthName})</option>`;
-    }
+  // Full Year (YTD) at the top — only if there are closed months
+  if (closedInYear.length > 0) {
+    const lastMonthName = closedInYear[closedInYear.length - 1].label.split(" ")[0];
+    options += `<option value="ytd-${year}">Full Year ${year}  (Jan - ${lastMonthName})</option>`;
+  }
 
-    [...closedInYear].reverse().forEach((p) => {
-      options += `<option value="${p.id}">${p.label}</option>`;
-    });
-
-    if (currentInYear) {
-      options += `<option value="${currentInYear.id}">${currentInYear.label} (en curso)</option>`;
-    }
+  // Individual months — most recent first
+  [...closedInYear].reverse().forEach((p) => {
+    options += `<option value="${p.id}">${p.label}</option>`;
   });
 
+  // Current in-progress month at the bottom
+  if (currentInYear) {
+    options += `<option value="${currentInYear.id}">${currentInYear.label} (in progress)</option>`;
+  }
+
+  // If no data for this year yet
+  if (!options) {
+    options = `<option value="">No data for ${year}</option>`;
+  }
+
   select.innerHTML = options;
-  select.addEventListener("change", () => selectPeriod(select.value));
+
+  // Only attach listener once — remove old and re-add
+  select.onchange = () => selectPeriod(select.value);
 }
 
 function selectPeriod(periodId) {
   activePeriod = periodId;
   const select = document.getElementById("monthSelect");
-  if (select) select.value = periodId;
-  render(periodId);
+  if (select && periodId) select.value = periodId;
+  if (periodId) render(periodId);
 }
 
 // ---------- Data helpers ----------
 function getRowsForPeriod(periodId) {
-  if (periodId.startsWith("ytd-")) {
+  // Full Year (YTD) — aggregate all closed months of the year
+  if (periodId && periodId.startsWith("ytd-")) {
     const yr = periodId.slice(4);
     const now = new Date();
     const currentId = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
@@ -105,6 +150,7 @@ function getRowsForPeriod(periodId) {
     return aggregateRows(monthIds);
   }
 
+  // Single month
   const periodData = DATA.channels[periodId] || DATA.channels[Object.keys(DATA.channels)[0]];
   const all = [];
   Object.entries(periodData).forEach(([brand, rows]) => {
