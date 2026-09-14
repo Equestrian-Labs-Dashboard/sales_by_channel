@@ -215,13 +215,16 @@ def classify_order(order, brand, locations, product_tags_by_id):
 
     Priority (highest first):
       0. Brand is Cavali                    -> cavali
-      1. Wellington POS or fulfillment      -> wellington
-      2. Product tag "Drop ship"            -> others
-      3. Product tag "Shopify Collective"   -> others
-      4. Order tag contains "Concierge"     -> concierge
-      5. Product tag "Legacy"               -> others
-      6. HITS/Trailer (location OR tag)     -> trailer
-      7. Default                            -> ecommerce
+      1. Wellington POS location            -> wellington
+      2. Order tag contains "Concierge"     -> concierge
+      3. HITS/Trailer (location OR tag)     -> trailer
+      4. Default (incl. Legacy, Drop Ship,
+         Shopify Collective)                -> ecommerce
+         (note kept for visibility)
+
+    "Others" is reserved for true external/affiliate channels
+    (e.g. CJ Affiliate, Klauvo) identified by order tag or source.
+    Add them below as OTHERS_ORDER_TAG_RULES when you have their tags.
     """
     if brand == "cavali":
         return "cavali", None
@@ -230,11 +233,6 @@ def classify_order(order, brand, locations, product_tags_by_id):
     loc_name = locations.get(loc_id, "")
 
     # 1: Wellington — ONLY orders placed AT the Wellington POS register.
-    # NOTE: Do NOT check fulfillment location here. The Wellington warehouse
-    # is Corro's main shipping warehouse, so nearly every online order gets
-    # FULFILLED from Wellington — but that doesn't make it a Wellington sale.
-    # A Wellington sale = a customer walked into the Wellington store and
-    # purchased at the POS terminal there.
     wellington_loc_name = "new wellington warehouse"
     if loc_name == wellington_loc_name:
         return "wellington", None
@@ -248,21 +246,11 @@ def classify_order(order, brand, locations, product_tags_by_id):
         all_product_tags.extend(product_tags_by_id.get(pid, []))
     product_tags_joined = " ".join(all_product_tags)
 
-    # 2-3: Drop ship / Shopify Collective -> Others
-    for substring, note in PRODUCT_TAG_OTHERS_RULES[:2]:
-        if substring in product_tags_joined:
-            return "others", note
-
-    # 4: Concierge order tag
+    # 2: Concierge — order tag match
     if CONCIERGE_ORDER_TAG_SUBSTRING in order_tags_joined:
         return "concierge", None
 
-    # 5: Legacy -> Others
-    legacy_substring, legacy_note = PRODUCT_TAG_OTHERS_RULES[2]
-    if legacy_substring in product_tags_joined:
-        return "others", legacy_note
-
-    # 6: HITS/Trailer — location OR tag, minus Concierge/Employee exclusion
+    # 3: HITS/Trailer — location OR tag, minus Concierge/Employee exclusion
     has_hits_tag = HITS_ORDER_TAG in order_tags
     at_hits_location = HITS_LOCATION_NAME in (loc_name or "")
     clearly_non_hits = (not has_hits_tag) and any(
@@ -271,8 +259,28 @@ def classify_order(order, brand, locations, product_tags_by_id):
     if (has_hits_tag or at_hits_location) and not clearly_non_hits:
         return "trailer", None
 
-    # 7: Default -> E-Commerce
-    return "ecommerce", None
+    # Others — external/affiliate channels (add tags here as you confirm them)
+    # e.g. ("cj affiliate", "CJ Affiliate"), ("klauvo", "Klauvo")
+    OTHERS_ORDER_TAG_RULES = [
+        # ("cj",     "CJ Affiliate"),
+        # ("klauvo", "Klauvo"),
+    ]
+    for tag_sub, note in OTHERS_ORDER_TAG_RULES:
+        if tag_sub in order_tags_joined:
+            return "others", note
+
+    # 4: Default — E-Commerce
+    # Includes: online orders, Drop Ship products, Shopify Collective,
+    # Legacy products — all ship from the Corro warehouse to end customers.
+    note = None
+    if "drop ship" in product_tags_joined:
+        note = "Drop Ship"
+    elif "shopify collective" in product_tags_joined:
+        note = "Shopify Collective"
+    elif "legacy" in product_tags_joined:
+        note = "Legacy"
+    return "ecommerce", note
+
 
 
 def build_brand_month_rows(domain, token, brand, year, month):
