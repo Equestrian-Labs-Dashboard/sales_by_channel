@@ -210,7 +210,33 @@ def fetch_product_tags(domain, token, product_ids):
     return tags_by_id
 
 
-def classify_order(order, brand, locations, product_tags_by_id):
+def fetch_cj_order_ids(domain, token, order_ids):
+    """Returns a set of order IDs that have the CJ Affiliate metafield.
+
+    CJ Network Integration stores affiliate data as a JSON metafield:
+      namespace = app--4415147
+      key       = cj_affiliate_data
+    If this metafield exists on an order, the order came through a CJ affiliate link.
+    """
+    cj_ids = set()
+    for oid in order_ids:
+        try:
+            resp = shopify_get(
+                domain, token,
+                f"orders/{oid}/metafields.json",
+                params={"namespace": "app--4415147", "key": "cj_affiliate_data"},
+            )
+            metafields = resp.json().get("metafields", [])
+            if metafields:
+                cj_ids.add(oid)
+        except Exception as e:
+            print(f"[warn] CJ metafield fetch failed for order {oid}: {e}", file=sys.stderr)
+        time.sleep(0.25)   # stay well under Shopify's 4 req/s REST limit
+    print(f"[cj] found {len(cj_ids)} CJ affiliate orders out of {len(order_ids)} checked", file=sys.stderr)
+    return cj_ids
+
+
+def classify_order(order, brand, locations, product_tags_by_id, cj_order_ids=None):
     """Returns (channel_id, note) for a single Shopify order.
 
     Priority (highest first):
@@ -218,13 +244,9 @@ def classify_order(order, brand, locations, product_tags_by_id):
       1. Wellington POS location            -> wellington
       2. Order tag contains "Concierge"     -> concierge
       3. HITS/Trailer (location OR tag)     -> trailer
-      4. Default (incl. Legacy, Drop Ship,
+      4. CJ Affiliate metafield present     -> others (CJ Affiliate)
+      5. Default (incl. Legacy, Drop Ship,
          Shopify Collective)                -> ecommerce
-         (note kept for visibility)
-
-    "Others" is reserved for true external/affiliate channels
-    (e.g. CJ Affiliate, Klauvo) identified by order tag or source.
-    Add them below as OTHERS_ORDER_TAG_RULES when you have their tags.
     """
     if brand == "cavali":
         return "cavali", None
@@ -269,7 +291,11 @@ def classify_order(order, brand, locations, product_tags_by_id):
         if tag_sub in order_tags_joined:
             return "others", note
 
-    # 4: Default — E-Commerce
+    # 4: CJ Affiliate — detected via order metafield (app--4415147.cj_affiliate_data)
+    if cj_order_ids and order.get("id") in cj_order_ids:
+        return "others", "CJ Affiliate"
+
+    # 5: Default — E-Commerce
     # Includes: online orders, Drop Ship products, Shopify Collective,
     # Legacy products — all ship from the Corro warehouse to end customers.
     note = None
@@ -295,6 +321,12 @@ def build_brand_month_rows(domain, token, brand, year, month):
     }
     product_tags_by_id = fetch_product_tags(domain, token, product_ids)
 
+    # CJ Affiliate detection — only for Corro (Cavali doesn't have the app)
+    cj_order_ids = set()
+    if brand == "corro":
+        all_order_ids = [o["id"] for o in orders if o.get("id")]
+        cj_order_ids = fetch_cj_order_ids(domain, token, all_order_ids)
+
     totals = defaultdict(lambda: {"gross_sales": 0.0, "discounts": 0.0, "sales_reversals": 0.0, "orders": 0, "notes": defaultdict(int), "units": 0})
     seen_order_ids = set()
     for order in orders:
@@ -316,7 +348,7 @@ def build_brand_month_rows(domain, token, brand, year, month):
         if order.get("financial_status") not in COUNTABLE_STATUSES:
             continue
 
-        channel, note = classify_order(order, brand, locations, product_tags_by_id)
+        channel, note = classify_order(order, brand, locations, product_tags_by_id, cj_order_ids)
         t = totals[channel]
         t["gross_sales"] += float(order.get("total_line_items_price") or order.get("total_price") or 0)
         t["discounts"] += float(order.get("total_discounts") or 0)
