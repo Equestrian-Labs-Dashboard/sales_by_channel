@@ -1,7 +1,7 @@
 {
   "meta": {
     "currency": "USD",
-    "last_updated": "2026-09-15",
+    "last_updated": "2026-09-19",
     "brands": {
       "corro": {
         "domain_env": "SHOPIFY_CORRO_DOMAIN",
@@ -726,55 +726,55 @@
         {
           "id": "ecommerce",
           "name": "E-Commerce",
-          "gross_sales": 16310.64,
-          "discounts": 2105.94,
-          "sales_reversals": 308.05,
-          "orders": 107,
-          "units": 278,
+          "gross_sales": 19712.62,
+          "discounts": 2317.98,
+          "sales_reversals": 311.04,
+          "orders": 144,
+          "units": 341,
           "margin1_pct": 0.328,
-          "note": "Includes: Legacy: 21, Shopify Collective: 20",
-          "gross_profit": 4558.1,
+          "note": "Includes: Legacy: 27, Shopify Collective: 24",
+          "gross_profit": 5603.42,
           "margin1_source": "Pending QuickBooks Online by-class",
-          "net_sales": 13896.65
+          "net_sales": 17083.6
         },
         {
           "id": "concierge",
           "name": "Concierge",
-          "gross_sales": 4592.37,
-          "discounts": 49.11,
-          "sales_reversals": 0.0,
-          "orders": 11,
-          "units": 112,
+          "gross_sales": 5850.45,
+          "discounts": 93.51,
+          "sales_reversals": 129.52,
+          "orders": 14,
+          "units": 157,
           "margin1_pct": 0.35,
-          "gross_profit": 1590.14,
+          "gross_profit": 1969.6,
           "margin1_source": "Pending QuickBooks Online by-class",
-          "net_sales": 4543.26
+          "net_sales": 5627.42
         },
         {
           "id": "trailer",
           "name": "HITS / Trailer",
-          "gross_sales": 7946.27,
-          "discounts": 441.51,
-          "sales_reversals": 312.01,
-          "orders": 74,
-          "units": 150,
+          "gross_sales": 9563.35,
+          "discounts": 525.19,
+          "sales_reversals": 315.04,
+          "orders": 99,
+          "units": 196,
           "margin1_pct": 0.333,
-          "gross_profit": 2395.19,
+          "gross_profit": 2904.8,
           "margin1_source": "Pending QuickBooks Online by-class",
-          "net_sales": 7192.75
+          "net_sales": 8723.12
         },
         {
           "id": "wellington",
           "name": "Wellington",
-          "gross_sales": 1954.15,
-          "discounts": 937.12,
+          "gross_sales": 1973.12,
+          "discounts": 946.22,
           "sales_reversals": 0.0,
           "orders": 7,
           "units": 38,
           "margin1_pct": 0.306,
-          "gross_profit": 311.21,
+          "gross_profit": 314.23,
           "margin1_source": "Pending QuickBooks Online by-class",
-          "net_sales": 1017.03
+          "net_sales": 1026.9
         },
         {
           "id": "others",
@@ -792,14 +792,14 @@
         {
           "id": "cavali",
           "name": "Cavali",
-          "gross_sales": 36893.6,
+          "gross_sales": 36896.6,
           "discounts": 2179.0,
           "sales_reversals": 0.0,
-          "orders": 275,
-          "units": 276,
+          "orders": 276,
+          "units": 277,
           "margin1_pct": 0.613,
-          "net_sales": 34047.94,
-          "gross_profit": -1.46,
+          "net_sales": 34050.94,
+          "gross_profit": -1.95,
           "margin1_source": "Shopify ShopifyQL (exact \u2014 single-channel store)"
         }
       ]
