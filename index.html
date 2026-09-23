@@ -10,11 +10,32 @@
 <link rel="stylesheet" href="styles.css?v=10">
 </head>
 <body data-theme="light">
-<div class="wrap">
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="sb-top">
+      <div class="sb-dots"><span></span><span></span></div>
+      <img class="sb-logo" src="corro_logo.png" alt="Corro">
+      <div class="sb-name">Equestrian Labs, Inc.</div>
+      <div class="sb-sub">Performance Dashboard</div>
+    </div>
+    <nav class="sb-nav" aria-label="Report navigation">
+      <div class="sb-sec">Performance</div>
+      <a class="sb-item" href="https://equestrian-labs-dashboard.pages.dev/dashboard?brand=corro&skipMenu=1">
+        <span class="grid-icon"></span> Dashboard
+      </a>
+      <a class="sb-item on" href="#">
+        <span class="bar-icon"></span> Sales by Channel
+      </a>
+      <div class="sb-sec">Brands</div>
+      <div class="sb-item brand-row"><span class="dot corro"></span> Corro</div>
+      <div class="sb-item brand-row"><span class="dot cavali"></span> Cavali</div>
+    </nav>
+  </aside>
+
+  <main class="wrap">
 
   <header class="masthead">
     <div class="brand-lockup">
-      <img class="brand-logo" src="corro_logo.png" alt="Corro">
       <div>
         <h1>Sales by Channel</h1>
         <p class="sub" id="brandSubtitle">Equestrian Labs — channel-by-channel performance</p>
@@ -28,7 +49,7 @@
     </div>
   </header>
 
-  <div class="controls">
+  <div class="controls panel-control">
     <div class="filter-bar">
       <div class="control-group">
         <span class="control-label">Year</span>
@@ -41,29 +62,37 @@
     </div>
   </div>
 
+  <div class="info-strip"><span>Net sales confirmed</span> · Shopify + QBO channel mix · Gross sales sorted descending</div>
+
   <section class="kpis" id="kpiRow"></section>
 
-  <section>
+  <section class="data-panel">
     <div class="table-head-row">
-      <h2>Channel share</h2>
+      <div>
+        <div class="sec-kicker">01</div>
+        <h2>Channel Share</h2>
+      </div>
+      <div class="panel-meta">Sales Channel Summary</div>
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th>Channel</th>
-          <th class="share-cell">Share</th>
-          <th>Gross Sales</th>
-          <th>Net Sales</th>
-          <th>Gross Profit</th>
-          <th>Margin 1</th>
-          <th>Orders</th>
-          <th>AOV</th>
-          <th>Units per Order</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-      <tfoot id="tableFoot"></tfoot>
-    </table>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Channel</th>
+            <th class="share-cell">Share</th>
+            <th>Gross Sales</th>
+            <th>Net Sales</th>
+            <th>Gross Profit</th>
+            <th>Margin 1</th>
+            <th>Orders</th>
+            <th>AOV</th>
+            <th>Units per Order</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+        <tfoot id="tableFoot"></tfoot>
+      </table>
+    </div>
   </section>
 
   <footer class="source-note">
@@ -71,8 +100,9 @@
     sample data — see README.md for the replacement pipeline via GitHub Actions.
   </footer>
 
+</main>
 </div>
 
-<script src="app.js?v=4"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>
