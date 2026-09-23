@@ -24,7 +24,7 @@ if (themeToggle) {
     setTheme(document.body.getAttribute("data-theme") === "dark" ? "light" : "dark");
   });
 }
-setTheme(localStorage.getItem("spc-theme") || "light");
+setTheme(localStorage.getItem("spc-theme") || "dark");
 
 // ---------- Data load ----------
 fetch("data/sales-channels.json?v=" + new Date().getTime())

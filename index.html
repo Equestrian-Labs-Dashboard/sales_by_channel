@@ -7,22 +7,7 @@
 <link rel="icon" type="image/png" href="corro_logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=13">
-<style>
-  /* Critical report styles kept inline so cached CSS can never distort the layout. */
-  :root{--bg:#0d1b2a;--sf:#0f2236;--sf2:#162e48;--sf3:#1c3a58;--bd:#1e3a5f;--bd2:#2a5080;--tx:#f0f6ff;--tx2:#a8c0d8;--tx3:#5a7a98;--gr:#2ee896;--pu:#a090ff;--bl:#72aeff}
-  body{margin:0;background:var(--bg)!important;color:var(--tx)!important;font-family:"DM Sans",system-ui,sans-serif}
-  .wrap{width:min(1380px,calc(100% - 48px));margin:0 auto;padding:24px 28px 70px;min-width:0}
-  .masthead{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:12px;border-bottom:1px solid var(--bd);padding-bottom:16px}
-  .brand-lockup{display:flex;align-items:center;gap:14px}.report-logo{width:58px!important;height:42px!important;max-width:58px!important;max-height:42px!important;object-fit:contain;object-position:left center;display:block;flex:0 0 auto}
-  .masthead h1{font:700 24px/1.05 Syne,system-ui,sans-serif;letter-spacing:-.03em;margin:0 0 4px;color:var(--tx)!important}.masthead .sub{font:400 12px "DM Sans",system-ui,sans-serif;color:var(--tx3)!important;margin:0}
-  .updated{font:500 11px "DM Sans",system-ui,sans-serif;color:var(--bl)!important;background:#12385c!important;border:1px solid var(--bd2)!important;border-radius:20px;padding:4px 10px}.toggle{width:28px;height:28px;border-radius:50%;border:1px solid var(--bd2)!important;background:var(--sf2)!important;padding:0}.toggle .knob{position:absolute;inset:4px;border-radius:50%;background:var(--gr)!important;display:grid;place-items:center}
-  .panel-control,.data-panel{background:var(--sf)!important;border:1px solid var(--bd)!important;border-radius:9px!important}.panel-control{padding:10px 13px;margin:0 0 10px}.filter-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}.control-group{display:flex;align-items:center;gap:8px}.control-label{font:700 10px "DM Sans",system-ui,sans-serif;color:var(--tx3)!important;text-transform:uppercase;letter-spacing:.08em}.btn-group{display:flex;gap:3px;background:var(--sf2);border:1px solid var(--bd);border-radius:7px;padding:2px}.year-btn,.month-select{background:var(--sf2)!important;border:1px solid var(--bd2)!important;color:var(--tx)!important;border-radius:5px;font:700 12px "DM Sans",system-ui,sans-serif}.year-btn{padding:5px 11px}.month-select{padding:5px 12px;min-width:180px}.year-btn.active{background:#143b60!important}
-  .info-strip{font:400 11px "DM Sans",system-ui,sans-serif;color:var(--tx3)!important;background:var(--sf2)!important;border-radius:6px;padding:7px 12px;margin-bottom:14px}.info-strip span{color:var(--tx)!important;font-weight:800}
-  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:18px}.kpi{background:var(--sf)!important;border:1px solid var(--bd)!important;border-radius:9px!important;border-top:3px solid var(--gr)!important;padding:16px;min-height:112px}.kpi:nth-child(2){border-top-color:var(--bl)!important}.kpi:nth-child(3){border-top-color:var(--pu)!important}.kpi-label{font:800 10px "DM Sans",system-ui,sans-serif;color:var(--tx2)!important;letter-spacing:.05em;text-transform:uppercase;margin-bottom:13px}.kpi-value{font:700 30px/1 Syne,system-ui,sans-serif;letter-spacing:-.04em;color:var(--tx)!important}.kpi-sub{font:400 10px "DM Sans",system-ui,sans-serif;color:var(--tx3)!important;margin-top:9px}
-  .table-head-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px;background:var(--sf2)!important;border-bottom:1px solid var(--bd)!important}.sec-kicker,.panel-meta{font:800 10px "DM Sans",system-ui,sans-serif;color:var(--tx3)!important;letter-spacing:.1em;text-transform:uppercase}.table-head-row h2{font:700 16px Syne,system-ui,sans-serif;margin:2px 0 0;color:var(--tx)!important}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:900px;background:var(--sf)!important}th{font:800 9px "DM Sans",system-ui,sans-serif;color:var(--bl)!important;text-transform:uppercase;letter-spacing:.06em;padding:11px 12px;text-align:right;border-bottom:1px solid var(--bd)!important;white-space:nowrap}th:first-child,th:nth-child(2){text-align:left}td{font:600 12px "DM Sans",system-ui,sans-serif;color:var(--tx)!important;padding:13px 12px;border-bottom:1px solid var(--bd)!important;text-align:right;white-space:nowrap}td:first-child{text-align:left;font-weight:800}.channel-note{display:block;color:var(--bl)!important;font-size:10px;font-weight:500;margin-top:3px}.share-cell{text-align:left!important;min-width:150px}.share-pct{color:var(--tx)!important;font-weight:800}.share-bar-track{height:4px;background:#25496c!important;border-radius:2px;margin-top:6px;overflow:hidden}.share-bar-fill{height:100%;background:var(--gr)!important;border-radius:2px}tfoot td{background:var(--sf2)!important;color:var(--tx)!important;font-weight:900;border-top:2px solid var(--bd2)!important}.source-note{color:var(--bl)!important;border-top:1px solid var(--bd)!important;font:400 11px/1.6 "DM Sans",system-ui,sans-serif;margin-top:16px;padding-top:14px}
-  @media(max-width:900px){.wrap{width:auto;padding:18px 14px 54px}.masthead{align-items:flex-start}.kpis{grid-template-columns:repeat(2,1fr)}}
-</style>
+<link rel="stylesheet" href="styles.css?v=14">
 </head>
 <body data-theme="dark">
 <main class="wrap report-wrap">
@@ -87,14 +72,9 @@
     </div>
   </section>
 
-  <footer class="source-note">
-    Gross Sales and discounts from Shopify Admin API (1 store per brand) · COGS and margins from QuickBooks Online ·
-    sample data — see README.md for the replacement pipeline via GitHub Actions.
-  </footer>
-
 </main>
 
-<script src="app.js?v=5"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>
 
