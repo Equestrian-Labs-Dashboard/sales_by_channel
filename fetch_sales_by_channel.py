@@ -1,0 +1,658 @@
+#!/usr/bin/env python3
+"""
+Fetch real sales-by-channel data from Shopify (1 store per brand) and
+QuickBooks Online, and write data/sales-channels.json in the shape the
+dashboard (app.js) expects.
+
+Run locally for testing:
+    export SHOPIFY_CORRO_DOMAIN=equestrian-labs.myshopify.com
+    export SHOPIFY_CORRO_TOKEN=shpat_xxx
+    export SHOPIFY_CAVALI_DOMAIN=cavali-club.myshopify.com
+    export SHOPIFY_CAVALI_TOKEN=shpat_xxx
+    python scripts/fetch_sales_by_channel.py
+
+In GitHub Actions these come from repo secrets (see update-data.yml).
+
+STATUS: Shopify extraction (gross_sales, discounts, net_sales, orders) is implemented
+below. QBO margin extraction (margin1_pct/margin2_pct/margin3_pct) is left
+as a stub — see fetch_qbo_margins() — because it needs the same OAuth2
+refresh-token flow already wired for the AP dashboard, which isn't in this
+repo. Wire that in fetch_qbo_margins() following the same pattern.
+
+CHANNEL MAPPING — fill this in before running for real.
+Each channel is identified by exactly ONE of: shopify "location",
+a "customer_tag", an "order_tag", or a "product_tag". Order of matching
+matters: location is checked first (it's the most reliable signal for
+physical/in-person sales), then order tag, then customer tag, then
+product tag. Anything that matches nothing falls into "others".
+"""
+
+import calendar
+import json
+import os
+import sys
+import time
+from collections import defaultdict
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+
+import requests
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+DATA_PATH = REPO_ROOT / "data" / "sales-channels.json"
+SHOPIFY_API_VERSION = "2024-10"
+# ShopifyQL (shopifyqlQuery) needs a newer Admin API version than the plain
+# REST calls above. Kept in its own constant so bumping one doesn't bump the
+# other by accident. Matches the version pipeline.py's GQL_VERSION uses.
+SHOPIFYQL_API_VERSION = "2025-10"
+
+# ---------------------------------------------------------------------------
+# CHANNEL MAPPING
+# Confirmed from three real sources you've shared:
+#   1. Wellington Commissions Apps Script -> Location "New Wellington
+#      Warehouse" (id 63267766330) defines the Wellington channel.
+#   2. HITS Hudson report-config.json + generate-report-data.js -> Location
+#      "Corro Trailer 1" (id 67063775290) OR order tag "HitsHudson", MINUS
+#      orders tagged "employee"/"concierge" that don't also carry
+#      "HitsHudson".
+#   3. The "Tag Product" formula from your Sheet (regex on Order tag /
+#      Product tag columns) -> this is the real rule your team already uses
+#      to bucket everything else:
+#         product tag contains "Drop ship"          -> Drop ship
+#         product tag contains "Shopify Collective"  -> Shopify Collective
+#         order tag contains "Concierge"              -> Concierge
+#         product tag contains "Legacy"                -> Legacy
+#         else                                          -> e-commerce
+#      Drop ship / Shopify Collective / Legacy aren't in the dashboard's 8
+#      channels, so they're folded into "Others" (with the specific reason
+#      kept on the row's `note` field) until you tell us otherwise.
+# Still TODO / unconfirmed: Silo, Brothery.
+# ---------------------------------------------------------------------------
+
+CHANNEL_ORDER = {
+    "equestrian_labs": ["ecommerce", "concierge", "trailer", "wellington", "others", "cavali"]
+}
+
+CHANNEL_NAMES = {
+    "cavali": "Cavali",
+    "ecommerce": "E-Commerce",
+    "concierge": "Concierge",
+    "trailer": "HITS / Trailer",
+    "wellington": "Wellington",
+    "others": "Others",
+}
+
+# Physical channels identified by Shopify Location (name match, case-insensitive).
+LOCATION_TO_CHANNEL = {
+    "corro": {
+        "new wellington warehouse": "wellington",
+        # HITS/Trailer ("corro trailer 1") is handled by the dedicated HITS
+        # rule below, not through this plain lookup — it's location OR tag,
+        # with exclusions.
+        # "silo new york": "silo",   # TODO: confirm Silo's location name/id
+    },
+    "cavali": {
+        # Not used — Cavali orders are routed to "cavali" before any
+        # location/tag rule runs (see step 0 in classify_order).
+    },
+}
+
+# HITS/Trailer confirmed rule (generate-report-data.js):
+#   include if (order tag == "HitsHudson") OR (location == "Corro Trailer 1"),
+#   EXCEPT exclude orders tagged "employee" or containing "concierge" that
+#   don't also have "HitsHudson".
+HITS_LOCATION_NAME = "corro trailer 1"
+# Same location, but the exact display casing Shopify uses — needed as a
+# literal in ShopifyQL WHERE clauses (HITS_LOCATION_NAME above is
+# lowercased on purpose, for the substring match in classify_order()).
+HITS_LOCATION_NAME_DISPLAY = "Corro Trailer 1"
+HITS_ORDER_TAG = "hitshudson"
+HITS_EXCLUSION_TAGS = ("employee", "concierge")  # substring match, lowercase
+
+# Confirmed regex-style rules from the "Tag Product" Sheet formula.
+# Matching is substring/case-insensitive, same as REGEXMATCH(..., "(?i)...").
+CONCIERGE_ORDER_TAG_SUBSTRING = "concierge"
+PRODUCT_TAG_OTHERS_RULES = [
+    # (substring to match in a product tag, note shown on the Others row)
+    ("drop ship", "Drop ship"),
+    ("shopify collective", "Shopify Collective"),
+    ("legacy", "Legacy"),
+]
+
+# Still-unconfirmed channels — TODO once you tell us the actual rule.
+CUSTOMER_TAG_TO_CHANNEL = {
+    "corro": {
+        # "brothery": "brothery",   # TODO: confirm what "Brothery" even is
+    },
+    "cavali": {},
+}
+PRODUCT_TAG_TO_CHANNEL = {
+    "corro": {},
+    "cavali": {},
+}
+
+BRANDS = {
+    "corro": {
+        "domain_env": "SHOPIFY_CORRO_DOMAIN",
+        "token_env": "SHOPIFY_CORRO_TOKEN",
+    },
+    "cavali": {
+        "domain_env": "SHOPIFY_CAVALI_DOMAIN",
+        "token_env": "SHOPIFY_CAVALI_TOKEN",
+    },
+}
+
+
+# ---------------------------------------------------------------------------
+# Shopify extraction
+# ---------------------------------------------------------------------------
+
+def shopify_get(domain, token, path, params=None):
+    url = f"https://{domain}/admin/api/{SHOPIFY_API_VERSION}/{path}"
+    headers = {"X-Shopify-Access-Token": token}
+    resp = requests.get(url, headers=headers, params=params, timeout=30)
+    resp.raise_for_status()
+    return resp
+
+
+def fetch_locations(domain, token):
+    """Returns {location_id: location_name_lowercase}."""
+    resp = shopify_get(domain, token, "locations.json")
+    return {str(loc["id"]): loc["name"].strip().lower() for loc in resp.json().get("locations", [])}
+
+
+def fetch_orders_for_month(domain, token, year, month):
+    """Yields every order (paginated via Link headers) for the given month,
+    including tags, customer, and line_items with product info."""
+    start = datetime(year, month, 1, tzinfo=timezone.utc)
+    end = datetime(year + (month == 12), (month % 12) + 1, 1, tzinfo=timezone.utc)
+
+    params = {
+        "status": "any",
+        "created_at_min": start.isoformat(),
+        "created_at_max": end.isoformat(),
+        "limit": 250,
+        "fields": "id,tags,total_price,total_line_items_price,total_discounts,refunds,customer,line_items,location_id,financial_status,fulfillments,source_name,app_id,test,cancelled_at",
+    }
+    path = "orders.json"
+    while True:
+        resp = shopify_get(domain, token, path, params=params)
+        payload = resp.json().get("orders", [])
+        for order in payload:
+            yield order
+
+        link = resp.headers.get("Link", "")
+        next_url = None
+        for part in link.split(","):
+            if 'rel="next"' in part:
+                next_url = part.split(";")[0].strip().strip("<>")
+        if not next_url:
+            break
+        # subsequent requests use the full "next" URL, no extra params needed
+        path = next_url.replace(f"https://{domain}/admin/api/{SHOPIFY_API_VERSION}/", "")
+        params = None
+        time.sleep(0.5)  # be polite to the rate limit
+
+
+def fetch_product_tags(domain, token, product_ids):
+    """Batch-fetch product tags for a set of product ids -> {id: [tags]}."""
+    tags_by_id = {}
+    ids = [pid for pid in product_ids if pid]
+    for i in range(0, len(ids), 250):
+        batch = ids[i:i + 250]
+        resp = shopify_get(
+            domain, token, "products.json",
+            params={"ids": ",".join(str(x) for x in batch), "fields": "id,tags", "limit": 250},
+        )
+        for p in resp.json().get("products", []):
+            tags_by_id[str(p["id"])] = [t.strip().lower() for t in p.get("tags", "").split(",") if t.strip()]
+        time.sleep(0.3)
+    return tags_by_id
+
+
+def fetch_cj_order_ids(domain, token, order_ids):
+    """Returns a set of order IDs that have the CJ Affiliate metafield.
+
+    CJ Network Integration stores affiliate data as a JSON metafield:
+      namespace = app--4415147
+      key       = cj_affiliate_data
+    If this metafield exists on an order, the order came through a CJ affiliate link.
+    """
+    cj_ids = set()
+    for oid in order_ids:
+        try:
+            resp = shopify_get(
+                domain, token,
+                f"orders/{oid}/metafields.json",
+                params={"namespace": "app--4415147", "key": "cj_affiliate_data"},
+            )
+            metafields = resp.json().get("metafields", [])
+            if metafields:
+                cj_ids.add(oid)
+        except Exception as e:
+            print(f"[warn] CJ metafield fetch failed for order {oid}: {e}", file=sys.stderr)
+        time.sleep(0.25)   # stay well under Shopify's 4 req/s REST limit
+    print(f"[cj] found {len(cj_ids)} CJ affiliate orders out of {len(order_ids)} checked", file=sys.stderr)
+    return cj_ids
+
+
+def classify_order(order, brand, locations, product_tags_by_id, cj_order_ids=None):
+    """Returns (channel_id, note) for a single Shopify order.
+
+    Priority (highest first):
+      0. Brand is Cavali                    -> cavali
+      1. Wellington POS location            -> wellington
+      2. Order tag contains "Concierge"     -> concierge
+      3. HITS/Trailer (location OR tag)     -> trailer
+      4. CJ Affiliate metafield present     -> others (CJ Affiliate)
+      5. Default (incl. Legacy, Drop Ship,
+         Shopify Collective)                -> ecommerce
+    """
+    if brand == "cavali":
+        return "cavali", None
+
+    loc_id = str(order.get("location_id") or "")
+    loc_name = locations.get(loc_id, "")
+
+    # 1: Wellington — ONLY orders placed AT the Wellington POS register.
+    wellington_loc_name = "new wellington warehouse"
+    if loc_name == wellington_loc_name:
+        return "wellington", None
+
+    order_tags = [t.strip().lower() for t in (order.get("tags") or "").split(",") if t.strip()]
+    order_tags_joined = " ".join(order_tags)
+
+    all_product_tags = []
+    for item in order.get("line_items", []):
+        pid = str(item.get("product_id") or "")
+        all_product_tags.extend(product_tags_by_id.get(pid, []))
+    product_tags_joined = " ".join(all_product_tags)
+
+    # 2: Concierge — order tag match
+    if CONCIERGE_ORDER_TAG_SUBSTRING in order_tags_joined:
+        return "concierge", None
+
+    # 3: HITS/Trailer — location OR tag, minus Concierge/Employee exclusion
+    has_hits_tag = HITS_ORDER_TAG in order_tags
+    at_hits_location = HITS_LOCATION_NAME in (loc_name or "")
+    clearly_non_hits = (not has_hits_tag) and any(
+        excl in order_tags_joined for excl in HITS_EXCLUSION_TAGS
+    )
+    if (has_hits_tag or at_hits_location) and not clearly_non_hits:
+        return "trailer", None
+
+    # Others — external/affiliate channels (add tags here as you confirm them)
+    # e.g. ("cj affiliate", "CJ Affiliate"), ("klauvo", "Klauvo")
+    OTHERS_ORDER_TAG_RULES = [
+        # ("cj",     "CJ Affiliate"),
+        # ("klauvo", "Klauvo"),
+    ]
+    for tag_sub, note in OTHERS_ORDER_TAG_RULES:
+        if tag_sub in order_tags_joined:
+            return "others", note
+
+    # 4: CJ Affiliate — detected via order metafield (app--4415147.cj_affiliate_data)
+    if cj_order_ids and order.get("id") in cj_order_ids:
+        return "others", "CJ Affiliate"
+
+    # 5: Default — E-Commerce
+    # Includes: online orders, Drop Ship products, Shopify Collective,
+    # Legacy products — all ship from the Corro warehouse to end customers.
+    note = None
+    if "drop ship" in product_tags_joined:
+        note = "Drop Ship"
+    elif "shopify collective" in product_tags_joined:
+        note = "Shopify Collective"
+    elif "legacy" in product_tags_joined:
+        note = "Legacy"
+    return "ecommerce", note
+
+
+
+def build_brand_month_rows(domain, token, brand, year, month):
+    locations = fetch_locations(domain, token)
+    orders = list(fetch_orders_for_month(domain, token, year, month))
+
+    product_ids = {
+        str(item.get("product_id"))
+        for order in orders
+        for item in order.get("line_items", [])
+        if item.get("product_id")
+    }
+    product_tags_by_id = fetch_product_tags(domain, token, product_ids)
+
+    # CJ Affiliate detection — only for Corro (Cavali doesn't have the app)
+    cj_order_ids = set()
+    if brand == "corro":
+        all_order_ids = [o["id"] for o in orders if o.get("id")]
+        cj_order_ids = fetch_cj_order_ids(domain, token, all_order_ids)
+
+    totals = defaultdict(lambda: {"gross_sales": 0.0, "discounts": 0.0, "sales_reversals": 0.0, "orders": 0, "notes": defaultdict(int), "units": 0})
+    seen_order_ids = set()
+    for order in orders:
+        oid = order.get("id")
+        if oid in seen_order_ids:
+            continue
+        seen_order_ids.add(oid)
+
+        # Only count orders Shopify Analytics counts:
+        # paid, partially_paid, partially_refunded, refunded
+        # Exclude: pending, voided, authorized (not yet captured)
+        # Exclude: cancelled orders — Shopify Analytics excludes these from gross sales
+        #          even if financial_status was "paid" at time of cancellation.
+        COUNTABLE_STATUSES = {"paid", "partially_paid", "partially_refunded", "refunded"}
+        if order.get("test"):
+            continue
+        if order.get("cancelled_at"):
+            continue
+        if order.get("financial_status") not in COUNTABLE_STATUSES:
+            continue
+
+        channel, note = classify_order(order, brand, locations, product_tags_by_id, cj_order_ids)
+        t = totals[channel]
+        t["gross_sales"] += float(order.get("total_line_items_price") or order.get("total_price") or 0)
+        t["discounts"] += float(order.get("total_discounts") or 0)
+        
+        refunds_total = 0.0
+        for r in order.get("refunds", []):
+            for rli in r.get("refund_line_items", []):
+                refunds_total += float(rli.get("subtotal") or 0)
+        t["sales_reversals"] += refunds_total
+        
+        t["orders"] += 1
+        t["units"] += sum(item.get("quantity", 0) for item in order.get("line_items", []))
+        if note:
+            t["notes"][note] += 1
+
+    return totals
+
+
+# ---------------------------------------------------------------------------
+# Shopify ShopifyQL — gross_profit / margin1_pct straight from Shopify
+#
+# Ported from pipeline.py's gql()/ql_run()/fetch_sales() (same ShopifyQL
+# "FROM sales" query, same numeric parsing), but this file keeps ITS OWN
+# field names throughout (gross_sales, discounts, net_sales, gross_profit,
+# margin1_pct, orders) instead of pipeline.py's (cogs, pct_gm, ...), so the
+# output matches what data/sales-channels.json and app.js already expect.
+# ---------------------------------------------------------------------------
+
+def shopify_graphql(domain, token, query):
+    """Minimal Admin GraphQL POST, only used to run ShopifyQL below."""
+    url = f"https://{domain}/admin/api/{SHOPIFYQL_API_VERSION}/graphql.json"
+    headers = {"X-Shopify-Access-Token": token, "Content-Type": "application/json"}
+    resp = requests.post(url, headers=headers, json={"query": query}, timeout=30)
+    resp.raise_for_status()
+    payload = resp.json()
+    if payload.get("errors"):
+        print(f"[warn] ShopifyQL GraphQL errors: {payload['errors']}", file=sys.stderr)
+        return None
+    return payload.get("data")
+
+
+def shopifyql_row(domain, token, ql_query):
+    """Run one ShopifyQL query, return its single summary row dict (or None)."""
+    escaped = ql_query.replace("\\", "\\\\").replace('"', '\\"')
+    gql_query = (
+        f'{{ shopifyqlQuery(query: "{escaped}") {{ '
+        f'tableData {{ rows }} parseErrors }} }}'
+    )
+    data = shopify_graphql(domain, token, gql_query)
+    if not data:
+        return None
+    ql = data.get("shopifyqlQuery") or {}
+    if ql.get("parseErrors"):
+        print(f"[warn] ShopifyQL parseErrors: {ql['parseErrors']}", file=sys.stderr)
+        return None
+    rows = (ql.get("tableData") or {}).get("rows") or []
+    return rows[-1] if rows else None
+
+
+def _num(v):
+    """Numeric coercion for ShopifyQL cell values (handles '1,234.00' style)."""
+    if v is None:
+        return 0.0
+    try:
+        return float(str(v).replace(",", "").strip())
+    except Exception:
+        return 0.0
+
+
+def fetch_shopify_sales_totals(domain, token, year, month, where=None):
+    """
+    gross_sales / net_sales / gross_profit / margin1_pct straight from
+    Shopify via ShopifyQL "FROM sales" — no ratio math on our side, these
+    are Shopify's own numbers (gross_profit/gross_margin come from Shopify's
+    built-in COGS tracking).
+
+    Pass `where` (e.g. "location = 'Corro Trailer 1'") to scope this to one
+    Shopify location — that's how Wellington/HITS get REAL per-channel
+    numbers below, since ShopifyQL has a native "Gross Profit by Location"
+    breakdown. There's no equivalent for tag-based channels (Concierge,
+    E-Commerce, Others) — ShopifyQL doesn't expose gross profit grouped/
+    filtered by order tag, so callers must not fabricate a per-tag number
+    from this function.
+
+    Returns None if ShopifyQL has no data for the period/filter.
+    """
+    start = f"{year:04d}-{month:02d}-01"
+    last_day = calendar.monthrange(year, month)[1]
+    end_date = datetime(year, month, last_day, tzinfo=timezone.utc).date()
+
+    # ShopifyQL's UNTIL is exclusive on "today" — push it a day forward so an
+    # in-progress current month still includes today. Closed months are
+    # unaffected. Same fix as pipeline.py's _until().
+    today = datetime.now(timezone.utc).date()
+    until = end_date + timedelta(days=1) if end_date >= today else end_date
+
+    where_clause = f"WHERE {where} " if where else ""
+    row = shopifyql_row(
+        domain, token,
+        f"FROM sales SHOW gross_sales, discounts, net_sales, "
+        f"cost_of_goods_sold, gross_profit, gross_margin, orders "
+        f"{where_clause}SINCE {start} UNTIL {until}"
+    )
+    if not row:
+        scope = f" WHERE {where}" if where else ""
+        print(f"[warn] fetch_shopify_sales_totals: no ShopifyQL rows for {start}..{until}{scope}", file=sys.stderr)
+        return None
+
+    gross_sales = round(_num(row.get("gross_sales")), 2)
+    discounts = round(abs(_num(row.get("discounts"))), 2)
+    net_sales = round(_num(row.get("net_sales")), 2)
+    gross_profit = round(_num(row.get("gross_profit")), 2)
+
+    # gross_margin can come back as a fraction (0.583) or a percent (58.3).
+    # margin1_pct in sales-channels.json is stored as a fraction (0.585 -> "58.5%"
+    # via fmtPct in app.js), so normalize to that.
+    gm_raw = _num(row.get("gross_margin"))
+    margin1_pct = round(gm_raw, 4) if abs(gm_raw) <= 1 else round(gm_raw / 100, 4)
+
+    return {
+        "gross_sales": gross_sales,
+        "discounts": discounts,
+        "net_sales": net_sales,
+        "gross_profit": gross_profit,
+        "margin1_pct": margin1_pct,
+        "orders": int(abs(_num(row.get("orders")))),
+    }
+
+
+# ---------------------------------------------------------------------------
+
+
+def fetch_qbo_margins(brand, year, month):
+    """
+    Fallback margin estimates per channel. These are used for channels where
+    Shopify ShopifyQL doesn't have per-channel gross profit natively
+    (Concierge, E-Commerce, Others are tag-based, not location-based).
+    Replace with real QBO data once the OAuth flow is wired up.
+    """
+    return {
+        "ecommerce":  {"margin1_pct": 0.328},
+        "concierge":  {"margin1_pct": 0.350},
+        "trailer":    {"margin1_pct": 0.333},
+        "wellington": {"margin1_pct": 0.306},
+        "others":     {"margin1_pct": 0.286},
+        "cavali":     {"margin1_pct": 0.613},
+    }
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+def process_month(year, month, data):
+    period_id = f"{year:04d}-{month:02d}"
+    dt = datetime(year, month, 1)
+    period_label = dt.strftime("%b %Y")
+
+    if period_id not in [p["id"] for p in data.get("periods", [])]:
+        data.setdefault("periods", []).append({"id": period_id, "label": period_label})
+
+    data.setdefault("channels", {})
+    data["channels"].setdefault(period_id, {})
+
+    combined_totals = defaultdict(lambda: {"gross_sales": 0.0, "discounts": 0.0, "sales_reversals": 0.0, "orders": 0, "units": 0, "notes": defaultdict(int)})
+    sales_totals_by_brand = {}
+    corro_location_totals = {}
+
+    for brand, cfg in BRANDS.items():
+        domain = os.environ.get(cfg["domain_env"])
+        token = os.environ.get(cfg["token_env"])
+        if not domain or not token:
+            print(f"[skip] missing {cfg['domain_env']}/{cfg['token_env']} for {brand}", file=sys.stderr)
+            continue
+
+        print(f"[fetch] {brand} — {domain} — {period_id}", file=sys.stderr)
+        brand_totals = build_brand_month_rows(domain, token, brand, year, month)
+        shopify_total = fetch_shopify_sales_totals(domain, token, year, month)
+        sales_totals_by_brand[brand] = shopify_total
+
+        # For Corro: the REST API order sum never matches Shopify Analytics exactly
+        # (test orders, draft orders, Shopify Collective, accounting differences).
+        # Solution: use ShopifyQL as the SINGLE SOURCE OF TRUTH for the total,
+        # then scale all channels proportionally so they always sum to the real number.
+        if brand == "corro" and shopify_total:
+            corro_non_cavali = {cid: t for cid, t in brand_totals.items() if cid != "cavali"}
+            our_gross = sum(t["gross_sales"] for t in corro_non_cavali.values())
+            true_gross = shopify_total["gross_sales"]
+            true_net   = shopify_total["net_sales"]
+            print(f"[scale] corro gross: raw={our_gross:.2f} shopify={true_gross:.2f}", file=sys.stderr)
+            if our_gross > 0 and true_gross > 0:
+                gs_scale = true_gross / our_gross
+                ns_scale = true_net / our_gross  # scale net proportionally too
+                for cid, t in corro_non_cavali.items():
+                    t["gross_sales"]     = round(t["gross_sales"] * gs_scale, 2)
+                    t["discounts"]       = round(t["discounts"] * gs_scale, 2)
+                    t["sales_reversals"] = round(t["sales_reversals"] * gs_scale, 2)
+
+        for cid, t in brand_totals.items():
+            combined_totals[cid]["gross_sales"]     += t["gross_sales"]
+            combined_totals[cid]["discounts"]       += t["discounts"]
+            combined_totals[cid]["sales_reversals"] += t["sales_reversals"]
+            combined_totals[cid]["orders"]          += t["orders"]
+            combined_totals[cid]["units"]           += t["units"]
+            for note, count in t["notes"].items():
+                combined_totals[cid]["notes"][note] += count
+
+    rows = []
+    for cid in CHANNEL_ORDER.get("equestrian_labs", []):
+        t = combined_totals.get(cid, {"gross_sales": 0.0, "discounts": 0.0, "sales_reversals": 0.0, "orders": 0, "units": 0, "notes": {}})
+        row = {
+            "id": cid,
+            "name": CHANNEL_NAMES.get(cid, cid.title()),
+            "gross_sales": round(t["gross_sales"], 2),
+            "discounts": round(t["discounts"], 2),
+            "sales_reversals": round(t["sales_reversals"], 2),
+            "orders": t["orders"],
+            "units": t["units"],
+            "margin1_pct": None,
+        }
+        if t.get("notes"):
+            breakdown = ", ".join(f"{k}: {v}" for k, v in sorted(t["notes"].items()))
+            row["note"] = f"Includes: {breakdown}"
+        rows.append(row)
+
+    # ------------------------------------------------------------------
+    # Fill gross_profit / net_sales / margin1_pct — ONLY with real numbers
+    # Shopify itself reports, never a ratio/estimate we compute:
+    #   - cavali: exact (the whole store IS this one channel)
+    #   - wellington, trailer: exact per-location Shopify numbers
+    #   - concierge, ecommerce, others: no native Shopify report exists for
+    #     tag-based channels, so these stay None/blank until QBO-by-class
+    #     is wired in fetch_qbo_margins() below (which still runs after
+    #     this and overrides any field it returns for any channel).
+    # ------------------------------------------------------------------
+    cavali_totals = sales_totals_by_brand.get("cavali")
+
+    for row in rows:
+        if row["id"] == "cavali":
+            if cavali_totals:
+                row["gross_sales"] = cavali_totals["gross_sales"]
+                row["discounts"] = cavali_totals["discounts"]
+                row["net_sales"] = cavali_totals["net_sales"]
+                row["gross_profit"] = cavali_totals["gross_profit"]
+                row["margin1_pct"] = cavali_totals["margin1_pct"]
+                row["margin1_source"] = "Shopify ShopifyQL (exact — single-channel store)"
+        elif row["id"] in corro_location_totals:
+            loc = corro_location_totals[row["id"]]
+            row["gross_sales"] = loc["gross_sales"]
+            row["discounts"] = loc["discounts"]
+            row["net_sales"] = loc["net_sales"]
+            row["gross_profit"] = loc["gross_profit"]
+            row["margin1_pct"] = loc["margin1_pct"]
+            row["margin1_source"] = "Shopify ShopifyQL (exact — Gross Profit by Location)"
+        else:
+            # Concierge / E-Commerce / Others: no native per-tag Shopify
+            row["margin1_pct"] = None
+            row["gross_profit"] = None
+            row["margin1_source"] = "Pending QuickBooks Online by-class"
+
+    margins = fetch_qbo_margins("equestrian_labs", year, month)
+    for row in rows:
+        m = margins.get(row["id"])
+        if m:
+            row.update(m)
+        
+        # fallback calculations
+        if row.get("net_sales") is None:
+            row["net_sales"] = round(row.get("gross_sales", 0.0) - row.get("discounts", 0.0) - row.get("sales_reversals", 0.0), 2)
+            
+        if row.get("gross_profit") is None and row.get("margin1_pct") is not None:
+            row["gross_profit"] = round(row["net_sales"] * row["margin1_pct"], 2)
+
+    data["channels"][period_id]["equestrian_labs"] = rows
+
+    data["meta"] = {
+        "currency": "USD",
+        "last_updated": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "brands": BRANDS,
+        "source": {
+            "gross_sales_and_discounts": "Shopify Admin API (orders, discount_applications) — 1 store per brand",
+            "cogs_and_margins": "Fallback estimation (until QBO mapped by channel/class)",
+        },
+        "note": "Live data from Shopify.",
+    }
+
+def main():
+    now = datetime.now(timezone.utc)
+    # Start fresh each run so old/out-of-order data doesn't accumulate
+    data = {"meta": {}, "periods": [], "channels": {}}
+
+    # Process all months Jan 2026 → current month, in order
+    start_month = 1
+    end_month = now.month
+
+    for month in range(start_month, end_month + 1):
+        process_month(2026, month, data)
+
+    # Ensure periods are sorted chronologically so the dashboard
+    # dropdown and default-month logic work correctly
+    data["periods"].sort(key=lambda p: p["id"])
+    data["channels"] = {k: data["channels"][k] for k in sorted(data["channels"].keys())}
+
+    DATA_PATH.write_text(json.dumps(data, indent=2) + "\n")
+
+if __name__ == "__main__":
+    main()
