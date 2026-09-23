@@ -1,4 +1,5 @@
 import { authorize } from "./_lib/authz.js";
+import { queueAccessLog } from "./_lib/audit.js";
 import { canUseReport } from "./_lib/registry.js";
 
 const REPORT_KEY = "sales_by_channel";
@@ -130,16 +131,21 @@ export async function onRequest(context) {
   try {
     const { user } = await authorize(context);
     if (!canUseReport(user, REPORT_KEY)) {
+      queueAccessLog(context, { project: "Sales by Channel", reportKey: REPORT_KEY, action: "view", result: "denied", user });
       return accessDeniedResponse();
     }
+    queueAccessLog(context, { project: "Sales by Channel", reportKey: REPORT_KEY, action: "view", result: "allowed", user });
     return context.next();
   } catch (e) {
     if (["session_missing", "session_expired", "session_invalid"].includes(e?.code)) {
+      queueAccessLog(context, { project: "Sales by Channel", reportKey: REPORT_KEY, action: "view", result: e.code });
       return signInResponse(e.code === "session_expired" ? "Your session expired. Please sign in again." : undefined);
     }
     if (!e?.status || Number(e.status) >= 500) {
+      queueAccessLog(context, { project: "Sales by Channel", reportKey: REPORT_KEY, action: "view", result: "setup_error" });
       return setupErrorResponse(e);
     }
+    queueAccessLog(context, { project: "Sales by Channel", reportKey: REPORT_KEY, action: "view", result: "denied" });
     return accessDeniedResponse();
   }
 }

@@ -48,7 +48,7 @@ export async function getGoogleAccessToken(env) {
   const header = { alg: "RS256", typ: "JWT" };
   const claim = {
     iss: creds.client_email,
-    scope: "https://www.googleapis.com/auth/spreadsheets.readonly",
+    scope: "https://www.googleapis.com/auth/spreadsheets",
     aud: tokenUri,
     iat: now,
     exp: now + 3600,
@@ -85,12 +85,17 @@ export async function getGoogleAccessToken(env) {
   return d.access_token;
 }
 
-async function googleFetch(env, url, attempts = 3) {
+async function googleFetch(env, url, options = {}, attempts = 3) {
   let last;
   for (let i = 0; i < attempts; i++) {
     const token = await getGoogleAccessToken(env);
     const r = await fetch(url, {
-      headers: { authorization: `Bearer ${token}`, accept: "application/json" },
+      ...options,
+      headers: {
+        authorization: `Bearer ${token}`,
+        accept: "application/json",
+        ...(options.headers || {}),
+      },
     });
     if (r.ok) return r;
     const text = await r.text().catch(() => "");
@@ -116,5 +121,21 @@ export async function batchGetValues(env, spreadsheetId, ranges) {
   const qs = (ranges || []).map(r => `ranges=${encodeURIComponent(r)}`).join("&");
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(sid)}/values:batchGet?majorDimension=ROWS&${qs}`;
   const r = await googleFetch(env, url);
+  return r.json();
+}
+
+export async function appendValues(env, spreadsheetId, a1Range, rows) {
+  const sid = String(spreadsheetId || "").trim();
+  if (!sid) throw new Error("Spreadsheet ID is not configured");
+  const range = encodeURIComponent(a1Range);
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(sid)}/values/${range}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+  const r = await googleFetch(env, url, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      majorDimension: "ROWS",
+      values: rows,
+    }),
+  });
   return r.json();
 }
