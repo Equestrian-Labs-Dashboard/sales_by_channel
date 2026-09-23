@@ -7,14 +7,31 @@
 <link rel="icon" type="image/png" href="corro_logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=10">
+<link rel="stylesheet" href="styles.css?v=12">
+<style>
+  /* Critical shell styles kept inline so cached CSS can never blow up the logo/layout. */
+  .app-shell{display:flex;min-height:100vh;width:100%}
+  .sidebar{width:200px;background:#fff;border-right:1px solid #c8d8e8;position:sticky;top:0;height:100vh;flex:0 0 auto;overflow:hidden}
+  .sb-top{padding:16px 14px 13px;border-bottom:1px solid #c8d8e8}
+  .sb-logo{width:50px!important;height:34px!important;max-width:50px!important;max-height:34px!important;object-fit:contain;object-position:left center;display:block;margin:2px 0 8px -4px}
+  .sb-dots{display:flex;gap:4px;margin-bottom:8px}.sb-dots span{width:7px;height:7px;border-radius:50%;display:block}.sb-dots span:first-child{background:#0c7050}.sb-dots span:last-child{background:#4840b0}
+  .sb-name{font:700 13px Syne,system-ui,sans-serif;color:#0d1b2a}.sb-sub{font:400 10px "DM Sans",system-ui,sans-serif;color:#7a96b0;margin-top:2px}
+  .sb-nav{padding:8px 0}.sb-sec{padding:9px 14px 4px;font:700 9px "DM Sans",system-ui,sans-serif;color:#7a96b0;letter-spacing:.1em;text-transform:uppercase}
+  .sb-item{display:flex;align-items:center;gap:8px;padding:7px 14px;font:500 12px "DM Sans",system-ui,sans-serif;color:#3a5470;text-decoration:none;border-left:2px solid transparent}.sb-item.on{background:#f0f5fa;color:#0d1b2a;border-left-color:#0c7050;font-weight:700}
+  .wrap{flex:1;min-width:0;padding:24px 26px 70px;max-width:none;margin:0}
+  .masthead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:12px}.masthead h1{font:700 23px/1.05 Syne,system-ui,sans-serif;letter-spacing:-.03em;margin:0 0 4px}.masthead .sub{font:400 12px "DM Sans",system-ui,sans-serif;color:#7a96b0;margin:0}
+  .panel-control,.data-panel{background:#fff;border:1px solid #c8d8e8;border-radius:9px}.panel-control{padding:10px 13px;margin:0 0 10px}.info-strip{font:400 11px "DM Sans",system-ui,sans-serif;color:#7a96b0;background:#f0f5fa;border-radius:6px;padding:7px 12px;margin-bottom:14px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px;margin-bottom:18px}.kpi{background:#fff;border:1px solid #c8d8e8;border-radius:9px;border-top:3px solid #0c7050;padding:16px;min-height:112px}.kpi-value{font:700 30px/1 Syne,system-ui,sans-serif;letter-spacing:-.04em}
+  .table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:900px}
+  @media(max-width:900px){.app-shell{display:block}.sidebar{position:relative;width:auto;height:auto;border-right:0;border-bottom:1px solid #c8d8e8}.wrap{padding:18px 14px 54px}}
+</style>
 </head>
 <body data-theme="light">
 <div class="app-shell">
   <aside class="sidebar">
     <div class="sb-top">
       <div class="sb-dots"><span></span><span></span></div>
-      <img class="sb-logo" src="corro_logo.png" alt="Corro">
+      <img class="sb-logo" src="corro_logo.png" alt="Corro" width="50" height="34" style="width:50px;height:34px;max-width:50px;max-height:34px;object-fit:contain;object-position:left center;display:block;margin:2px 0 8px -4px">
       <div class="sb-name">Equestrian Labs, Inc.</div>
       <div class="sb-sub">Performance Dashboard</div>
     </div>
