@@ -17,6 +17,54 @@ sales-per-channel/
 
 No build step: plain HTML/CSS/JS, same pattern as the AP dashboard and the subscription dashboard. To publish on GitHub Pages, push this folder to a repo and point Pages at `main` / `root`.
 
+## Cloudflare Pages access control
+
+This repo includes Cloudflare Pages Functions under `functions/` so the report can use the shared Google Sheets user registry.
+
+Expected Google Sheets columns:
+
+| Column | Example |
+|---|---|
+| `User Name` | `Alejandra` |
+| `Email` | `arojas@corroshop.com` |
+| `Report Access` | `All` or `Sales Channel` |
+| `Branch` | `All` |
+
+Accepted report permission names for this project:
+
+- `All`
+- `Sales Channel`
+- `Sales by Channel`
+- `sales_channel`
+- `sales_by_channel`
+- `Channel Sales`
+- `Sales by Channel Summary`
+
+Cloudflare Pages settings:
+
+| Setting | Value |
+|---|---|
+| Build command | leave empty, or `exit 0` |
+| Build output directory | `/` |
+| Root directory | empty, unless the repo stores this project in a subfolder |
+
+Cloudflare Pages variables and secrets:
+
+| Name | Type | Notes |
+|---|---|---|
+| `GOOGLE_CLIENT_ID` | Text | OAuth web client ID used for Google sign-in |
+| `GOOGLE_CREDENTIALS` | Secret | Service account JSON with access to the registry sheet |
+| `SESSION_SECRET` | Secret | Random string, at least 32 characters |
+| `USER_REGISTRY_SHEET_ID` | Text | The Google Sheet ID for the shared user registry |
+| `USER_REGISTRY_TAB` | Text | Usually `Register Users`; fallback tabs are also tried |
+| `USER_REGISTRY_CACHE_SECONDS` | Text | Optional, for example `30` |
+
+In Google Cloud OAuth, add the Cloudflare Pages production URL to **Authorized JavaScript origins**, for example:
+
+`https://sales-by-channel.pages.dev`
+
+The service account email from `GOOGLE_CREDENTIALS` must have viewer access to the Google Sheet.
+
 ## What's in the draft
 
 - Brand filter: **All brands / Corro / Cavali**, with each brand color-coded (Corro `#9C5F3C`, Cavali `#3C6E71` in light mode — both shift lighter in dark mode). "All brands" combines both, channel by channel, with margins weighted by net sales.

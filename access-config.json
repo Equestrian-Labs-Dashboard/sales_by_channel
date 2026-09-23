@@ -1,0 +1,16 @@
+{
+  "report": "Sales by Channel",
+  "permission": "Sales Channel",
+  "permissions": [
+    "sales_channel",
+    "sales_by_channel",
+    "Sales by Channel",
+    "Sales Channel"
+  ],
+  "aliases": [
+    "Channel Sales",
+    "Sales Channel Summary",
+    "Sales by Channel Summary"
+  ],
+  "portal": "https://equestrian-labs-dashboard.pages.dev"
+}
