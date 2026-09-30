@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" href="corro_logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=15">
+<link rel="stylesheet" href="styles.css?v=16">
 </head>
 <body data-theme="dark">
 <main class="wrap report-wrap">
@@ -39,7 +39,7 @@
     </div>
   </div>
 
-  <div class="info-strip"><span>Sales grouped by channel</span> · Paid Ads · Direct · Organic · Smartrr · Others</div>
+  <div class="info-strip"><span>Net sales confirmed</span> · Shopify + QBO channel mix · Detail plus adjusted grouped summary</div>
 
   <section class="kpis" id="kpiRow"></section>
 
@@ -49,10 +49,32 @@
         <div class="sec-kicker">01</div>
         <h2>Sales by Channel</h2>
       </div>
-      <div class="panel-meta">Adjusted Channel Summary</div>
+      <div class="view-tabs" role="tablist" aria-label="Sales by channel views">
+        <button class="view-tab active" id="detailTab" type="button" role="tab" aria-selected="true" aria-controls="detailView">Detail</button>
+        <button class="view-tab" id="summaryTab" type="button" role="tab" aria-selected="false" aria-controls="summaryView">Adjusted Summary</button>
+      </div>
     </div>
-    <div class="table-wrap">
+    <div class="table-wrap tab-view active" id="detailView" role="tabpanel" aria-labelledby="detailTab">
       <table>
+        <thead>
+          <tr>
+            <th>Channel</th>
+            <th class="share-cell">Share</th>
+            <th>Gross Sales</th>
+            <th>Net Sales</th>
+            <th>Gross Profit</th>
+            <th>Margin 1</th>
+            <th>Orders</th>
+            <th>AOV</th>
+            <th>Units per Order</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+        <tfoot id="tableFoot"></tfoot>
+      </table>
+    </div>
+    <div class="table-wrap tab-view" id="summaryView" role="tabpanel" aria-labelledby="summaryTab" hidden>
+      <table class="summary-table">
         <thead>
           <tr>
             <th>Channel</th>
@@ -60,16 +82,16 @@
             <th class="share-cell">% Share</th>
           </tr>
         </thead>
-        <tbody id="tableBody"></tbody>
-        <tfoot id="tableFoot"></tfoot>
+        <tbody id="summaryTableBody"></tbody>
+        <tfoot id="summaryTableFoot"></tfoot>
       </table>
+      <p class="methodology-note" id="methodologyNote"></p>
     </div>
-    <p class="methodology-note" id="methodologyNote"></p>
   </section>
 
 </main>
 
-<script src="app.js?v=7"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>
 

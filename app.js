@@ -24,6 +24,22 @@ let DATA          = null;
 let activePeriod  = null;
 let activeYear    = null;
 
+document.querySelectorAll(".view-tab").forEach((tab) => {
+  tab.addEventListener("click", () => setActiveView(tab.id === "summaryTab" ? "summary" : "detail"));
+});
+
+function setActiveView(view) {
+  const isSummary = view === "summary";
+  document.getElementById("detailTab")?.classList.toggle("active", !isSummary);
+  document.getElementById("summaryTab")?.classList.toggle("active", isSummary);
+  document.getElementById("detailTab")?.setAttribute("aria-selected", String(!isSummary));
+  document.getElementById("summaryTab")?.setAttribute("aria-selected", String(isSummary));
+  document.getElementById("detailView")?.classList.toggle("active", !isSummary);
+  document.getElementById("summaryView")?.classList.toggle("active", isSummary);
+  if (document.getElementById("detailView")) document.getElementById("detailView").hidden = isSummary;
+  if (document.getElementById("summaryView")) document.getElementById("summaryView").hidden = !isSummary;
+}
+
 // ---------- Theme ----------
 const themeToggle = document.getElementById("themeToggle");
 const themeKnob   = document.getElementById("themeKnob");
@@ -65,7 +81,7 @@ fetch("data/sales-channels.json?v=" + new Date().getTime())
   .catch((err) => {
     const errBody = document.getElementById("tableBody");
     if (errBody)
-      errBody.innerHTML = `<tr><td colspan="3">Could not load data (${err.message}). Check data/sales-channels.json.</td></tr>`;
+      errBody.innerHTML = `<tr><td colspan="9">Could not load data (${err.message}). Check data/sales-channels.json.</td></tr>`;
   });
 
 // ---------- Year buttons ----------
@@ -312,18 +328,18 @@ function render(periodId) {
   }));
 
   const summary          = buildChannelSummary(enriched);
-  const displayRows      = summary.rows;
-  const totalGross       = displayRows.reduce((s, c) => s + c.gross_sales, 0);
-  const totalNet         = displayRows.reduce((s, c) => s + c.net_sales, 0);
-  const gpKnownRows      = displayRows.filter((c) => c.gross_profit != null);
+  const totalGross       = enriched.reduce((s, c) => s + c.gross_sales, 0);
+  const totalNet         = enriched.reduce((s, c) => s + c.net_sales, 0);
+  const gpKnownRows      = enriched.filter((c) => c.gross_profit != null);
   const totalGrossProfit = gpKnownRows.reduce((s, c) => s + c.gross_profit, 0);
-  const isPartialGP      = gpKnownRows.length < displayRows.length;
+  const isPartialGP      = gpKnownRows.length < enriched.length;
   const weightedM1       = totalNet > 0 ? totalGrossProfit / totalNet : 0;
-  const totalOrders      = displayRows.reduce((s, c) => s + (c.orders || 0), 0);
-  const totalUnits       = displayRows.reduce((s, c) => s + (c.units  || 0), 0);
+  const totalOrders      = enriched.reduce((s, c) => s + (c.orders || 0), 0);
+  const totalUnits       = enriched.reduce((s, c) => s + (c.units  || 0), 0);
 
   renderKPIs(totalGross, totalNet, totalGrossProfit, weightedM1, totalOrders, isPartialGP);
-  renderTable(displayRows, totalGross, totalOrders, totalUnits, summary);
+  renderDetailTable(enriched, totalGross, totalNet, totalGrossProfit, totalOrders, totalUnits);
+  renderSummaryTable(summary.rows, totalGross, summary);
 }
 
 function renderKPIs(totalGross, totalNet, totalGrossProfit, weightedM1, totalOrders, isPartialGP) {
@@ -346,8 +362,59 @@ function renderKPIs(totalGross, totalNet, totalGrossProfit, weightedM1, totalOrd
     .join("");
 }
 
-function renderTable(rows, totalGross, totalOrders, totalUnits, summary) {
+function renderDetailTable(rows, totalGross, totalNet, totalGrossProfit, totalOrders, totalUnits) {
   const body   = document.getElementById("tableBody");
+  const sorted = [...rows].sort((a, b) => b.gross_sales - a.gross_sales);
+
+  if (body) {
+    body.innerHTML = sorted.map((c) => {
+      const share = totalGross > 0 ? c.gross_sales / totalGross : 0;
+      const hasGP            = c.gross_profit != null;
+      const hasMargin        = c.margin1_pct  != null;
+      const grossProfitLabel = hasGP     ? fmtUSD(c.gross_profit) : "-";
+      const marginLabel      = hasMargin ? fmtPct(c.margin1_pct)  : "-";
+      const orders = c.orders || 0;
+      const units  = c.units  || 0;
+      const aov    = orders > 0 ? fmtUSD(c.gross_sales / orders) : "-";
+      const upo    = orders > 0 ? (units / orders).toFixed(2)    : "-";
+
+      return `
+        <tr>
+          <td>${c.name}${c.note ? `<span class="channel-note">${c.note}</span>` : ""}</td>
+          <td class="share-cell">
+            <span class="share-pct">${fmtPct(share)}</span>
+            <div class="share-bar-track"><div class="share-bar-fill" style="width:${(share * 100).toFixed(1)}%"></div></div>
+          </td>
+          <td>${fmtUSD(c.gross_sales)}</td>
+          <td>${fmtUSD(c.net_sales)}</td>
+          <td>${grossProfitLabel}</td>
+          <td>${marginLabel}</td>
+          <td>${orders.toLocaleString("en-US")}</td>
+          <td>${aov}</td>
+          <td>${upo}</td>
+        </tr>`;
+    }).join("");
+  }
+
+  const foot = document.getElementById("tableFoot");
+  if (foot) {
+    foot.innerHTML = `
+      <tr>
+        <td>Total</td>
+        <td class="share-cell">100.0%</td>
+        <td>${fmtUSD(totalGross)}</td>
+        <td>${fmtUSD(totalNet)}</td>
+        <td>${fmtUSD(totalGrossProfit)}</td>
+        <td></td>
+        <td>${totalOrders.toLocaleString("en-US")}</td>
+        <td>${totalOrders > 0 ? fmtUSD(totalGross / totalOrders) : "-"}</td>
+        <td>${totalOrders > 0 ? (totalUnits / totalOrders).toFixed(2) : "-"}</td>
+      </tr>`;
+  }
+}
+
+function renderSummaryTable(rows, totalGross, summary) {
+  const body   = document.getElementById("summaryTableBody");
   const sorted = CHANNEL_GROUPS.map((group) => rows.find((row) => row.id === group.id)).filter(Boolean);
 
   if (body) {
@@ -366,7 +433,7 @@ function renderTable(rows, totalGross, totalOrders, totalUnits, summary) {
     }).join("");
   }
 
-  const foot = document.getElementById("tableFoot");
+  const foot = document.getElementById("summaryTableFoot");
   if (foot) {
     foot.innerHTML = `
       <tr>
