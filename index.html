@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" href="corro_logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=14">
+<link rel="stylesheet" href="styles.css?v=15">
 </head>
 <body data-theme="dark">
 <main class="wrap report-wrap">
@@ -39,7 +39,7 @@
     </div>
   </div>
 
-  <div class="info-strip"><span>Net sales confirmed</span> · Shopify + QBO channel mix · Gross sales sorted descending</div>
+  <div class="info-strip"><span>Sales grouped by channel</span> · Paid Ads · Direct · Organic · Smartrr · Others</div>
 
   <section class="kpis" id="kpiRow"></section>
 
@@ -47,34 +47,29 @@
     <div class="table-head-row">
       <div>
         <div class="sec-kicker">01</div>
-        <h2>Channel Share</h2>
+        <h2>Sales by Channel</h2>
       </div>
-      <div class="panel-meta">Sales Channel Summary</div>
+      <div class="panel-meta">Adjusted Channel Summary</div>
     </div>
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
             <th>Channel</th>
-            <th class="share-cell">Share</th>
-            <th>Gross Sales</th>
-            <th>Net Sales</th>
-            <th>Gross Profit</th>
-            <th>Margin 1</th>
-            <th>Orders</th>
-            <th>AOV</th>
-            <th>Units per Order</th>
+            <th>Sales</th>
+            <th class="share-cell">% Share</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
         <tfoot id="tableFoot"></tfoot>
       </table>
     </div>
+    <p class="methodology-note" id="methodologyNote"></p>
   </section>
 
 </main>
 
-<script src="app.js?v=6"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>
 

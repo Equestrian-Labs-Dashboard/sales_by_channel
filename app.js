@@ -2,6 +2,21 @@
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 const fmtPct = (n) => (n * 100).toFixed(1) + "%";
 
+const CHANNEL_GROUPS = [
+  { id: "paid_ads", name: "Paid Ads", aliases: ["paid_ads", "paid ads", "paid", "paid search", "paid social", "ads"] },
+  { id: "direct", name: "Direct", aliases: ["direct"] },
+  { id: "organic", name: "Organic", aliases: ["organic", "organic search", "organic social", "ecommerce", "e-commerce"] },
+  { id: "smartrr", name: "Smartrr", aliases: ["smartrr", "smart rr", "subscription", "subscriptions"] },
+  { id: "others", name: "Others", aliases: ["others", "other"] },
+];
+
+const GROUP_BY_ALIAS = CHANNEL_GROUPS.reduce((acc, group) => {
+  group.aliases.forEach((alias) => {
+    acc[normalizeKey(alias)] = group.id;
+  });
+  return acc;
+}, {});
+
 const SUN_ICON  = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"></path></svg>`;
 const MOON_ICON = `<svg viewBox="0 0 24 24"><path d="M20 14.5a8.5 8.5 0 1 1-9.5-9.4 7 7 0 0 0 9.5 9.4z"></path></svg>`;
 
@@ -50,7 +65,7 @@ fetch("data/sales-channels.json?v=" + new Date().getTime())
   .catch((err) => {
     const errBody = document.getElementById("tableBody");
     if (errBody)
-      errBody.innerHTML = `<tr><td colspan="9">Could not load data (${err.message}). Check data/sales-channels.json.</td></tr>`;
+      errBody.innerHTML = `<tr><td colspan="3">Could not load data (${err.message}). Check data/sales-channels.json.</td></tr>`;
   });
 
 // ---------- Year buttons ----------
@@ -198,6 +213,94 @@ function aggregateRows(periodIds) {
   }));
 }
 
+function normalizeKey(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function getChannelGroup(row) {
+  const idKey = normalizeKey(row.id);
+  const nameKey = normalizeKey(row.name);
+  if (idKey === "unclassified" || nameKey === "unclassified") return "unclassified";
+  return GROUP_BY_ALIAS[idKey] || GROUP_BY_ALIAS[nameKey] || "others";
+}
+
+function emptyGroupedRows() {
+  return CHANNEL_GROUPS.map((group) => ({
+    id: group.id,
+    name: group.name,
+    gross_sales: 0,
+    net_sales: 0,
+    discounts: 0,
+    sales_reversals: 0,
+    gross_profit: 0,
+    orders: 0,
+    units: 0,
+    _gpKnown: 0,
+  }));
+}
+
+function addIntoGroup(group, row, ratio = 1) {
+  group.gross_sales += (row.gross_sales || 0) * ratio;
+  group.net_sales += (row.net_sales || 0) * ratio;
+  group.discounts += (row.discounts || 0) * ratio;
+  group.sales_reversals += (row.sales_reversals || 0) * ratio;
+  group.orders += (row.orders || 0) * ratio;
+  group.units += (row.units || 0) * ratio;
+  if (row.gross_profit != null) {
+    group.gross_profit += row.gross_profit * ratio;
+    group._gpKnown += 1;
+  }
+}
+
+function buildChannelSummary(rows) {
+  const grouped = emptyGroupedRows();
+  const byId = grouped.reduce((acc, group) => {
+    acc[group.id] = group;
+    return acc;
+  }, {});
+  const unclassified = [];
+
+  rows.forEach((row) => {
+    const groupId = getChannelGroup(row);
+    if (groupId === "unclassified") {
+      unclassified.push(row);
+      return;
+    }
+    addIntoGroup(byId[groupId] || byId.others, row);
+  });
+
+  const classifiedGross = grouped.reduce((sum, row) => sum + row.gross_sales, 0);
+  const unclassifiedGross = unclassified.reduce((sum, row) => sum + (row.gross_sales || 0), 0);
+
+  if (classifiedGross > 0 && unclassified.length > 0) {
+    grouped.forEach((group) => {
+      const ratio = group.gross_sales / classifiedGross;
+      unclassified.forEach((row) => addIntoGroup(group, row, ratio));
+    });
+  } else if (unclassified.length > 0) {
+    unclassified.forEach((row) => addIntoGroup(byId.others, row));
+  }
+
+  return {
+    rows: grouped.map((row) => ({
+      ...row,
+      gross_sales: Math.round(row.gross_sales * 100) / 100,
+      net_sales: Math.round(row.net_sales * 100) / 100,
+      gross_profit: row._gpKnown > 0 ? Math.round(row.gross_profit * 100) / 100 : null,
+      margin1_pct: row._gpKnown > 0 && row.net_sales > 0 ? row.gross_profit / row.net_sales : null,
+      orders: Math.round(row.orders),
+      units: Math.round(row.units),
+    })),
+    unclassifiedGross,
+    unclassifiedShare: classifiedGross + unclassifiedGross > 0 ? unclassifiedGross / (classifiedGross + unclassifiedGross) : 0,
+    unclassifiedWasAllocated: unclassifiedGross > 0,
+  };
+}
+
 // ---------- Render ----------
 function render(periodId) {
   const rows = getRowsForPeriod(periodId);
@@ -208,17 +311,19 @@ function render(periodId) {
       : (c.gross_sales - (c.discounts || 0) - (c.sales_reversals || 0)),
   }));
 
-  const totalGross       = enriched.reduce((s, c) => s + c.gross_sales, 0);
-  const totalNet         = enriched.reduce((s, c) => s + c.net_sales, 0);
-  const gpKnownRows      = enriched.filter((c) => c.gross_profit != null);
+  const summary          = buildChannelSummary(enriched);
+  const displayRows      = summary.rows;
+  const totalGross       = displayRows.reduce((s, c) => s + c.gross_sales, 0);
+  const totalNet         = displayRows.reduce((s, c) => s + c.net_sales, 0);
+  const gpKnownRows      = displayRows.filter((c) => c.gross_profit != null);
   const totalGrossProfit = gpKnownRows.reduce((s, c) => s + c.gross_profit, 0);
-  const isPartialGP      = gpKnownRows.length < enriched.length;
+  const isPartialGP      = gpKnownRows.length < displayRows.length;
   const weightedM1       = totalNet > 0 ? totalGrossProfit / totalNet : 0;
-  const totalOrders      = enriched.reduce((s, c) => s + (c.orders || 0), 0);
-  const totalUnits       = enriched.reduce((s, c) => s + (c.units  || 0), 0);
+  const totalOrders      = displayRows.reduce((s, c) => s + (c.orders || 0), 0);
+  const totalUnits       = displayRows.reduce((s, c) => s + (c.units  || 0), 0);
 
   renderKPIs(totalGross, totalNet, totalGrossProfit, weightedM1, totalOrders, isPartialGP);
-  renderTable(enriched, totalGross, totalNet, totalGrossProfit, totalOrders, totalUnits);
+  renderTable(displayRows, totalGross, totalOrders, totalUnits, summary);
 }
 
 function renderKPIs(totalGross, totalNet, totalGrossProfit, weightedM1, totalOrders, isPartialGP) {
@@ -241,36 +346,22 @@ function renderKPIs(totalGross, totalNet, totalGrossProfit, weightedM1, totalOrd
     .join("");
 }
 
-function renderTable(rows, totalGross, totalNet, totalGrossProfit, totalOrders, totalUnits) {
+function renderTable(rows, totalGross, totalOrders, totalUnits, summary) {
   const body   = document.getElementById("tableBody");
-  const sorted = [...rows].sort((a, b) => b.gross_sales - a.gross_sales);
+  const sorted = CHANNEL_GROUPS.map((group) => rows.find((row) => row.id === group.id)).filter(Boolean);
 
   if (body) {
     body.innerHTML = sorted.map((c) => {
-      const share            = c.gross_sales / totalGross;
-      const hasGP            = c.gross_profit != null;
-      const hasMargin        = c.margin1_pct  != null;
-      const grossProfitLabel = hasGP     ? fmtUSD(c.gross_profit) : "-";
-      const marginLabel      = hasMargin ? fmtPct(c.margin1_pct)  : "-";
-      const orders = c.orders || 0;
-      const units  = c.units  || 0;
-      const aov    = orders > 0 ? fmtUSD(c.gross_sales / orders) : "-";
-      const upo    = orders > 0 ? (units / orders).toFixed(2)    : "-";
+      const share = totalGross > 0 ? c.gross_sales / totalGross : 0;
 
       return `
         <tr>
-          <td>${c.name}${c.note ? `<span class="channel-note">${c.note}</span>` : ""}</td>
+          <td>${c.name}</td>
+          <td>${fmtUSD(c.gross_sales)}</td>
           <td class="share-cell">
             <span class="share-pct">${fmtPct(share)}</span>
             <div class="share-bar-track"><div class="share-bar-fill" style="width:${(share * 100).toFixed(1)}%"></div></div>
           </td>
-          <td>${fmtUSD(c.gross_sales)}</td>
-          <td>${fmtUSD(c.net_sales)}</td>
-          <td>${grossProfitLabel}</td>
-          <td>${marginLabel}</td>
-          <td>${orders.toLocaleString("en-US")}</td>
-          <td>${aov}</td>
-          <td>${upo}</td>
         </tr>`;
     }).join("");
   }
@@ -280,14 +371,16 @@ function renderTable(rows, totalGross, totalNet, totalGrossProfit, totalOrders, 
     foot.innerHTML = `
       <tr>
         <td>Total</td>
-        <td class="share-cell">100.0%</td>
         <td>${fmtUSD(totalGross)}</td>
-        <td>${fmtUSD(totalNet)}</td>
-        <td>${fmtUSD(totalGrossProfit)}</td>
-        <td></td>
-        <td>${totalOrders.toLocaleString("en-US")}</td>
-        <td>${totalOrders > 0 ? fmtUSD(totalGross / totalOrders) : "-"}</td>
-        <td>${totalOrders > 0 ? (totalUnits / totalOrders).toFixed(2) : "-"}</td>
+        <td class="share-cell">100.0%</td>
       </tr>`;
+  }
+
+  const note = document.getElementById("methodologyNote");
+  if (note) {
+    const unclassifiedText = summary.unclassifiedWasAllocated
+      ? ` Unclassified represented ${fmtUSD(summary.unclassifiedGross)} (${fmtPct(summary.unclassifiedShare)}) of total sales before allocation.`
+      : "";
+    note.textContent = `Note: Unclassified sales were proportionally allocated across identified channels based on their respective share of classified sales.${unclassifiedText}`;
   }
 }
