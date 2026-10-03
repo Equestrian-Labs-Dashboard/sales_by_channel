@@ -1,4 +1,4 @@
-﻿const fmtUSD = (n) =>
+const fmtUSD = (n) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 const fmtPct = (n) => (n * 100).toFixed(1) + "%";
 
@@ -9,6 +9,8 @@ const CHANNEL_GROUPS = [
   { id: "smartrr", name: "Smartrr", aliases: ["smartrr", "smart rr", "subscription", "subscriptions"] },
   { id: "others", name: "Others", aliases: ["others", "other"] },
 ];
+
+const CAVALI_GROUP = { id: "cavali", name: "Cavali Club" };
 
 const GROUP_BY_ALIAS = CHANNEL_GROUPS.reduce((acc, group) => {
   group.aliases.forEach((alias) => {
@@ -23,6 +25,7 @@ const MOON_ICON = `<svg viewBox="0 0 24 24"><path d="M20 14.5a8.5 8.5 0 1 1-9.5-
 let DATA          = null;
 let activePeriod  = null;
 let activeYear    = null;
+let activeBrand   = "all";
 
 document.querySelectorAll(".view-tab").forEach((tab) => {
   tab.addEventListener("click", () => setActiveView(tab.id === "summaryTab" ? "summary" : "detail"));
@@ -38,6 +41,34 @@ function setActiveView(view) {
   document.getElementById("summaryView")?.classList.toggle("active", isSummary);
   if (document.getElementById("detailView")) document.getElementById("detailView").hidden = isSummary;
   if (document.getElementById("summaryView")) document.getElementById("summaryView").hidden = !isSummary;
+}
+
+function rowBrand(row) {
+  return normalizeKey(row.id) === "cavali" || normalizeKey(row.name) === "cavali" || normalizeKey(row.name) === "cavali club"
+    ? "cavali"
+    : "corro";
+}
+
+function filterRowsByBrand(rows) {
+  if (activeBrand === "all") return rows;
+  return rows.filter((row) => rowBrand(row) === activeBrand);
+}
+
+function selectBrand(brand) {
+  activeBrand = ["all", "corro", "cavali"].includes(brand) ? brand : "all";
+  document.querySelectorAll(".brand-btn").forEach((btn) => {
+    const active = btn.dataset.brand === activeBrand;
+    btn.classList.toggle("active", active);
+    btn.setAttribute("aria-pressed", String(active));
+  });
+
+  const subtitle = document.getElementById("brandSubtitle");
+  if (subtitle) {
+    const label = activeBrand === "corro" ? "Corro" : activeBrand === "cavali" ? "Cavali Club" : "Corro + Cavali Club";
+    subtitle.textContent = `${label} — channel-by-channel performance`;
+  }
+
+  if (activePeriod) render(activePeriod);
 }
 
 // ---------- Theme ----------
@@ -240,8 +271,18 @@ function normalizeKey(value) {
 function getChannelGroup(row) {
   const idKey = normalizeKey(row.id);
   const nameKey = normalizeKey(row.name);
-  if (idKey === "unclassified" || nameKey === "unclassified") return "unclassified";
-  return GROUP_BY_ALIAS[idKey] || GROUP_BY_ALIAS[nameKey] || "others";
+
+  // Cavali Club is a separate store/channel. It must never inflate the
+  // Unmapped/Unclassified count used to assess Corro channel mapping quality.
+  if (rowBrand(row) === "cavali") return "cavali";
+
+  if (["unclassified", "unmapped"].includes(idKey) || ["unclassified", "unmapped"].includes(nameKey)) {
+    return "unmapped";
+  }
+
+  // Known aliases map into the adjusted summary. Unknown Corro rows remain
+  // genuinely unmapped instead of being silently folded into Others.
+  return GROUP_BY_ALIAS[idKey] || GROUP_BY_ALIAS[nameKey] || "unmapped";
 }
 
 function emptyGroupedRows() {
@@ -278,48 +319,79 @@ function buildChannelSummary(rows) {
     acc[group.id] = group;
     return acc;
   }, {});
-  const unclassified = [];
+  const unmapped = [];
+  const cavaliRows = [];
 
   rows.forEach((row) => {
     const groupId = getChannelGroup(row);
-    if (groupId === "unclassified") {
-      unclassified.push(row);
+    if (groupId === "cavali") {
+      cavaliRows.push(row);
       return;
     }
-    addIntoGroup(byId[groupId] || byId.others, row);
+    if (groupId === "unmapped") {
+      unmapped.push(row);
+      return;
+    }
+    addIntoGroup(byId[groupId], row);
   });
 
-  const classifiedGross = grouped.reduce((sum, row) => sum + row.gross_sales, 0);
-  const unclassifiedGross = unclassified.reduce((sum, row) => sum + (row.gross_sales || 0), 0);
+  const mappedGross = grouped.reduce((sum, row) => sum + row.gross_sales, 0);
+  const unmappedGross = unmapped.reduce((sum, row) => sum + (row.gross_sales || 0), 0);
+  const cavaliGross = cavaliRows.reduce((sum, row) => sum + (row.gross_sales || 0), 0);
 
-  if (classifiedGross > 0 && unclassified.length > 0) {
+  // Allocate only Corro's unmapped sales. Cavali Club is intentionally excluded
+  // from both the unmapped numerator and the mapping-coverage denominator.
+  if (mappedGross > 0 && unmapped.length > 0) {
     grouped.forEach((group) => {
-      const ratio = group.gross_sales / classifiedGross;
-      unclassified.forEach((row) => addIntoGroup(group, row, ratio));
+      const ratio = group.gross_sales / mappedGross;
+      unmapped.forEach((row) => addIntoGroup(group, row, ratio));
     });
-  } else if (unclassified.length > 0) {
-    unclassified.forEach((row) => addIntoGroup(byId.others, row));
+  } else if (unmapped.length > 0) {
+    unmapped.forEach((row) => addIntoGroup(byId.others, row));
   }
 
+  const cavaliSummary = {
+    id: CAVALI_GROUP.id,
+    name: CAVALI_GROUP.name,
+    gross_sales: cavaliRows.reduce((sum, row) => sum + (row.gross_sales || 0), 0),
+    net_sales: cavaliRows.reduce((sum, row) => sum + (row.net_sales || 0), 0),
+    discounts: cavaliRows.reduce((sum, row) => sum + (row.discounts || 0), 0),
+    sales_reversals: cavaliRows.reduce((sum, row) => sum + (row.sales_reversals || 0), 0),
+    gross_profit: cavaliRows.some((row) => row.gross_profit != null)
+      ? cavaliRows.reduce((sum, row) => sum + (row.gross_profit || 0), 0)
+      : null,
+    orders: cavaliRows.reduce((sum, row) => sum + (row.orders || 0), 0),
+    units: cavaliRows.reduce((sum, row) => sum + (row.units || 0), 0),
+  };
+  cavaliSummary.margin1_pct = cavaliSummary.gross_profit != null && cavaliSummary.net_sales > 0
+    ? cavaliSummary.gross_profit / cavaliSummary.net_sales
+    : null;
+
+  const mappedRows = grouped.map((row) => ({
+    ...row,
+    gross_sales: Math.round(row.gross_sales * 100) / 100,
+    net_sales: Math.round(row.net_sales * 100) / 100,
+    gross_profit: row._gpKnown > 0 ? Math.round(row.gross_profit * 100) / 100 : null,
+    margin1_pct: row._gpKnown > 0 && row.net_sales > 0 ? row.gross_profit / row.net_sales : null,
+    orders: Math.round(row.orders),
+    units: Math.round(row.units),
+  }));
+
+  const mappingDenominator = mappedGross + unmappedGross;
   return {
-    rows: grouped.map((row) => ({
-      ...row,
-      gross_sales: Math.round(row.gross_sales * 100) / 100,
-      net_sales: Math.round(row.net_sales * 100) / 100,
-      gross_profit: row._gpKnown > 0 ? Math.round(row.gross_profit * 100) / 100 : null,
-      margin1_pct: row._gpKnown > 0 && row.net_sales > 0 ? row.gross_profit / row.net_sales : null,
-      orders: Math.round(row.orders),
-      units: Math.round(row.units),
-    })),
-    unclassifiedGross,
-    unclassifiedShare: classifiedGross + unclassifiedGross > 0 ? unclassifiedGross / (classifiedGross + unclassifiedGross) : 0,
-    unclassifiedWasAllocated: unclassifiedGross > 0,
+    rows: cavaliGross > 0 ? [...mappedRows, cavaliSummary] : mappedRows,
+    unmappedGross,
+    unmappedShare: mappingDenominator > 0 ? unmappedGross / mappingDenominator : 0,
+    unmappedWasAllocated: unmappedGross > 0,
+    mappingCoverage: mappingDenominator > 0 ? mappedGross / mappingDenominator : null,
+    cavaliExcludedGross: cavaliGross,
+    cavaliExcludedFromMapping: cavaliGross > 0,
   };
 }
 
 // ---------- Render ----------
 function render(periodId) {
-  const rows = getRowsForPeriod(periodId);
+  const rows = filterRowsByBrand(getRowsForPeriod(periodId));
   const enriched = rows.map((c) => ({
     ...c,
     net_sales: Number.isFinite(c.net_sales)
@@ -347,7 +419,7 @@ function renderKPIs(totalGross, totalNet, totalGrossProfit, weightedM1, totalOrd
   if (!el) return;
   const cards = [
     { label: "Gross Sales",    value: fmtUSD(totalGross) },
-    { label: "Net Sales",      value: fmtUSD(totalNet), sub: fmtPct(totalNet / totalGross) + " of gross" },
+    { label: "Net Sales",      value: fmtUSD(totalNet), sub: totalGross > 0 ? fmtPct(totalNet / totalGross) + " of gross" : "—" },
     { label: "Gross Profit",   value: fmtUSD(totalGrossProfit), sub: isPartialGP ? "partial - some channels pending QBO" : undefined },
     { label: "Gross Margin 1", value: fmtPct(weightedM1), sub: isPartialGP ? "partial" : undefined },
     { label: "Orders",         value: totalOrders.toLocaleString("en-US") },
@@ -380,7 +452,7 @@ function renderDetailTable(rows, totalGross, totalNet, totalGrossProfit, totalOr
 
       return `
         <tr>
-          <td>${c.name}${c.note ? `<span class="channel-note">${c.note}</span>` : ""}</td>
+          <td>${rowBrand(c) === "cavali" ? "Cavali Club" : c.name}${c.note ? `<span class="channel-note">${c.note}</span>` : ""}</td>
           <td class="share-cell">
             <span class="share-pct">${fmtPct(share)}</span>
             <div class="share-bar-track"><div class="share-bar-fill" style="width:${(share * 100).toFixed(1)}%"></div></div>
@@ -414,15 +486,15 @@ function renderDetailTable(rows, totalGross, totalNet, totalGrossProfit, totalOr
 }
 
 function renderSummaryTable(rows, totalGross, summary) {
-  const body   = document.getElementById("summaryTableBody");
-  const sorted = CHANNEL_GROUPS.map((group) => rows.find((row) => row.id === group.id)).filter(Boolean);
+  const body = document.getElementById("summaryTableBody");
+  const preferredOrder = [...CHANNEL_GROUPS.map((group) => group.id), CAVALI_GROUP.id];
+  const sorted = preferredOrder.map((id) => rows.find((row) => row.id === id)).filter(Boolean);
 
   if (body) {
     body.innerHTML = sorted.map((c) => {
       const share = totalGross > 0 ? c.gross_sales / totalGross : 0;
-
       return `
-        <tr>
+        <tr class="${c.id === "cavali" ? "cavali-summary-row" : ""}">
           <td>${c.name}</td>
           <td>${fmtUSD(c.gross_sales)}</td>
           <td class="share-cell">
@@ -445,9 +517,20 @@ function renderSummaryTable(rows, totalGross, summary) {
 
   const note = document.getElementById("methodologyNote");
   if (note) {
-    const unclassifiedText = summary.unclassifiedWasAllocated
-      ? ` Unclassified represented ${fmtUSD(summary.unclassifiedGross)} (${fmtPct(summary.unclassifiedShare)}) of total sales before allocation.`
-      : "";
-    note.textContent = `Note: Unclassified sales were proportionally allocated across identified channels based on their respective share of classified sales.${unclassifiedText}`;
+    const pieces = [];
+    if (summary.unmappedWasAllocated) {
+      pieces.push(`Unmapped Corro sales were proportionally allocated across identified Corro groups. Before allocation, Unmapped was ${fmtUSD(summary.unmappedGross)} (${fmtPct(summary.unmappedShare)} of Corro mapping-eligible sales).`);
+    } else {
+      pieces.push("No Unmapped Corro sales were detected for this selection.");
+    }
+    if (summary.cavaliExcludedFromMapping) {
+      pieces.push(`Cavali Club (${fmtUSD(summary.cavaliExcludedGross)}) is shown separately and is excluded from both the Unmapped count and mapping-coverage denominator.`);
+    }
+    if (summary.mappingCoverage != null) {
+      pieces.push(`Corro mapping coverage before allocation: ${fmtPct(summary.mappingCoverage)}.`);
+    } else if (activeBrand === "cavali") {
+      pieces.push("Corro mapping coverage is not applicable in the Cavali Club-only view.");
+    }
+    note.textContent = `Note: ${pieces.join(" ")}`;
   }
 }

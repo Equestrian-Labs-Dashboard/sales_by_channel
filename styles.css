@@ -133,6 +133,7 @@ body {
   border-radius: 7px;
 }
 .year-btn,
+.brand-btn,
 .month-select {
   color: var(--tx);
   background: var(--sf2);
@@ -140,8 +141,10 @@ body {
   border-radius: 5px;
   font: 700 12px "DM Sans", system-ui, sans-serif;
 }
-.year-btn { padding: 5px 11px; cursor: pointer; }
-.year-btn.active {
+.year-btn,
+.brand-btn { padding: 5px 11px; cursor: pointer; }
+.year-btn.active,
+.brand-btn.active {
   color: #fff;
   background: var(--navy);
   border-color: var(--navy);
@@ -324,4 +327,19 @@ tfoot td {
   .control-group { align-items: flex-start; flex-direction: column; }
   .filter-bar { width: 100%; }
   .month-select { min-width: 0; width: 100%; }
+}
+
+.brand-group { flex-wrap: wrap; }
+.cavali-summary-row td:first-child::after {
+  content: "excluded from Unmapped";
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 6px;
+  color: var(--tx3);
+  background: var(--sf3);
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .02em;
+  vertical-align: middle;
 }

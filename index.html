@@ -7,7 +7,7 @@
 <link rel="icon" type="image/png" href="corro_logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=16">
+<link rel="stylesheet" href="styles.css?v=17">
 </head>
 <body data-theme="dark">
 <main class="wrap report-wrap">
@@ -36,10 +36,18 @@
         <span class="control-label">Period</span>
         <select id="monthSelect" class="month-select"></select>
       </div>
+      <div class="control-group">
+        <span class="control-label">Brand</span>
+        <div class="btn-group brand-group" role="group" aria-label="Brand filter">
+          <button class="brand-btn active" type="button" data-brand="all" aria-pressed="true" onclick="selectBrand('all')">All</button>
+          <button class="brand-btn" type="button" data-brand="corro" aria-pressed="false" onclick="selectBrand('corro')">Corro</button>
+          <button class="brand-btn" type="button" data-brand="cavali" aria-pressed="false" onclick="selectBrand('cavali')">Cavali Club</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="info-strip"><span>Net sales confirmed</span> · Shopify + QBO channel mix · Detail plus adjusted grouped summary</div>
+  <div class="info-strip"><span>Net sales confirmed</span> · Shopify + QBO channel mix · Brand filter + Detail + Adjusted Summary · Cavali Club excluded from Unmapped mapping count</div>
 
   <section class="kpis" id="kpiRow"></section>
 
@@ -91,7 +99,7 @@
 
 </main>
 
-<script src="app.js?v=8"></script>
+<script src="app.js?v=9"></script>
 </body>
 </html>
 

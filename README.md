@@ -126,3 +126,12 @@ Warm ivory/near-black base with a single gold accent (used for the toggle, activ
 - Gross Profit now uses Shopify/QBO provided value when available.
 - Margin calculations no longer overwrite real Gross Profit.
 - Ready for separate brand/channel reporting.
+
+
+## Meeting corrections — Oct 2026
+- Restored the **All / Corro / Cavali Club** brand filter in the dashboard UI.
+- Kept the new **Adjusted Summary** tab next to **Detail**.
+- `Unmapped`/`Unclassified` now measures only mapping-eligible **Corro** sales. **Cavali Club is explicitly excluded from both the Unmapped numerator and its denominator**, because it is a separate store/channel rather than an unmapped Corro acquisition channel.
+- Unknown Corro channel labels are no longer silently folded into `Others`; they are treated as Unmapped for mapping-quality measurement, then proportionally allocated in Adjusted Summary.
+- Cavali Club remains visible as its own row in the Adjusted Summary when selected/included.
+- Removed the duplicated `Full Year` option in the period selector.
